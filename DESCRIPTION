@@ -1,0 +1,14 @@
+Encoding: UTF-8
+Package: EWDdane
+Version: 0.1
+Date: 2014-08-05
+Title: Functions for Educational Value-Added data import/export.
+Author: Tomasz Zoltak <tomek@zozlak.org>
+Maintainer: Tomasz Zoltak <tomek@zozlak.org>
+Description: Functions for Educational Value-Added data import/export.
+Depends:
+    ODBCext, ZPD, R (>= 2.15.0)
+Suggests:
+License: LGPL-3
+Language: pl
+NeedsCompilation: no
