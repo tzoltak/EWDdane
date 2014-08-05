@@ -7,8 +7,9 @@ Author: Tomasz Zoltak <tomek@zozlak.org>
 Maintainer: Tomasz Zoltak <tomek@zozlak.org>
 Description: Functions for Educational Value-Added data import/export.
 Depends:
-    ODBCext, ZPD, R (>= 2.15.0)
-Suggests:
+    RODBCext,
+    ZPD,
+    R (>= 2.15.0)
 License: LGPL-3
 Language: pl
 NeedsCompilation: no
