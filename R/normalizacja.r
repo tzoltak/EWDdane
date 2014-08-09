@@ -141,12 +141,13 @@ sklej_normy = function(wynikiZnorm, wynikiSurowe, do, grupy=NULL, sr=100, os=15,
 #' @param zrodloDanychODBC opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")
 #' @details
 #' Funkcja nie dopuszcza braków danych w argumencie \code{normy}.
+#' Funkcja wymaga też, aby w ramach połączenia nawiązywanego z bazą mieć prawa do modyfikacji tablic 'skale' i 'normy_ekwikwantylowe'.
 #' @return funkcja nic nie zwraca
 #' @seealso \code{\link{normy_ekwikwantylowe}}, \code{\link{pobierz_wyniki_surowe_ewd_gimn}}
 #' @import RODBCext
 #' @export
 zapisz_normy_do_bazy = function(normy, prefiksRok, zrodloDanychODBC="EWD") {
-  stopifnot(is.numeric(normy), length(normy) > 0, any(is.na(normy)),
+  stopifnot(is.numeric(normy), length(normy) > 0, all(!is.na(normy)),
             is.character(prefiksRok), length(prefiksRok) == 1,
             is.character(zrodloDanychODBC), length(zrodloDanychODBC) == 1)
   stopifnot(!is.null(names(normy)))
