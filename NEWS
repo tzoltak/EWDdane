@@ -8,4 +8,13 @@ Zmiany w EWDskalowanie 0.? (rrrr-mm-dd)
   - ;
 
 --------------------
-Publikacja EWDdane 0.1 (2014-08-05)
+Publikacja EWDdane 0.1 (2014-08-09)
+
+- Nowe funkcje:
+  - pobierz_dane_uczniow();
+  - pobierz_dane_szkol();
+  - wielokrotnie_przystepujacy();
+  - pobierz_wyniki_surowe_ewd_gimn();
+  - normy_ekwikwantylowe();
+  - sklej_normy();
+  - zapisz_normy_do_bazy();
