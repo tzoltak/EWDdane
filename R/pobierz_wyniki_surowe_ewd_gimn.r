@@ -219,7 +219,7 @@ pobierz_wyniki_surowe_ewd_gimn = function(lataEG, dlKsztalcenia=3:4, usunSzkolyS
         if (substr(i, 1, 1) == "g") {  # egzamin gimnazjalny
           normyTemp = normy_ekwikwantylowe(eG[, nazwaSuma])
         } else {  # sprawdzian
-          message("  Pobieranie wyników egzaminu (dane CKE) z bazy.")
+          message("    Pobieranie wyników egzaminu (dane CKE) z bazy.")
           spr = pobierz_czesc_egzaminu("sprawdzian", "", rok, zrodloDanychODBC=zrodloDanychODBC, czyEwd=FALSE)
           suma = apply(spr[, grep("^[kp]_", names(spr))], 1,
                        function(x) {
@@ -232,7 +232,7 @@ pobierz_wyniki_surowe_ewd_gimn = function(lataEG, dlKsztalcenia=3:4, usunSzkolyS
           normyTemp = normy_ekwikwantylowe(suma)
         }
         tryCatch({nic = zapisz_normy_do_bazy(normyTemp, i, zrodloDanychODBC=zrodloDanychODBC)},
-                 error= warning)
+                 error=function(e) {warning(e, immediate.=TRUE)})
          normyTemp = data.frame(nazwa=i, wartosc=as.numeric(names(normyTemp)), wartosc_zr=normyTemp)
       }
       normalizacje[[length(normalizacje) + 1]] = normyTemp
@@ -262,7 +262,11 @@ pobierz_wyniki_surowe_ewd_gimn = function(lataEG, dlKsztalcenia=3:4, usunSzkolyS
     }
   }
 
-  # koniec!
+  # porządki z formatami zmiennych i koniec!
+  message("Porządki z formatami zmiennych.")
+  if (!("laureat_gh") %in% names(eG)) eG = cbind(eG, laureat_gh = with(eG, as.numeric(laureat_gh_p == 1 | laureat_gh_h == 1)))
+  if (!("laureat_gm") %in% names(eG)) eG = cbind(eG, laureat_gm = with(eG, as.numeric(laureat_gm_m == 1 | laureat_gm_p == 1)))
+  eG = formaty_zmiennych_baza_na_ewd(eG)
   attributes(eG)$kryteria = kryteria
   attributes(eG)$normy = normalizacje
   return(eG)

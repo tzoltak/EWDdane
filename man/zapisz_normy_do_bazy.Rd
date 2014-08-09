@@ -20,6 +20,7 @@ Funkcja służy do zapisania do bazy wyliczonych norm ekwikwantylowych.
 }
 \details{
 Funkcja nie dopuszcza braków danych w argumencie \code{normy}.
+Funkcja wymaga też, aby w ramach połączenia nawiązywanego z bazą mieć prawa do modyfikacji tablic 'skale' i 'normy_ekwikwantylowe'.
 }
 \seealso{
 \code{\link{normy_ekwikwantylowe}}, \code{\link{pobierz_wyniki_surowe_ewd_gimn}}
