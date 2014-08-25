@@ -31,7 +31,7 @@ pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=F
                       ifelse( is.null(typySzkol) | any(typySzkol %in% c("LO","LP","T")) ,", d.matura_miedzynarodowa",""),
                       " FROM szkoly AS sz JOIN szkoly_dane AS d USING (id_szkoly)
                       WHERE sz.id_szkoly > 0 AND d.rok IN (", paste0(rep("?", length(lata)), collapse=", "), ")
-                        AND d.rok = (SELECT max(rok) FROM szkoly_dane WHERE id_szkoly = d.id_szkoly)",
+                        AND d.rok = (SELECT max(rok) FROM szkoly_dane WHERE id_szkoly = d.id_szkoly AND rok IN (", paste0(lata, collapse=", "), "))",
                       ifelse( is.null(typySzkol), "", paste0(" AND sz.typ_szkoly IN (", paste0(rep("?", length(typySzkol)), collapse=", "), ")") ),
                       ifelse( dolaczPaou, "", " AND d.paou = FALSE"),
                       " ORDER BY id_szkoly")
