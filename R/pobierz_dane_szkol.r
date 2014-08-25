@@ -25,7 +25,7 @@ pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=F
 
   zapytanie = paste0( "SELECT id_szkoly, typ_szkoly, publiczna, dla_doroslych, specjalna, przyszpitalna,
                         d.rok, ",
-                      ifelse(daneAdresowe, "d.nazwa, d.adres, d.miejscowosc, d.pna, ", ""),
+                      ifelse(daneAdresowe, "d.nazwa, d.miejscowosc, d.adres, d.pna, d.poczta, ", ""),
                       ifelse(idOke       , "d.id_szkoly_oke, ", ""),
                       "d.wielkosc_miejscowosci, id_gminy + 100*id_powiatu + 10000*id_wojewodztwa AS teryt",
                       ifelse( is.null(typySzkol) | any(typySzkol %in% c("LO","LP","T")) ,", d.matura_miedzynarodowa",""),
