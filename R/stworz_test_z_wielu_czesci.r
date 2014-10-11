@@ -24,12 +24,12 @@
     is.character(rodzajEgzaminu), 
     length(rodzajEgzaminu) == 1,
     is.character(czesciEgzaminu),
-    length(czescEgzaminu) > 1,
+    length(czesciEgzaminu) > 1,
     is.numeric(rokEgzaminu),
     length(rokEgzaminu) == 1,
-    is.logical(czyEWD),
-    length(czyEWD) == 1,
-    is.character(opsi),
+    is.logical(czyEwd),
+    length(czyEwd) == 1,
+    is.character(opis),
     length(opis) == 1,
     opis[1] != '',
     is.character(zrodloDanychODBC), 
@@ -51,7 +51,7 @@
           AND extract(year FROM data_egzaminu) = ?
           AND ewd = ?
         ORDER BY data")
-      testy = sqlExecute(P, zapytanie, t(c(rodzajEgzaminu, czesciEgzaminu, rok, czyEwd)), T, stringsAsFactors = F)
+      testy = sqlExecute(P, zapytanie, t(c(rodzajEgzaminu, czesciEgzaminu, rokEgzaminu, czyEwd)), T, stringsAsFactors = F)
       
       stopifnot(nrow(testy) > 0)
       
