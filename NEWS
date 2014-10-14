@@ -1,14 +1,17 @@
 --------------------
-Zmiany w EWDskalowanie 0.? (rrrr-mm-dd)
+Zmiany w EWDskalowanie 0.3 (2014-10-14)
 
 - Nowe funkcje:
-  - ;
+  - stworz_test_z_wielu_czesci() - pozwala łatwo tworzyć testy opisujące EWDowe "złożone"
+    wskażniki umiejętności, obejmujące kilka części jednego egzaminu; co ważne, oprócz
+    dokonania wpisu w tablicy 'testy' wypełnia również odpowiednimi danymi tablicę
+    'dane_osobowe.testy_obserwacje';
 
-- Nowe funkcjonalności:
-  - ;
+- Inne zmiany:
+  - Dostosowanie funkcji pobierz_dane_uczniow() do zmian w strukturze bazy.
 
 --------------------
-Zmiany w EWDskalowanie 0.2 (2014-08-25)
+Zmiany w EWDdane 0.2 (2014-08-25)
 
 - Poprawione błędy:
   - pobierz_dane_szkol() teraz na prawdę pobiera dane najaktualniejsze w ramach podanego okresu (wcześniej próbowała pobrać najaktualniejsze w ogóle);
