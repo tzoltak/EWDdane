@@ -12,7 +12,7 @@
 #' @export
 pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=FALSE, dolaczPaou=FALSE, zrodloDanychODBC="EWD"){
   stopifnot(is.numeric(lata)         , length(lata) > 0,
-            is.character(typySzkol),
+            is.character(typySzkol) | is.null(typySzkol),
             is.logical(idOke)       , length(idOke) == 1,
             is.logical(daneAdresowe), length(daneAdresowe) == 1,
             is.logical(dolaczPaou)  , length(dolaczPaou) == 1,
