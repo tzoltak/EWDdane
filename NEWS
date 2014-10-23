@@ -2,7 +2,7 @@
 Zmiany w EWDskalowanie 0.4 (2014-10-23)
 
 - Nowe funkcje:
-  - pobierz_wartosci_wskaznikow() - pobiera zestawienia wartości wskaźników EWD;
+  - pobierz_wartosci_wskaznikow() - pobiera zestawienia wartości wskaźników EWD.
 
 --------------------
 Zmiany w EWDskalowanie 0.3 (2014-10-14)
@@ -11,7 +11,7 @@ Zmiany w EWDskalowanie 0.3 (2014-10-14)
   - stworz_test_z_wielu_czesci() - pozwala łatwo tworzyć testy opisujące EWDowe "złożone"
     wskażniki umiejętności, obejmujące kilka części jednego egzaminu; co ważne, oprócz
     dokonania wpisu w tablicy 'testy' wypełnia również odpowiednimi danymi tablicę
-    'dane_osobowe.testy_obserwacje';
+    'dane_osobowe.testy_obserwacje'.
 
 - Inne zmiany:
   - Dostosowanie funkcji pobierz_dane_uczniow() do zmian w strukturze bazy.

@@ -132,7 +132,7 @@ pobierz_wartosci_wskaznikow = function(typSzkoly, lata, zapis=NULL, jst=NULL, id
   }
 	# zapis
 	if (!is.null(zapis)) {
-    write.csv2(wskazniki, zapis, row.names=FALSE, na="")
+    write.csv2(wskazniki, zapis, row.names=FALSE, na="", fileEncoding="UTF-8")
     invisible(wskazniki)
 	} else {
     return(wskazniki)
