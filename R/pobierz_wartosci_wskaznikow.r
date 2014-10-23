@@ -113,7 +113,9 @@ pobierz_wartosci_wskaznikow = function(typSzkoly, lata, zapis=NULL, jst=NULL, id
                             names(wskazniki)[!maskaNazwyId])]
   # ew. piękne nazwy kolumn
   if (ladneNazwy) {
-    names(wskazniki) = sub("id_szkoly", "id szkoły", names(wskazniki))
+    maska = grep("ewd_|sr_wynik_egz_", names(wskazniki))
+    wskazniki[maska] = lapply(wskazniki[maska], round, digits=2)
+    names(wskazniki) = sub("id_szkoly", "id szkoły w bazie EWD", names(wskazniki))
     names(wskazniki) = sub("teryt", "TERYT gminy", names(wskazniki))
     names(wskazniki) = sub("rok_do", "ostatni rok okresu obejmowanego przez wskaźnik",
                            names(wskazniki))
