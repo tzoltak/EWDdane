@@ -1,4 +1,10 @@
 --------------------
+Zmiany w EWDskalowanie 0.4 (2014-10-23)
+
+- Nowe funkcje:
+  - pobierz_wartosci_wskaznikow() - pobiera zestawienia wartości wskaźników EWD;
+
+--------------------
 Zmiany w EWDskalowanie 0.3 (2014-10-14)
 
 - Nowe funkcje:

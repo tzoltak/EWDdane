@@ -3,6 +3,7 @@
 export(normy_ekwikwantylowe)
 export(pobierz_dane_szkol)
 export(pobierz_dane_uczniow)
+export(pobierz_wartosci_wskaznikow)
 export(pobierz_wyniki_surowe_ewd_gimn)
 export(sklej_normy)
 export(stworz_test_z_wielu_czesci)
