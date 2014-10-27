@@ -5,7 +5,8 @@
 \usage{
 pobierz_wartosci_wskaznikow(typSzkoly, lata, zapis = NULL, jst = NULL,
   idOke = FALSE, daneEWD = FALSE, daneAdresowe = TRUE,
-  ladneNazwy = TRUE, zrodloDanychODBC = "EWD")
+  ladneNazwy = TRUE, fileEncoding = "windows-1250",
+  zrodloDanychODBC = "EWD")
 }
 \arguments{
 \item{typSzkoly}{ciąg znaków: 'gimn.', 'LO' lub 'T'}
@@ -31,6 +32,9 @@ szkół?}
 
 \item{ladneNazwy}{wartość logiczna (domyślnie TRUE) - czy zmieniać nazwy kolumn na
 pięknie opisowe?}
+
+\item{fileEncoding}{ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
+plik csv}
 
 \item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
 (domyślnie "EWD")}

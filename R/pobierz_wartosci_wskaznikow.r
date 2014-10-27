@@ -18,12 +18,14 @@
 #' szkół?
 #' @param ladneNazwy wartość logiczna (domyślnie TRUE) - czy zmieniać nazwy kolumn na
 #' pięknie opisowe?
+#' @param fileEncoding ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
+#' plik csv
 #' @param zrodloDanychODBC opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
 #' (domyślnie "EWD")
 #' @return data frame
 #' @import RODBCext
 #' @export
-pobierz_wartosci_wskaznikow = function(typSzkoly, lata, zapis=NULL, jst=NULL, idOke=FALSE, daneEWD=FALSE, daneAdresowe=TRUE, ladneNazwy=TRUE, zrodloDanychODBC="EWD"){
+pobierz_wartosci_wskaznikow = function(typSzkoly, lata, zapis=NULL, jst=NULL, idOke=FALSE, daneEWD=FALSE, daneAdresowe=TRUE, ladneNazwy=TRUE, fileEncoding="windows-1250", zrodloDanychODBC="EWD"){
   stopifnot(is.numeric(lata)        , length(lata) > 0,
             is.character(typSzkoly) , length(typSzkoly) == 1,
             is.null(jst) | is.character(jst), is.null(jst) | length(jst) == 1,
@@ -33,6 +35,7 @@ pobierz_wartosci_wskaznikow = function(typSzkoly, lata, zapis=NULL, jst=NULL, id
             is.logical(daneEWD)     , length(daneEWD) == 1,
             is.logical(daneAdresowe), length(daneAdresowe) == 1,
             is.logical(ladneNazwy)  , length(ladneNazwy) == 1,
+            is.character(fileEncoding), length(fileEncoding) == 1,
             is.character(zrodloDanychODBC), length(zrodloDanychODBC) == 1
   )
 
@@ -79,7 +82,8 @@ pobierz_wartosci_wskaznikow = function(typSzkoly, lata, zapis=NULL, jst=NULL, id
       finally = odbcClose(baza)
     )
   }
-	wskazniki=mapply(
+  wskazniki = wskazniki[unlist(lapply(wskazniki, nrow)) > 0]
+	wskazniki = mapply(
 		function(x, nazwa) {
       maska = !(names(x))%in%c("id_szkoly", "rok_do")
 			names(x)[maska] = paste0(names(x)[maska], "_", nazwa)
@@ -134,7 +138,7 @@ pobierz_wartosci_wskaznikow = function(typSzkoly, lata, zapis=NULL, jst=NULL, id
   }
 	# zapis
 	if (!is.null(zapis)) {
-    write.csv2(wskazniki, zapis, row.names=FALSE, na="", fileEncoding="UTF-8")
+    write.csv2(wskazniki, zapis, row.names=FALSE, na="", fileEncoding=fileEncoding)
     invisible(wskazniki)
 	} else {
     return(wskazniki)
