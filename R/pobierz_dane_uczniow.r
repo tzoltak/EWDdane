@@ -15,45 +15,38 @@ pobierz_dane_uczniow <- function(idTestow, zrodloDanychODBC="EWD"){
   )
   try(suppressWarnings(Sys.setlocale("LC_ALL", "pl_PL.UTF-8")))
 
-  P = odbcConnect(zrodloDanychODBC)
-
   zapytanie = paste0( "SELECT DISTINCT AR.rodzaj_egzaminu, EXTRACT(YEAR FROM AR.data_egzaminu)
                       FROM testy AS T JOIN arkusze AS AR using(arkusz)
                       WHERE id_testu IN (", paste0(rep("?", length(idTestow)), collapse=", "), ") AND ewd = TRUE")
   tryCatch({
+      P = odbcConnect(zrodloDanychODBC)
       ret =  sqlExecute(P, zapytanie, fetch = TRUE, stringsAsFactors = FALSE, data=as.list(idTestow))
-      odbcClose(P)
     },
-    error=function(e) {
-      odbcClose(P)
-      stop(e)
-    }
+    error = stop,
+    finally = odbcClose(P)
   )
 
   if(nrow(ret) > 1 ){
     stop("Podane testy powiązane są z różnymi egzaminami. Czy na pewno podano poprawne id testów?")
   }
 
-  P = odbcConnect(zrodloDanychODBC)
-  zapTest1 = "select has_table_privilege('dane_osobowe.obserwacje', 'select')"
-  zapTest2 = "select has_table_privilege('testy_obserwacje', 'select')"
+  zapTest1 = "SELECT has_table_privilege('dane_osobowe.obserwacje', 'select')"
+  zapTest2 = "SELECT has_table_privilege('testy_obserwacje', 'select')"
   do_obs =0
-  do_testy = 0 
+  do_testy = 0
   tryCatch({
+      P = odbcConnect(zrodloDanychODBC)
       do_obs = sqlExecute(P, zapTest1, fetch = TRUE)
       do_testy = sqlExecute(P, zapTest1, fetch = TRUE)
-      odbcClose(P)
     },
-    error=function(e) {
-      odbcClose(P)
-    }
+    error = stop,
+    finally = odbcClose(P)
   )
-  
+
   if(do_obs!=1 | do_testy!=1){
     stop("Brak dostępu do danych poufnych.")
   }
 
-  P = odbcConnect(zrodloDanychODBC)
   zapytanie = paste0( "SELECT DISTINCT ob.id_obserwacji, tob.klasa, tob.kod_u,
                       12*(EXTRACT(YEAR FROM t.pierwszy_egz) - EXTRACT(YEAR FROM ob.data_ur)) + (EXTRACT(MONTH FROM t.pierwszy_egz) - EXTRACT(MONTH FROM ob.data_ur)) AS wiek
                       FROM dane_osobowe.obserwacje AS ob
@@ -68,18 +61,33 @@ pobierz_dane_uczniow <- function(idTestow, zrodloDanychODBC="EWD"){
                               WHERE ewd = TRUE AND id_testu IN (", paste0(rep("?", length(idTestow)), collapse=", "), ")
                               ) AS t USING (id_testu)")
   tryCatch({
+      P = odbcConnect(zrodloDanychODBC)
       ret = sqlExecute(P, zapytanie, fetch = TRUE,  data=c(as.list(idTestow), as.list(idTestow)))
-      odbcClose(P)
     },
-    error=function(e) {
-      odbcClose(P)
-      stop(e)
-    }
+    error = stop,
+    finally = odbcClose(P)
   )
-
   if (any(duplicated(ret$id_obserwacji))) {
-    stop("Łączeniu informacji dot. różnych testów doprowadziło do powtórzeń id_obserwacji:\n  ", paste0(ret$id_obserwacji[duplicated(ret$id_obserwacji)], collapse=",\n  "), ".")
+    warning("Łączeniu informacji dot. różnych testów doprowadziło do powtórzeń id_obserwacji:\n  ",
+            paste0(ret$id_obserwacji[duplicated(ret$id_obserwacji)], collapse=",\n  "),
+            ".\nTam, gdzie problem polegał na konflikcie braku informacji z występowaniem informacji, został on jednak rozwiązany.")
+    duplikaty = with(ret, {ret$id_obserwacji[duplicated(ret$id_obserwacji)]})
+    bezDupl   = subset(ret, !(ret$id_obserwacji %in% duplikaty))
+    duplikaty = subset(ret,   ret$id_obserwacji %in% duplikaty )
+    duplikaty = ddply(duplikaty, ~id_obserwacji,
+                      function(x) {
+                        klasaINumer = rowSums(!is.na(x[, c("klasa", "kod_u")]))
+                        tylkoJedenWierszBezBD = (sum(klasaINumer == 2) == 1) |
+                          ( (max(klasaINumer) == 1) & (sum(klasaINumer == 1) == 1) )
+                        resztaWPorzadku = unique(x[, !(names(x) %in% c("id_obserwacji", "klasa", "kod_u")), drop=FALSE])
+                        resztaWPorzadku = nrow(resztaWPorzadku) == 1
+                        if (tylkoJedenWierszBezBD & resztaWPorzadku) {
+                          return(x[which.max(klasaINumer), ])
+                        } else {
+                          return(x)
+                        }
+                      })
+    ret = rbind(bezDupl, duplikaty)
   }
-
   return(ret)
 }

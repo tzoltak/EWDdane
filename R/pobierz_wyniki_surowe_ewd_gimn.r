@@ -45,19 +45,18 @@ pobierz_wyniki_surowe_ewd_gimn = function(lataEG, dlKsztalcenia=3:4, usunSzkolyS
     eG = kryteriaEG = list()
     prefiksy = c()
     for (i in lataEG) {
-      baza = odbcConnect(zrodloDanychODBC)
+
       zapytanie = paste0("SELECT DISTINCT czesc_egzaminu, prefiks
                           FROM arkusze JOIN sl_czesci_egzaminow USING (rodzaj_egzaminu, czesc_egzaminu)
                           WHERE rodzaj_egzaminu='egzamin gimnazjalny'
                           AND EXTRACT (YEAR FROM data_egzaminu) = ?")
       tryCatch({
+          baza = odbcConnect(zrodloDanychODBC)
           czesciEG = sqlExecute(baza, zapytanie, fetch = TRUE, stringsAsFactors = FALSE, data=i)
           odbcClose(baza)
         },
-        error=function(e) {
-          odbcClose(baza)
-         stop(e)
-        }
+        error = stop,
+        finally = odbcClose(baza)
       )
       prefiksy = c(prefiksy, czesciEG$prefiks)
       if (!jezykiObce) czesciEG = czesciEG[!grepl("^j[.] ", czesciEG$czesc_egzaminu) | czesciEG$czesc_egzaminu == "j. polski", ]
@@ -191,19 +190,17 @@ pobierz_wyniki_surowe_ewd_gimn = function(lataEG, dlKsztalcenia=3:4, usunSzkolyS
   if (wyliczNormalizacje) {
     message("Normalizacja ekwikwantylowa wyników.")
     normalizacje=list()
-    baza = odbcConnect(zrodloDanychODBC)
     zapytanie = "SELECT nazwa, wartosc, wartosc_zr
                 FROM normy_ekwikwantylowe JOIN skale USING (id_skali)
                 WHERE nazwa LIKE 'ewd;g%' OR nazwa LIKE 'ewd;s%'
                 ORDER BY nazwa, wartosc"
     tryCatch({
+        baza = odbcConnect(zrodloDanychODBC)
         normy = sqlExecute(baza, zapytanie, fetch = TRUE, stringsAsFactors = FALSE)
         odbcClose(baza)
       },
-      error=function(e) {
-        odbcClose(baza)
-        stop(e)
-      }
+      error = stop,
+      finally = odbcClose(baza)
     )
     normy$nazwa = gsub("^ewd|;", "", normy$nazwa)
     normy = normy[normy$nazwa %in% names(kryteria), ]
@@ -233,7 +230,7 @@ pobierz_wyniki_surowe_ewd_gimn = function(lataEG, dlKsztalcenia=3:4, usunSzkolyS
         }
         tryCatch({nic = zapisz_normy_do_bazy(normyTemp, i, zrodloDanychODBC=zrodloDanychODBC)},
                  error=function(e) {warning(e, immediate.=TRUE)})
-         normyTemp = data.frame(nazwa=i, wartosc=as.numeric(names(normyTemp)), wartosc_zr=normyTemp)
+        normyTemp = data.frame(nazwa=i, wartosc=as.numeric(names(normyTemp)), wartosc_zr=normyTemp)
       }
       normalizacje[[length(normalizacje) + 1]] = normyTemp
       normyTemp = normyTemp$wartosc_zr[eG[, nazwaSuma] + 1]

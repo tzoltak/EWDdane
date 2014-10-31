@@ -12,7 +12,7 @@
 #' @export
 pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=FALSE, dolaczPaou=FALSE, zrodloDanychODBC="EWD"){
   stopifnot(is.numeric(lata)         , length(lata) > 0,
-            is.character(typySzkol),
+            is.character(typySzkol) | is.null(typySzkol),
             is.logical(idOke)       , length(idOke) == 1,
             is.logical(daneAdresowe), length(daneAdresowe) == 1,
             is.logical(dolaczPaou)  , length(dolaczPaou) == 1,
@@ -20,8 +20,6 @@ pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=F
   )
   stopifnot(idOke %in% c(TRUE, FALSE), daneAdresowe %in% c(TRUE, FALSE), dolaczPaou %in% c(TRUE, FALSE))
   try(suppressWarnings(Sys.setlocale("LC_ALL", "pl_PL.UTF-8")))
-
-  P = odbcConnect(zrodloDanychODBC)
 
   zapytanie = paste0( "SELECT id_szkoly, typ_szkoly, publiczna, dla_doroslych, specjalna, przyszpitalna,
                         d.rok, ",
@@ -42,13 +40,11 @@ pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=F
   }
 
   tryCatch({
+      P = odbcConnect(zrodloDanychODBC)
       ret = sqlExecute(P, zapytanie, fetch=TRUE, stringsAsFactors=FALSE, data=dane)
-      odbcClose(P)
     },
-    error=function(e) {
-      odbcClose(P)
-      stop(e)
-    }
+    error = stop,
+    finally = odbcClose(P)
   )
 
   ret$typ_szkoly[ret$typ_szkoly=="TRUE"] = "T"
