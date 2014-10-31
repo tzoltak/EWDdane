@@ -38,7 +38,7 @@ pobierz_dane_uczniow <- function(idTestow, zrodloDanychODBC="EWD"){
   zapTest1 = "select has_table_privilege('dane_osobowe.obserwacje', 'select')"
   zapTest2 = "select has_table_privilege('testy_obserwacje', 'select')"
   do_obs =0
-  do_testy = 0 
+  do_testy = 0
   tryCatch({
       do_obs = sqlExecute(P, zapTest1, fetch = TRUE)
       do_testy = sqlExecute(P, zapTest1, fetch = TRUE)
@@ -48,7 +48,7 @@ pobierz_dane_uczniow <- function(idTestow, zrodloDanychODBC="EWD"){
       odbcClose(P)
     }
   )
-  
+
   if(do_obs!=1 | do_testy!=1){
     stop("Brak dostępu do danych poufnych.")
   }
@@ -76,10 +76,27 @@ pobierz_dane_uczniow <- function(idTestow, zrodloDanychODBC="EWD"){
       stop(e)
     }
   )
-
   if (any(duplicated(ret$id_obserwacji))) {
-    stop("Łączeniu informacji dot. różnych testów doprowadziło do powtórzeń id_obserwacji:\n  ", paste0(ret$id_obserwacji[duplicated(ret$id_obserwacji)], collapse=",\n  "), ".")
+    warning("Łączeniu informacji dot. różnych testów doprowadziło do powtórzeń id_obserwacji:\n  ",
+            paste0(ret$id_obserwacji[duplicated(ret$id_obserwacji)], collapse=",\n  "),
+            ".\nTam, gdzie problem polegał na konflikcie braku informacji z występowaniem informacji, został on jednak rozwiązany.")
+    duplikaty = with(ret, {ret$id_obserwacji[duplicated(ret$id_obserwacji)]})
+    bezDupl   = subset(ret, !(ret$id_obserwacji %in% duplikaty))
+    duplikaty = subset(ret,   ret$id_obserwacji %in% duplikaty )
+    duplikaty = ddply(duplikaty, ~id_obserwacji,
+                      function(x) {
+                        klasaINumer = rowSums(!is.na(x[, c("klasa", "kod_u")]))
+                        tylkoJedenWierszBezBD = (sum(klasaINumer == 2) == 1) |
+                          ( (max(klasaINumer) == 1) & (sum(klasaINumer == 1) == 1) )
+                        resztaWPorzadku = unique(x[, !(names(x) %in% c("id_obserwacji", "klasa", "kod_u")), drop=FALSE])
+                        resztaWPorzadku = nrow(resztaWPorzadku) == 1
+                        if (tylkoJedenWierszBezBD & resztaWPorzadku) {
+                          return(x[which.max(klasaINumer), ])
+                        } else {
+                          return(x)
+                        }
+                      })
+    ret = rbind(bezDupl, duplikaty)
   }
-
   return(ret)
 }
