@@ -16,6 +16,11 @@
 #' Spośród kolumn tablicy \code{dane_osobowe.testy_obserwacje} kopiowana jest tylko kolumna
 #' \code{id_szkoly}, natomiast kolumna \code{zrodlo} ustawiana jest na wartość \code{baza}.
 #' Pozostałe kolumny (np. \code{dysleksja, klasa}, itp.) ustawiane są na \code{NULL}.
+#' 
+#' Jeśli w bazie istnieje już test o takim samym opisie, zrówcone zostanie id_testu tego testu
+#' i jednocześnie wygenerowany zostanie warning informujący o tym, że nowy test nie został utworzony.
+#' Uwaga! Nie gwarantuje to, że istniejący w bazie test składa się z identycznych testów składowych
+#' - porównanie bazuje tylko na opisie testu, który jest ustawiany arbitralnie przez tworządego test.
 #' @return id_testu utworzonego testu
 #' @import RODBCext
 #' @export
@@ -40,6 +45,12 @@
   P = odbcConnect(zrodloDanychODBC)
   tryCatch(
     {
+      czyJest = sqlExecute(P, "SELECT id_testu FROM testy WHERE opis = ?", opis, fetch = T)[, 1]
+      if(length(czyJest) > 0){
+        warning('w bazie istnieje już taki test')
+        return(czyJest[1])
+      }
+      
       zapytanie = paste0("
         SELECT id_testu, data_egzaminu 
         FROM testy JOIN arkusze USING (arkusz)
