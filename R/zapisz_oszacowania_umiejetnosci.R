@@ -49,12 +49,13 @@ zapisz_oszacowania_umiejetnosci <- function(oszacowania, skrotCzesci, rEAP, rodz
     idTestu = suppressWarnings(stworz_test_z_wielu_czesci(rodzajEgzaminu, czesciEgzaminu, rokEgzaminu, czyEwd = TRUE, opis = opisEgzaminu, zrodloDanychODBC))
   } else {
     idTestu = oszacowania[[4]]
-  } 
+  }
   
   zapytanie = "INSERT INTO skalowania_obserwacje (id_testu, id_obserwacji, id_skali, skalowanie, estymacja,  wynik, bl_std, nr_pv)
-              VALUES (?, ?, ?, ?, 'EAP', ?,  ?, -1)"
+              VALUES (?, ?, ?, ?, ?, ?,  ?, -1)"
   
-  doWstawienia = data.frame(idTestu, oszacowania$id_obserwacji, idSkali, nrSkalowania, oszacowania[[skrotCzesci]],  oszacowania[[paste0(skrotCzesci,"_se")]])
+  doWstawienia = data.frame(idTestu, oszacowania$id_obserwacji, idSkali, nrSkalowania, rodzajEstymacji, 
+                            oszacowania[[skrotCzesci]]/rEAP,  oszacowania[[paste0(skrotCzesci,"_se")]]/rEAP)
   
   if(!is.null(maskaTestowa)){
     doWstawienia = doWstawienia[maskaTestowa, ]
