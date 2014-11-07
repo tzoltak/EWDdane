@@ -8,7 +8,7 @@
 #' @param parametry ramka danych o strukturze zgodnej z tą, w jakiej zwraca oszacowania parametrów funkcja skaluj().
 #' @param opis opis estymacji
 #' @param estymacja parametr opisujący metodę estymacji - musi być jedną z wartości występujących w tablicy sl_estymacje_parametrow.
-#' @param rEAP rzetelność empiryczna, która domyśnie wynosi NULL
+#' @param rEAP rzetelność empiryczna, która domyśnie wynosi NULL.
 #' @param zrodloDanychODBC string określający źródło danych. Wartość domyślna to 'EWD'.
 #' @return Funkcja zwraca id skalowania.
 #' @import RODBCext
@@ -171,7 +171,8 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
         
         
       } else if ( liczbaParamKryteria[k] > 1 ){ # model GRM
-        dyskryminacja = parBy[parByNumeryKryteriow %in% krytNum, "wartosc"]
+        # dyskryminacja = parBy[parByNumeryKryteriow %in% krytNum, "wartosc"]
+        dyskryminacja =parBy$wartosc[parByNumeryKryteriow %in% krytNum]
         
         wstaw_do_skalowania_elementy (P, idSkali, kolejnoscTemp,
                                       numerSkalowania, "dyskryminacja",
@@ -193,8 +194,8 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
           }
           
           wstaw_do_skalowania_elementy(P, idSkali, kolejnoscTemp, numerSkalowania, nazwaPar, "GRM",
-                                       parTreshold$wartosc[m]/parBy$wartosc[parByNumeryKryteriow %in% krytNum] - srednia,
-                                       parTreshold$'S.E.'[m]/parBy$wartosc[parByNumeryKryteriow %in% krytNum])
+                                       parTreshold$wartosc[m]/dyskryminacja - srednia, 
+                                       parTreshold$'S.E.'[m]/dyskryminacja)
         }
         }
     }
@@ -230,7 +231,7 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
                                       "GRM", dyskryminacja, parBy$'S.E.'[parByNumeryPseudo %in% pseudoNum])
         
         indTres = which(parTresholdNumeryPseudo %in% pseudoNum)
-        srednia = mean(parTreshold[indTres, "wartosc"]) / parBy$wartosc[parByNumeryPseudo %in% pseudoNum]
+        srednia = mean(parTreshold[indTres, "wartosc"]) / dyskryminacja
         
         wstaw_do_skalowania_elementy(P, idSkali, kolejnoscTemp, numerSkalowania,
                                      "trudność", "GRM", srednia, NULL)
@@ -239,14 +240,14 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
           nazwaPar = paste0("k", which(m==indTres))
           
           if( ! nazwaPar %in% nazwyParametrow ){
-            insert = "INSERT INTO sl_parametry(parametr,opis)
+            insert = "INSERT INTO sl_parametry(parametr, opis)
             values ( ? ,'kn - odchylenie krzywych opisujących poszczególne liczby punktów od średniej trudności całego zadania w modelu GRM')"
             sqlExecute(P, insert, data = nazwaPar)
           }
           
           wstaw_do_skalowania_elementy(P, idSkali, kolejnoscTemp, numerSkalowania, nazwaPar, "GRM",
-                                       parTreshold$wartosc[m]/parBy$wartosc[parByNumeryKryteriow %in% krytNum] - srednia,
-                                       parTreshold$'S.E.'[m]/parBy$wartosc[parByNumeryKryteriow %in% krytNum])
+                                       parTreshold$wartosc[m]/dyskryminacja - srednia,
+                                       parTreshold$'S.E.'[m]/dyskryminacja)
         }
         }
     }

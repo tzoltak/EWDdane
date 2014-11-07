@@ -27,10 +27,10 @@
 #' }
 #' @import RODBCext
 #' @export
-pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_skalowania='.*',
+pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_skalowania='.*', idSkalowania = NULL,
                                          zrodloDanychODBC = 'EWD', parametryzacja = "baza"){
   
-  if(!parametryzacja %in% c("baza","mplus")){
+  if(!parametryzacja %in% c("baza", "mplus")){
     stop("Niepoprawna wartość parametru 'parametryzacja': ",parametryzacja)
   }
   
@@ -61,7 +61,13 @@ pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_s
   } else {
     where = paste0(where, " id_testu = ? ")
   }
-  where = paste0(where, " and SA.opis ~* ? ")
+  if(is.null(idSkalowania)){
+    where = paste0(where, " and SA.opis ~* ? ")
+  } else{
+    where = paste0(where, " and SA.skalowanie = ? ")
+  }
+  
+  
   
   #   joiny =             "
   #   from skale AS S
@@ -101,21 +107,25 @@ pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_s
                       S.*
                       ", joiny , where)
   
-  
-  if( !is.null(nazwa_skali) & !is.null(id_testu) ){
-    sqlFrame = data.frame(nazwa_skali, id_testu, opis_skalowania)
-  } else if( !is.null(nazwa_skali) & is.null(id_testu) ){
-    sqlFrame = data.frame(nazwa_skali, opis_skalowania)
-  } else  {
-    sqlFrame = data.frame(id_testu, opis_skalowania)
+  if(is.null(idSkalowania)){
+    parSkalowania = opis_skalowania
+  } else{
+    parSkalowania = idSkalowania
   }
   
+  if( !is.null(nazwa_skali) & !is.null(id_testu) ){
+    sqlFrame = data.frame(nazwa_skali, id_testu, parSkalowania)
+  } else if( !is.null(nazwa_skali) & is.null(id_testu) ){
+    sqlFrame = data.frame(nazwa_skali, parSkalowania)
+  } else  {
+    sqlFrame = data.frame(id_testu, parSkalowania)
+  }
   
   tryCatch({
     P = odbcConnect(zrodloDanychODBC)
-    tablicaDanych = sqlExecute(P, zapytanie1, data = sqlFrame, fetch = TRUE)
-    opisSkalowan  = sqlExecute(P, zapytanie2, data = sqlFrame, fetch = TRUE)
-    skale         = sqlExecute(P, zapytanie3, data = sqlFrame, fetch = TRUE)
+    tablicaDanych = sqlExecute(P, zapytanie1, data = sqlFrame, fetch = TRUE, stringsAsFactors = FALSE)
+    opisSkalowan  = sqlExecute(P, zapytanie2, data = sqlFrame, fetch = TRUE, stringsAsFactors = FALSE)
+    skale         = sqlExecute(P, zapytanie3, data = sqlFrame, fetch = TRUE, stringsAsFactors = FALSE)
     odbcClose(P)
   },
   error=function(e) {
@@ -206,16 +216,16 @@ zmien_na_mplus <- function(tablicaDanych){
   for(krytNum in unique(kryt)){
     czyKryterium = krytNum %in% na.omit(dwaPL$id_kryterium)
     
-    by = dwaPL$wartosc[dwaPL$id_kryterium == krytNum & dwaPL$parametr=="dyskryminacja" ]
-    byStd = dwaPL$bl_std[dwaPL$id_kryterium == krytNum & dwaPL$parametr=="dyskryminacja" ]
+    by = dwaPL$wartosc[kryt == krytNum & dwaPL$parametr=="dyskryminacja" ]
+    byStd = dwaPL$bl_std[kryt == krytNum & dwaPL$parametr=="dyskryminacja" ]
     
     zmienna1 = ifelse(czyKryterium, "k", "p")
     zmienna2 = paste0(zmienna1, "_", krytNum)
     
     ret2PL = rbind(ret2PL, data.frame(typ="by", zmienna1, zmienna2, wartosc = by, S.E.= byStd ))
     
-    tres = dwaPL$wartosc[dwaPL$id_kryterium == krytNum & dwaPL$parametr=="trudność" ]
-    tresStd = dwaPL$bl_std[dwaPL$id_kryterium == krytNum & dwaPL$parametr=="trudność" ]
+    tres = dwaPL$wartosc[kryt == krytNum & dwaPL$parametr=="trudność" ]
+    tresStd = dwaPL$bl_std[kryt == krytNum & dwaPL$parametr=="trudność" ]
     
     ret2PL = rbind(ret2PL, data.frame(typ="treshold", zmienna1=zmienna2, zmienna2=zmienna1,
                                       wartosc = tres*by, S.E.=tresStd*by ))
@@ -225,7 +235,7 @@ zmien_na_mplus <- function(tablicaDanych){
   kryt = grm$id_kryterium
   kryt[is.na(kryt)] = na.omit(grm$id_pseudokryterium)
   
-  retGRM = data.frame()
+  retGRM = data.frame(stringsAsFactors=FALSE)
   for(krytNum in unique(kryt)){
     
     czyKryterium = krytNum %in% tablicaDanych$id_kryterium
@@ -242,7 +252,7 @@ zmien_na_mplus <- function(tablicaDanych){
     
     retGRM = rbind(retGRM,
                    data.frame(typ ='treshold', zmienna1=zmienna2, zmienna2=zmienna1,
-                              wartosc = kPar$wartosc*by$wartosc + srednia, S.E.=kPar$bl_std*by$wartosc ) )
+                              wartosc = (kPar$wartosc )*by$wartosc + srednia, S.E.=kPar$bl_std*by$wartosc ) )
   }
   
   ret = rbind(ret2PL, retGRM)

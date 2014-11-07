@@ -4,7 +4,7 @@
 \title{Pobieranie parametrow skalowan.}
 \usage{
 pobierz_parametry_skalowania(nazwa_skali = NULL, id_testu = NULL,
-  opis_skalowania = ".*", zrodloDanychODBC = "EWD",
+  opis_skalowania = ".*", idSkalowania = NULL, zrodloDanychODBC = "EWD",
   parametryzacja = "baza")
 }
 \arguments{

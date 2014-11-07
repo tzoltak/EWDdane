@@ -19,7 +19,7 @@ uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
 
 \item{estymacja}{parametr opisujący metodę estymacji - musi być jedną z wartości występujących w tablicy sl_estymacje_parametrow.}
 
-\item{rEAP}{rzetelność empiryczna, która domyśnie wynosi NULL}
+\item{rEAP}{rzetelność empiryczna, która domyśnie wynosi NULL.}
 
 \item{zrodloDanychODBC}{string określający źródło danych. Wartość domyślna to 'EWD'.}
 }

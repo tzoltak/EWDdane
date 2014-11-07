@@ -16,6 +16,10 @@
 #' @export
 zapisz_oszacowania_umiejetnosci <- function(oszacowania, skrotCzesci, rEAP, rodzajEgzaminu, rokEgzaminu, nrSkalowania, idSkali, rodzajEstymacji = 'EAP', zrodloDanychODBC = "EWD", maskaTestowa=NULL){
   
+  stopifnot(is.list(oszacowania), is.character(skrotCzesci), is.numeric(rEAP), is.character(rodzajEgzaminu),
+            is.numeric(rokEgzaminu), is.numeric(nrSkalowania), is.numeric(idSkali),
+            is.character(rodzajEstymacji), is.character(zrodloDanychODBC), is.numeric(maskaTestowa))
+  
   testy = which(grepl("^id_testu", names(oszacowania)))
   
   if(length(testy)>1){
