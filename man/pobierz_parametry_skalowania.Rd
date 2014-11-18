@@ -16,6 +16,8 @@ uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
 
 \item{opis_skalowania}{wyrażenie regularne określające opis skalowania. Domyślna wartość to '\%'.}
 
+\item{idSkalowania}{numer skalowania, domyślnie ustawiony na NULL. Gdy argument nie ma wartości NULL to parametr 'opis_skalowania' jest ignorowany.}
+
 \item{zrodloDanychODBC}{string określający źródło danych. docelowa wartość domyślna to 'EWD'. Obecnie 'ewd_grzes'.}
 
 \item{parametryzacja}{parametr określający format zwracanego wyniku. Domyślna wartość to 'baza'.

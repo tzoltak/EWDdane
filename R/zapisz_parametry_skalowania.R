@@ -185,11 +185,10 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
                                      "trudność", "GRM", srednia, NULL)
         
         for(m in indTres ){
-          nazwaPar = paste0("k", which(m==indTres))
+          nazwaPar = paste0("b", bNr <- which(m==indTres))
           
           if( ! nazwaPar %in% nazwyParametrow ){
-            insert = "INSERT INTO sl_parametry(parametr,opis)
-            values ( ? ,'kn - odchylenie krzywych opisujących poszczególne liczby punktów od średniej trudności całego zadania w modelu GRM')"
+            insert = paste0("INSERT INTO sl_parametry(parametr, opis) values ( ? ,'trudność ", bNr, " poziomu wykonania')")
             sqlExecute(P, insert, data = nazwaPar)
           }
           
@@ -197,7 +196,7 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
                                        parTreshold$wartosc[m]/dyskryminacja - srednia, 
                                        parTreshold$'S.E.'[m]/dyskryminacja)
         }
-        }
+      }
     }
     
     
@@ -237,11 +236,10 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
                                      "trudność", "GRM", srednia, NULL)
         
         for(m in indTres ){
-          nazwaPar = paste0("k", which(m==indTres))
+          nazwaPar = paste0("b", bNr <- which(m==indTres))
           
           if( ! nazwaPar %in% nazwyParametrow ){
-            insert = "INSERT INTO sl_parametry(parametr, opis)
-            values ( ? ,'kn - odchylenie krzywych opisujących poszczególne liczby punktów od średniej trudności całego zadania w modelu GRM')"
+            insert = paste0("INSERT INTO sl_parametry(parametr, opis) values ( ? ,'trudność ", bNr, " poziomu wykonania')")
             sqlExecute(P, insert, data = nazwaPar)
           }
           
@@ -249,7 +247,7 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
                                        parTreshold$wartosc[m]/dyskryminacja - srednia,
                                        parTreshold$'S.E.'[m]/dyskryminacja)
         }
-        }
+      }
     }
     
     if(!is.null(rEAP)){
@@ -259,7 +257,6 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
       
       sqlExecute(P, insert,
                  data = data.frame(idSkali, numerSkalowania, rEAP))
-      
     }
     
     odbcEndTran(P, TRUE) 
@@ -289,18 +286,32 @@ zapisz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, paramet
 wstaw_do_skalowania_elementy <- function(zrodloODBC, idSkali, kolejnosc, numerSkalowania,
                                          nazwaParametru, model, wartosc, odchylenie){
   
+  
+  
+  parametrGrupowy = sqlExecute(zrodloODBC, "select parametr, grupowy from sl_parametry where opis = ? or parametr = ?",
+                               data = data.frame(nazwaParametru, nazwaParametru), fetch=TRUE, stringsAsFactors = FALSE)
+  
+  print(wartosc)
+  print(nazwaParametru)
+  print(parametrGrupowy)
+  
   insSkalowania = paste0("INSERT INTO skalowania_elementy  (id_elementu, id_skali, kolejnosc,
-                         skalowanie, parametr, model, wartosc, uwagi", ifelse(is.null(odchylenie), "",", bl_std"), ")
-                         VALUES (nextval('skalowania_elementy_id_elementu_seq'), ?, ?, ?, ?, ?, ?,",
-                         "''", ifelse(is.null(odchylenie), "", ", ?" ), ")"
+                         skalowanie, parametr, ", ifelse(is.na(parametrGrupowy$grupowy), "","grupowy, "), " model, wartosc, uwagi", ifelse(is.null(odchylenie), "",", bl_std"), ")
+                         VALUES (nextval('skalowania_elementy_id_elementu_seq'), ?, ?, ?, ?, ?, ?,", ifelse(is.na(parametrGrupowy$grupowy),  "", " ?,"), 
+                         " ''", ifelse(is.null(odchylenie), "", ", ?" ), ")"
                          )
+  
+  
+  if(is.na(parametrGrupowy$grupowy)){
+    parametrGrupowy = parametrGrupowy$parametr
+  }
   
   if(is.null(odchylenie)){
     sqlExecute(zrodloODBC, insSkalowania,
-               data = data.frame(idSkali, kolejnosc, numerSkalowania, nazwaParametru, model, wartosc))
+               data = data.frame(idSkali, kolejnosc, numerSkalowania, parametrGrupowy, model, wartosc))
   } else{
     sqlExecute(zrodloODBC, insSkalowania,
-               data = data.frame(idSkali, kolejnosc, numerSkalowania, nazwaParametru, model, wartosc, odchylenie))
+               data = data.frame(idSkali, kolejnosc, numerSkalowania, parametrGrupowy, model, wartosc, odchylenie))
   }
   invisible(NULL)
 }
