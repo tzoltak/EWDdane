@@ -7,6 +7,7 @@
 #' @param id_testu id testu.Kiedy id testu przymuje wartość NULL nie jest brana pod
 #' uwagę w wyszukiwaniu. Wartość domyślna to NULL.
 #' @param opis_skalowania wyrażenie regularne określające opis skalowania. Domyślna wartość to '\%'.
+#' @param idSkalowania numer skalowania, domyślnie ustawiony na NULL. Gdy argument nie ma wartości NULL to parametr 'opis_skalowania' jest ignorowany. 
 #' @param zrodloDanychODBC string określający źródło danych. docelowa wartość domyślna to 'EWD'. Obecnie 'ewd_grzes'.
 #' @param parametryzacja parametr określający format zwracanego wyniku. Domyślna wartość to 'baza'.
 #' Inna możliwa wartość to 'mplus'.
@@ -27,8 +28,7 @@
 #' }
 #' @import RODBCext
 #' @export
-pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_skalowania='.*', idSkalowania = NULL,
-                                         zrodloDanychODBC = 'EWD', parametryzacja = "baza"){
+pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_skalowania='.*', idSkalowania = NULL, zrodloDanychODBC = 'EWD', parametryzacja = "baza"){
   
   if(!parametryzacja %in% c("baza", "mplus")){
     stop("Niepoprawna wartość parametru 'parametryzacja': ",parametryzacja)
@@ -204,7 +204,7 @@ zmien_na_mplus <- function(tablicaDanych){
   
   # 2PL
   
-  if( length ( errInds <- which( ! dwaPL$parametr %in% c("dyskryminacja","trudność")  ) ) != 0 ){
+  if( length ( errInds <- which( ! dwaPL$parametr %in% c("a","trudność")  ) ) != 0 ){
     stop("Niepoprawne rodzaje parametrów dla modelu 2PL: \n", paste(errInds, collapse="\n"))
   }
   
@@ -216,8 +216,8 @@ zmien_na_mplus <- function(tablicaDanych){
   for(krytNum in unique(kryt)){
     czyKryterium = krytNum %in% na.omit(dwaPL$id_kryterium)
     
-    by = dwaPL$wartosc[kryt == krytNum & dwaPL$parametr=="dyskryminacja" ]
-    byStd = dwaPL$bl_std[kryt == krytNum & dwaPL$parametr=="dyskryminacja" ]
+    by = dwaPL$wartosc[kryt == krytNum & dwaPL$parametr=="a" ]
+    byStd = dwaPL$bl_std[kryt == krytNum & dwaPL$parametr=="a" ]
     
     zmienna1 = ifelse(czyKryterium, "k", "p")
     zmienna2 = paste0(zmienna1, "_", krytNum)
@@ -240,9 +240,9 @@ zmien_na_mplus <- function(tablicaDanych){
     
     czyKryterium = krytNum %in% tablicaDanych$id_kryterium
     
-    by  = grm[ grm$parametr=="dyskryminacja" & kryt == krytNum, c("wartosc", "bl_std")]
+    by  = grm[ grm$parametr=="a" & kryt == krytNum, c("wartosc", "bl_std")]
     srednia = grm$wartosc[ grm$parametr=="trudność" & kryt == krytNum] * by$wartosc
-    kPar = grm[ grepl("^k[[:digit:]+]$", grm$parametr) & kryt == krytNum , c("wartosc", "bl_std")]
+    kPar = grm[ grepl("^b[[:digit:]+]$", grm$parametr) & kryt == krytNum , c("wartosc", "bl_std")]
     
     zmienna1 = ifelse(czyKryterium, "k", "p")
     zmienna2 = paste0(zmienna1, "_", krytNum)
