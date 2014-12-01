@@ -34,5 +34,10 @@ oraz \code{ewd} zgodne z testami, z których powstał.
 Spośród kolumn tablicy \code{dane_osobowe.testy_obserwacje} kopiowana jest tylko kolumna
 \code{id_szkoly}, natomiast kolumna \code{zrodlo} ustawiana jest na wartość \code{baza}.
 Pozostałe kolumny (np. \code{dysleksja, klasa}, itp.) ustawiane są na \code{NULL}.
+
+Jeśli w bazie istnieje już test o takim samym opisie, zrówcone zostanie id_testu tego testu
+i jednocześnie wygenerowany zostanie warning informujący o tym, że nowy test nie został utworzony.
+Uwaga! Nie gwarantuje to, że istniejący w bazie test składa się z identycznych testów składowych
+- porównanie bazuje tylko na opisie testu, który jest ustawiany arbitralnie przez tworządego test.
 }
 
