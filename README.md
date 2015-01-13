@@ -2,13 +2,13 @@
 
 Pakiet zawiera funkcje służące do pobierania i zapisywania danych z bazy (o poziom wyżej niż to, co oferuje pakiet ZPD).
 
-## Instalacja
+## Instalacja / aktualizacja
 
 Pakiet nie jest wypchnięty na CRAN-a, więc instalować trzeba ze źródeł.
 
 Ponieważ jednak zawiera jedynie kod w R, nie ma potrzeby zaopatrywać się w kompilatory, itp.
 
-Instalacja możliwa jest w dwóch wariantach:
+Instalacja możliwa jest w dwóch wariantach **(aby zaktualizować pakiet do najnowszej wersji należy zrobić dokładnie to samo)**:
 
 1) Z użyciem pakietu devtools:
 ```r
