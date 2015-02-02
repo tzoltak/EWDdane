@@ -21,7 +21,7 @@ pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=F
   stopifnot(idOke %in% c(TRUE, FALSE), daneAdresowe %in% c(TRUE, FALSE), dolaczPaou %in% c(TRUE, FALSE))
   try(suppressWarnings(Sys.setlocale("LC_ALL", "pl_PL.UTF-8")))
 
-  zapytanie = paste0( "SELECT id_szkoly, typ_szkoly, publiczna, dla_doroslych, specjalna, przyszpitalna,
+  zapytanie = paste0( "SELECT id_szkoly, typ_szkoly, publiczna, dla_doroslych, specjalna, przyszpitalna, artystyczna,
                         d.rok, ",
                       ifelse(daneAdresowe, "d.nazwa, d.miejscowosc, d.adres, d.pna, d.poczta, ", ""),
                       ifelse(idOke       , "d.id_szkoly_oke, ", ""),
