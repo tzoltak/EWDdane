@@ -8,17 +8,20 @@ zapisz_parametry_skalowania(nazwa_skali = NULL, id_testu = NULL, parametry,
   opis, estymacja, rEAP = NULL, zrodloDanychODBC = "EWD")
 }
 \arguments{
-\item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie jest brana pod
+\item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie jest
+brana pod
 uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
 
 \item{id_testu}{id testu. Kiedy id testu przymuje wartość NULL nie jest brana pod
 uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
 
-\item{parametry}{ramka danych o strukturze zgodnej z tą, w jakiej zwraca oszacowania parametrów funkcja skaluj().}
+\item{parametry}{ramka danych o strukturze zgodnej z tą, w jakiej zwraca oszacowania
+parametrów funkcja skaluj().}
 
 \item{opis}{opis estymacji}
 
-\item{estymacja}{parametr opisujący metodę estymacji - musi być jedną z wartości występujących w tablicy sl_estymacje_parametrow.}
+\item{estymacja}{parametr opisujący metodę estymacji - musi być jedną z wartości
+występujących w tablicy sl_estymacje_parametrow.}
 
 \item{rEAP}{rzetelność empiryczna, która domyśnie wynosi NULL.}
 

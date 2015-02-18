@@ -5,25 +5,25 @@
 \title{Pobieranie danych o szkołach.}
 \usage{
 pobierz_dane_szkol(lata, typySzkol = NULL, idOke = FALSE,
-  daneAdresowe = FALSE, dolaczPaou = FALSE, zrodloDanychODBC = "EWD")
+  daneAdresowe = FALSE)
 }
 \arguments{
-\item{lata}{wektor liczb całkowitych - lata, których mają dotyczyć dane (dla każdej szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)}
+\item{lata}{wektor liczb całkowitych - lata, których mają dotyczyć dane (dla każdej
+szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)}
 
-\item{typySzkol}{opcjonalny wektor tekstowy z typami szkół, które mają zostać zwrócone (lub NULL - zwraca informacje o wszystkich szkołach)}
+\item{typySzkol}{opcjonalny wektor tekstowy z typami szkół, które mają zostać zwrócone
+(lub NULL - zwraca informacje o wszystkich szkołach)}
 
 \item{idOke}{wartość logiczna (domyślnie FALSE) - czy dołączać kody OKE szkół?}
 
-\item{daneAdresowe}{wartość logiczna (domyślnie FALSE) - czy dołączać nazwę i dane adresowe?}
-
-\item{dolaczPaou}{wartość logiczna (domyślnie FALSE) - czy dołączać szkoły z danych PAOU?}
-
-\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")}
+\item{daneAdresowe}{wartość logiczna (domyślnie FALSE) - czy dołączać nazwę i dane
+adresowe?}
 }
 \value{
 data frame
 }
 \description{
-Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie, adresowe i o lokalizacji.
+Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie, adresowe
+i o lokalizacji.
 }
 

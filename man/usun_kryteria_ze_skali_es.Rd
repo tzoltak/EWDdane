@@ -7,16 +7,20 @@
 usun_kryteria_ze_skali_es(skalowanie, idSkali, zrodloDanychODBC = "EWD")
 }
 \arguments{
-\item{skalowanie}{lista zawierająca obiekt usunieteKryteria - wektor nazw kryteriów do usunięcia.}
+\item{skalowanie}{lista zawierająca obiekt usunieteKryteria - wektor nazw kryteriów do
+usunięcia.}
 
 \item{idSkali}{id skali, z której usuwane są kryteria.}
 
-\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")}
+\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
+(domyślnie "EWD")}
 }
 \value{
-Funkcja zwraca ramkę danych, która podana do funkcji \code{\link[ZPD]{edytuj_skale}} usunie z niej zbędne (pseudo)kryteria.
+Funkcja zwraca ramkę danych, która podana do funkcji
+\code{\link[ZPDzapis]{edytuj_skale}} usunie z niej zbędne (pseudo)kryteria.
 }
 \description{
-Funkcja przygotowuje obiekt do modyfikacji skali, który nie zawiera zbędnych kryteriów i pseudokryteriów.
+Funkcja przygotowuje obiekt do modyfikacji skali, który nie zawiera zbędnych kryteriów
+i pseudokryteriów.
 }
 

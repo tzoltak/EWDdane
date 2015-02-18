@@ -10,11 +10,14 @@ sklej_normy(wynikiZnorm, wynikiSurowe, do, grupy = NULL, sr = 100,
 \arguments{
 \item{wynikiZnorm}{wektor wartości na skali znormalizowanej}
 
-\item{wynikiSurowe}{wektor wartości surowych, odpowiadających wartościom znormalizowanym podanym w \code{wynikiZnorm}}
+\item{wynikiSurowe}{wektor wartości surowych, odpowiadających wartościom
+znormalizowanym podanym w \code{wynikiZnorm}}
 
-\item{do}{wartość liczbowa - wartość surowa, do jakiej należy kontynuować skracanie (ale nie zostanie przeprowadzonych więcej złączeń, niż wartość argumentu \code{ile})}
+\item{do}{wartość liczbowa - wartość surowa, do jakiej należy kontynuować skracanie
+(ale nie zostanie przeprowadzonych więcej złączeń, niż wartość argumentu \code{ile})}
 
-\item{grupy}{opcjonalnie zmienna definiująca podział na grupy, w ramach których oddzielnie ma być przeprowadzone łączenie}
+\item{grupy}{opcjonalnie zmienna definiująca podział na grupy, w ramach których
+oddzielnie ma być przeprowadzone łączenie}
 
 \item{sr}{liczba - średnia znormalizowanej skali}
 
@@ -26,12 +29,14 @@ sklej_normy(wynikiZnorm, wynikiSurowe, do, grupy = NULL, sr = 100,
 Wektor liczbowy z przeliczonymi wartościami argumentu \code{wynikiZnorm}.
 }
 \description{
-Funkcja służy do sklejania ze sobą najniższych wartości skali znormalizowanej ekwikwantylowo, przeliczając jednocześnie wartości skali.
+Funkcja służy do sklejania ze sobą najniższych wartości skali znormalizowanej
+ekwikwantylowo, przeliczając jednocześnie wartości skali.
 }
 \details{
-Tu w przyszłości uzupełnić. Trzeba dodać do funkcji jakąś weryfikację poprawności argumentów.
+Tu w przyszłości uzupełnić. Trzeba dodać do funkcji jakąś weryfikację poprawności
+argumentów.
 }
 \seealso{
-\code{\link{normy_ekwikwantylowe}}
+\code{\link[ZPD]{normalizuj_ekwikwantylowo}}
 }
 

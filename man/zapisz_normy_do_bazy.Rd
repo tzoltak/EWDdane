@@ -7,11 +7,14 @@
 zapisz_normy_do_bazy(normy, prefiksRok, zrodloDanychODBC = "EWD")
 }
 \arguments{
-\item{normy}{wektor opisujący unormowanie, typowo zwrócony przez funkcję \code{\link{normy_ekwikwantylowe}}}
+\item{normy}{wektor opisujący unormowanie, typowo zwrócony przez funkcję
+\code{\link[ZPD]{normalizuj_ekwikwantylowo}}}
 
-\item{prefiksRok}{ciąg znaków postaci 'pr', gdzie p oznacza prefiks części egzaminu, a r rok (zapis czterema cyframi)}
+\item{prefiksRok}{ciąg znaków postaci 'pr', gdzie p oznacza prefiks części egzaminu,
+a r rok (zapis czterema cyframi)}
 
-\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")}
+\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
+(domyślnie "EWD")}
 }
 \value{
 funkcja nic nie zwraca
@@ -21,9 +24,11 @@ Funkcja służy do zapisania do bazy wyliczonych norm ekwikwantylowych.
 }
 \details{
 Funkcja nie dopuszcza braków danych w argumencie \code{normy}.
-Funkcja wymaga też, aby w ramach połączenia nawiązywanego z bazą mieć prawa do modyfikacji tablic 'skale' i 'normy_ekwikwantylowe'.
+Funkcja wymaga też, aby w ramach połączenia nawiązywanego z bazą mieć prawa do
+modyfikacji tablic 'skale' i 'normy_ekwikwantylowe'.
 }
 \seealso{
-\code{\link{normy_ekwikwantylowe}}, \code{\link{pobierz_wyniki_surowe_ewd_gimn}}
+\code{\link[ZPD]{normalizuj_ekwikwantylowo}},
+\code{\link{pobierz_wyniki_surowe_ewd_gimn}}
 }
 

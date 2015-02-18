@@ -1,16 +1,23 @@
 Encoding: UTF-8
 Package: EWDdane
-Version: 0.4
-Date: 2014-10-23
+Version: 0.5
+Date: 2015-02-17
 Title: Functions for Educational Value-Added data import/export.
-Author: Tomasz Zoltak <tomek@zozlak.org>, Grzegorz Golonka <ggolonka@o2.pl>,
-    Mateusz Zoltak <zozlak@zozlak.org>
-Maintainer: Tomasz Zoltak <tomek@zozlak.org>
+Authors@R: c(
+  person("Tomasz", "Zoltak", , "tomek@zozlak.org", role = c("aut", "cre")),
+  person("Mateusz", "Zoltak", , "zozlak@zozlak.org", role = c("aut")),
+  person("Grzegorz", "Golonka", , "ggolonka@o2.pl", role = c("aut")))
 Description: Functions for Educational Value-Added data import/export.
 Depends:
-    RODBCext,
-    ZPD,
-    R (>= 2.15.0)
-License: LGPL-3
+  reshape2,
+  ZPD (>= 1.0.1)
+Imports:
+  dplyr,
+  lazyeval
+Suggests:
+  knitr,
+  testthat
+License:  MIT + file LICENSE
 Language: pl
+VignetteBuilder: knitr
 NeedsCompilation: no

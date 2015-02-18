@@ -10,27 +10,37 @@ pobierz_wyniki_surowe_ewd_gimn(lataEG, dlKsztalcenia = 3:4,
   backupZapisz = NULL, backupWczytaj = NULL)
 }
 \arguments{
-\item{lataEG}{wektor liczb całkowitych - roczniki egzaminu gimnazjalnego, które mają zostać pobrane (wraz z przypisanymi wynikami sprawdzianu i innymi przydatnymi danymi)}
+\item{lataEG}{wektor liczb całkowitych - roczniki egzaminu gimnazjalnego, które mają
+zostać pobrane (wraz z przypisanymi wynikami sprawdzianu i innymi przydatnymi danymi)}
 
-\item{dlKsztalcenia}{wektor liczb całkowitych - długość toku kształcenia, czyli z jakim przesunięciem wstecz powinny być pobierane wyniki sprawdzianu}
+\item{dlKsztalcenia}{wektor liczb całkowitych - długość toku kształcenia, czyli
+z jakim przesunięciem wstecz powinny być pobierane wyniki sprawdzianu}
 
-\item{usunSzkolySpecjalne}{wartość logiczna - czy usuwać uczniów szkół dla dorosłych, specjalnych, itp.?}
+\item{usunSzkolySpecjalne}{wartość logiczna - czy usuwać uczniów szkół dla dorosłych,
+specjalnych, itp.?}
 
-\item{jezykiObce}{wartość logiczna - czy zwrócone mają być również wyniki w zakresie języków obcych?}
+\item{jezykiObce}{wartość logiczna - czy zwrócone mają być również wyniki w zakresie
+języków obcych?}
 
-\item{wyliczNormalizacje}{wartość logiczna - czy jeśli zostanie stwierdzone, że w bazie nie mazapisanych normalizacji ekwikwantylowych wyników egzaminów, to obliczyć je i zapisać do bazy?}
+\item{wyliczNormalizacje}{wartość logiczna - czy jeśli zostanie stwierdzone, że
+w bazie nie mazapisanych normalizacji ekwikwantylowych wyników egzaminów, to obliczyć
+je i zapisać do bazy?}
 
-\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")}
+\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
+(domyślnie "EWD")}
 
-\item{backupZapisz}{nazwa pliku .RData, do którego zostaną zapisane dane po pobraniu i scaleniu, ale przed wyliczeniem sum i normalizacją}
+\item{backupZapisz}{nazwa pliku .RData, do którego zostaną zapisane dane po pobraniu
+i scaleniu, ale przed wyliczeniem sum i normalizacją}
 
-\item{backupWczytaj}{nazwa pliku .RData, zapisanego przy wcześniejszym wywołaniu funkcji z wykorzystaniem argumentu \code{backupZapisz}}
+\item{backupWczytaj}{nazwa pliku .RData, zapisanego przy wcześniejszym wywołaniu
+funkcji z wykorzystaniem argumentu \code{backupZapisz}}
 }
 \value{
 Data frame, który zawiera: i tu też trzeba będzie opisać.
 }
 \description{
-Funkcja pobiera dane surowe - w tym wyniki uzyskane za poszczególne kryteria oceny - egzaminu gimnazjalnego i połączone z nimi wyniki surowe sprawdzianu.
+Funkcja pobiera dane surowe - w tym wyniki uzyskane za poszczególne kryteria oceny
+- egzaminu gimnazjalnego i połączone z nimi wyniki surowe sprawdzianu.
 }
 \details{
 Tu się przyda jakiś opis

@@ -9,30 +9,36 @@ pobierz_parametry_skalowania(nazwa_skali = NULL, id_testu = NULL,
   parametryzacja = "baza")
 }
 \arguments{
-\item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie jest brana pod
-uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
+\item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie jest brana
+pod uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
 
-\item{id_testu}{id testu.Kiedy id testu przymuje wartość NULL nie jest brana pod
-uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
+\item{id_testu}{id testu.Kiedy id testu przymuje wartość NULL nie jest brana pod uwagę
+w wyszukiwaniu. Wartość domyślna to NULL.}
 
-\item{opis_skalowania}{wyrażenie regularne określające opis skalowania. Domyślna wartość to '\%'.}
+\item{opis_skalowania}{wyrażenie regularne określające opis skalowania. Domyślna
+wartość to '\%'.}
 
-\item{idSkalowania}{numer skalowania, domyślnie ustawiony na NULL. Gdy argument nie ma wartości NULL to parametr 'opis_skalowania' jest ignorowany.}
+\item{idSkalowania}{numer skalowania, domyślnie ustawiony na NULL. Gdy argument nie ma
+wartości NULL to parametr 'opis_skalowania' jest ignorowany.}
 
-\item{zrodloDanychODBC}{string określający źródło danych. docelowa wartość domyślna to 'EWD'. Obecnie 'ewd_grzes'.}
+\item{zrodloDanychODBC}{string określający źródło danych. docelowa wartość domyślna to
+'EWD'. Obecnie 'ewd_grzes'.}
 
-\item{parametryzacja}{parametr określający format zwracanego wyniku. Domyślna wartość to 'baza'.
+\item{parametryzacja}{parametr określający format zwracanego wyniku. Domyślna wartość
+to 'baza'.
 Inna możliwa wartość to 'mplus'.}
 }
 \value{
 W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką, że:
 \itemize{
-   \item każdy element listy opisuje parametry innego skalowania;
-   \item każdy element listy ma też przypisane jako atrybuty wartości kolumn: 'skalowanie', 'opis', 'estymacja';
-   \item zwracana lista ma przypisane jako atrybuty wartości wszystkich kolumn z tablicy 'skale';
+   \item{każdy element listy opisuje parametry innego skalowania;}
+   \item{każdy element listy ma też przypisane jako atrybuty wartości kolumn:
+         'skalowanie', 'opis', 'estymacja';}
+   \item{zwracana lista ma przypisane jako atrybuty wartości wszystkich kolumn
+         z tablicy 'skale';}
 }
-W przyopadku użycia parametryzacji 'mplus' funkcja zwraca parametry skalowania w formie ramki danych, która jest
-w postaci zwracanej przez funkcję skaluj().
+W przyopadku użycia parametryzacji 'mplus' funkcja zwraca parametry skalowania w formie
+ramki danych, która jest w postaci zwracanej przez funkcję skaluj().
 }
 \description{
 Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu oraz których

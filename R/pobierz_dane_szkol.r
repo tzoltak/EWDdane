@@ -1,58 +1,51 @@
 #' @title Pobieranie danych o szkołach.
 #' @description
-#' Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie, adresowe i o lokalizacji.
-#' @param lata wektor liczb całkowitych - lata, których mają dotyczyć dane (dla każdej szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)
-#' @param typySzkol opcjonalny wektor tekstowy z typami szkół, które mają zostać zwrócone (lub NULL - zwraca informacje o wszystkich szkołach)
+#' Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie, adresowe
+#' i o lokalizacji.
+#' @param lata wektor liczb całkowitych - lata, których mają dotyczyć dane (dla każdej
+#' szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)
+#' @param typySzkol opcjonalny wektor tekstowy z typami szkół, które mają zostać zwrócone
+#' (lub NULL - zwraca informacje o wszystkich szkołach)
 #' @param idOke wartość logiczna (domyślnie FALSE) - czy dołączać kody OKE szkół?
-#' @param daneAdresowe wartość logiczna (domyślnie FALSE) - czy dołączać nazwę i dane adresowe?
-#' @param dolaczPaou wartość logiczna (domyślnie FALSE) - czy dołączać szkoły z danych PAOU?
-#' @param zrodloDanychODBC opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")
+#' @param daneAdresowe wartość logiczna (domyślnie FALSE) - czy dołączać nazwę i dane
+#' adresowe?
 #' @return data frame
-#' @import RODBCext
+#' @import dplyr
+#' @import ZPD
 #' @export
-pobierz_dane_szkol <- function(lata, typySzkol=NULL, idOke=FALSE, daneAdresowe=FALSE, dolaczPaou=FALSE, zrodloDanychODBC="EWD"){
-  stopifnot(is.numeric(lata)         , length(lata) > 0,
+pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
+                              daneAdresowe = FALSE) {
+  stopifnot(is.numeric(lata)        , length(lata) > 0,
             is.character(typySzkol) | is.null(typySzkol),
             is.logical(idOke)       , length(idOke) == 1,
-            is.logical(daneAdresowe), length(daneAdresowe) == 1,
-            is.logical(dolaczPaou)  , length(dolaczPaou) == 1,
-            is.character(zrodloDanychODBC), length(zrodloDanychODBC) == 1
+            is.logical(daneAdresowe), length(daneAdresowe) == 1
   )
-  stopifnot(idOke %in% c(TRUE, FALSE), daneAdresowe %in% c(TRUE, FALSE), dolaczPaou %in% c(TRUE, FALSE))
-  try(suppressWarnings(Sys.setlocale("LC_ALL", "pl_PL.UTF-8")))
+  stopifnot(idOke %in% c(TRUE, FALSE),
+            daneAdresowe %in% c(TRUE, FALSE))
 
-  zapytanie = paste0( "SELECT id_szkoly, typ_szkoly, publiczna, dla_doroslych, specjalna, przyszpitalna, artystyczna,
-                        d.rok, ",
-                      ifelse(daneAdresowe, "d.nazwa, d.miejscowosc, d.adres, d.pna, d.poczta, ", ""),
-                      ifelse(idOke       , "d.id_szkoly_oke, ", ""),
-                      "d.wielkosc_miejscowosci, id_gminy + 100*id_powiatu + 10000*id_wojewodztwa AS teryt",
-                      ifelse( is.null(typySzkol) | any(typySzkol %in% c("LO","LP","T")) ,", d.matura_miedzynarodowa",""),
-                      " FROM szkoly AS sz JOIN szkoly_dane AS d USING (id_szkoly)
-                      WHERE sz.id_szkoly > 0 AND d.rok IN (", paste0(rep("?", length(lata)), collapse=", "), ")
-                        AND d.rok = (SELECT max(rok) FROM szkoly_dane WHERE id_szkoly = d.id_szkoly AND rok IN (", paste0(lata, collapse=", "), "))",
-                      ifelse( is.null(typySzkol), "", paste0(" AND sz.typ_szkoly IN (", paste0(rep("?", length(typySzkol)), collapse=", "), ")") ),
-                      ifelse( dolaczPaou, "", " AND sz.paou = FALSE"),
-                      " ORDER BY id_szkoly")
-  dane = if( is.null(typySzkol)){
-    as.list(lata)
-  } else{
-    data.frame(as.list(lata), as.list(typySzkol), stringsAsFactors=FALSE)
+  if (length(typySzkol) == 1) typySzkol = rep(typySzkol, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
+  szkoly = pobierz_szkoly(polacz())
+  szkoly = filter_(szkoly, ~ rok %in% lata)
+  szkoly = select_(szkoly, ~ -wojewodztwo, ~ -powiat, ~ -gmina)
+  if (!is.null(typySzkol)) szkoly = filter_(szkoly, ~ typ_szkoly %in% typySzkol)
+  if (!idOke) szkoly = select_(szkoly, ~ -id_szkoly_oke)
+  if (!daneAdresowe) szkoly = select_(szkoly, ~ -nazwa_szkoly, ~ -adres, ~ -miejscowosc,
+                                      ~ -pna, ~ -poczta, ~ -wielkosc_miejscowosci,
+                                      ~ -teryt_szkoly, ~ -rodzaj_gminy)
+  szkoly = collect(szkoly)
+  szkoly = group_by_(szkoly, ~ rok)
+  szkoly = mutate_(szkoly, .dots=list(max_rok = "max(rok)"))
+  szkoly = filter_(szkoly, ~ rok == max_rok)
+  szkoly = select_(szkoly, ~ -max_rok)
+  szkoly = as.data.frame(szkoly)
+
+  typyWWynikach = typySzkol %in% szkoly$typ_szkoly
+  if (any(!typyWWynikach)) warning("Nie znaleziono żadnych szkół typu/ów: ",
+                                   paste0(typySzkol[!typyWWynikach], collapse=", "), ".")
+
+  for (i in names(szkoly)[unlist(lapply(szkoly, is.character))]) {
+    Encoding(szkoly[, i]) = "UTF-8"
   }
-
-  tryCatch({
-      P = odbcConnect(zrodloDanychODBC)
-      ret = sqlExecute(P, zapytanie, fetch=TRUE, stringsAsFactors=FALSE, data=dane)
-    },
-    error = stop,
-    finally = odbcClose(P)
-  )
-
-  ret$typ_szkoly[ret$typ_szkoly=="TRUE"] = "T"
-  if (!("SP" %in% typySzkol)) ret = ret[, names(ret) != "id_szkoly_obut"]
-
-  typyWWynikach = typySzkol %in% ret$typ_szkoly
-  if (any(!typyWWynikach)) warning("Nie znaleziono żadnych szkół typu/ów: ", paste0(typySzkol[!typyWWynikach], collapse=", "), ".")
-
-  attributes(ret)$lata = lata
-  return( ret )
+  attributes(szkoly)$lata = lata
+  return(szkoly)
 }

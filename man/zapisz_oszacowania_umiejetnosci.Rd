@@ -9,7 +9,8 @@ zapisz_oszacowania_umiejetnosci(oszacowania, skrotCzesci, rEAP, rodzajEgzaminu,
   zrodloDanychODBC = "EWD", maskaTestowa = NULL)
 }
 \arguments{
-\item{oszacowania}{ramka danych zawierająca oszacowania, błędy standardowe oraz id testu lub testów poszczególnych uczniów.}
+\item{oszacowania}{ramka danych zawierająca oszacowania, błędy standardowe oraz id
+testu lub testów poszczególnych uczniów.}
 
 \item{skrotCzesci}{skrócona nazwa częsci egzaminu, np.: gh_p, gh.}
 
@@ -23,14 +24,18 @@ zapisz_oszacowania_umiejetnosci(oszacowania, skrotCzesci, rEAP, rodzajEgzaminu,
 
 \item{idSkali}{id skali, z której usuwane są kryteria.}
 
-\item{rodzajEstymacji}{ciąg znakowy opisujący rodzaj estymacji. Domyślnie przyjmuje wartość 'EAP'.}
+\item{rodzajEstymacji}{ciąg znakowy opisujący rodzaj estymacji. Domyślnie przyjmuje
+wartość 'EAP'.}
 
-\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")}
+\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
+(domyślnie "EWD")}
 
-\item{maskaTestowa}{wektor liczb określający, które wiersze ramki 'oszacowania' mają być zapisane.}
+\item{maskaTestowa}{wektor liczb określający, które wiersze ramki 'oszacowania' mają
+być zapisane.}
 }
 \value{
-Funkcja zwraca ramkę danych, która podana do funkcji \code{\link[ZPD]{edytuj_skale}} usunie z niej zbędne (pseudo)kryteria.
+Funkcja zwraca ramkę danych, która podana do funkcji
+\code{\link[ZPDzapis]{edytuj_skale}} usunie z niej zbędne (pseudo)kryteria.
 }
 \description{
 Funkcja zapisuje oszacowania umiejętności uczniów do bazy danych.

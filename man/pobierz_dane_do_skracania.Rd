@@ -16,12 +16,16 @@ pobierz_dane_do_skracania(rodzajEgzaminu, czescEgzaminu, rokEgzaminu,
 
 \item{idSkali}{numer skali}
 
-\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")}
+\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
+(domyślnie "EWD")}
 }
 \value{
 data frame
 }
 \description{
-Funkcja pobiera dane z określonej części egzaminu. Następnie z tych danych usuwani są uczniowie, którzy przystępowali do egzaminu wielokrotnie lub uczęszczali do szkoły dla dorosłych, specjalnych lub przyszpitalnych. Usunięto także uczniów, których odział był oznaczony cyfrą.
+Funkcja pobiera dane z określonej części egzaminu. Następnie z tych danych usuwani są
+uczniowie, którzy przystępowali do egzaminu wielokrotnie lub uczęszczali do szkoły dla
+dorosłych, specjalnych lub przyszpitalnych. Usunięto także uczniów, których odział był
+oznaczony cyfrą.
 }
 

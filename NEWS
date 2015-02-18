@@ -1,31 +1,66 @@
 --------------------
+Zmiany w EWDskalowanie 0.5 (2015-02-17)
+
+Zmiana licencji na MIT.
+
+Jest to przejściowa wersja pakietu, w której większość funkcji została wyłączona
+z działania, za sprawą zmian w pakiecie ZPD, do których muszą one teraz zostać
+dopasowane. Będzie się to sukcesywnie działo w kolejnych wersjach pakietu.
+
+Funkcje, które zostały na razie wyłączone z działania i czekają na przepisanie:
+  - zapisz_normy_do_bazy() - potencjalnie do przeniesienia do nowopowstałego pakietu
+    ZPDzapis;
+  - usun_kryteria_ze_skali_es() - potencjalnie do przeniesienia do nowopowstałego
+    pakietu ZPDzapis;
+  - zapisz_parametry_skalowania(), wstaw_do_skalowania_elementy(),
+    sprawdz_zgodnosc_kryteriow(), wydziel_kryteria_pseudokryteria() - potencjalnie do
+    przeniesienia do nowopowstałego pakietu ZPDzapis;
+  - zapisz_oszacowania_umiejetnosci() - potencjalnie do przeniesienia do nowopowstałego
+    pakietu ZPDzapis;
+  - pobierz_dane_do_skracania();
+  - pobierz_dane_uczniow();
+  - pobierz_parametry_skalowania(), zmien_na_mplus();
+  - pobierz_wyniki_surowe_ewd_gimn();
+  - wielokrotnie_przystepujacy().
+
+Funkcje, które działają w tej wersji pakietu:
+  - formaty_zmiennych_baza_na_ewd();
+  - sklej_normy();
+  - pobierz_dane_szkol();
+  - pobierz_wartosci_wskaznikow().
+
+Funkcje przeniesione do innych pakietów:
+  - normy_ekwikwantylowe() - do pakietu ZPD.
+  - stworz_test_z_wielu_czesci() - do pakietu ZPDzapis.
+
+--------------------
 Zmiany w EWDskalowanie 0.4 (2014-10-23)
 
-- Nowe funkcje:
+Nowe funkcje:
   - pobierz_wartosci_wskaznikow() - pobiera zestawienia wartości wskaźników EWD.
 
 --------------------
 Zmiany w EWDskalowanie 0.3 (2014-10-14)
 
-- Nowe funkcje:
+Nowe funkcje:
   - stworz_test_z_wielu_czesci() - pozwala łatwo tworzyć testy opisujące EWDowe "złożone"
     wskażniki umiejętności, obejmujące kilka części jednego egzaminu; co ważne, oprócz
     dokonania wpisu w tablicy 'testy' wypełnia również odpowiednimi danymi tablicę
     'dane_osobowe.testy_obserwacje'.
 
-- Inne zmiany:
+Inne zmiany:
   - Dostosowanie funkcji pobierz_dane_uczniow() do zmian w strukturze bazy.
 
 --------------------
 Zmiany w EWDdane 0.2 (2014-08-25)
 
-- Poprawione błędy:
+Poprawione błędy:
   - pobierz_dane_szkol() teraz na prawdę pobiera dane najaktualniejsze w ramach podanego okresu (wcześniej próbowała pobrać najaktualniejsze w ogóle);
 
 --------------------
 Publikacja EWDdane 0.1 (2014-08-09)
 
-- Nowe funkcje:
+Nowe funkcje:
   - pobierz_dane_uczniow();
   - pobierz_dane_szkol();
   - wielokrotnie_przystepujacy();

@@ -7,18 +7,24 @@
 pobierz_dane_uczniow(idTestow, zrodloDanychODBC = "EWD")
 }
 \arguments{
-\item{idTestow}{wektor liczbowy zawierający wartości \code{id_testu} testów, które rozwiązywali uczniowie, których mają dotyczyć zwracane dane}
+\item{idTestow}{wektor liczbowy zawierający wartości \code{id_testu} testów, które
+rozwiązywali uczniowie, których mają dotyczyć zwracane dane}
 
-\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy (domyślnie "EWD")}
+\item{zrodloDanychODBC}{opcjonalnie nazwa źródła danych ODBC, dającego dostęp do bazy
+(domyślnie "EWD")}
 }
 \value{
 data frame
 }
 \description{
-Funkcja pobiera z bazy dane o uczniach, których nie zwraca funkcja \code{pobierz_czesc_egzaminu()} z pakietu ZPD: informacje o klasie, numerze uczni i jego wieku (w miesiącach).
+Funkcja pobiera z bazy dane o uczniach, których nie zwraca funkcja
+\code{pobierz_czesc_egzaminu()} z pakietu ZPD: informacje o klasie, numerze ucznia
+i jego wieku (w miesiącach).
 }
 \details{
-Wszystkie \code{id_testu} podane w argumencie \code{idTestow} muszą być powiązane z tym samym egzaminem.
-Wiek zwracany jest w miesiącach. Jeśli testy były pisane w różnych dniach, zwrócony zostanie wiek wyliczony w odniesieniu do daty testu, który został przeprowadzony najwcześniej.
+Wszystkie \code{id_testu} podane w argumencie \code{idTestow} muszą być powiązane
+z tym samym egzaminem. Wiek zwracany jest w miesiącach. Jeśli testy były pisane
+w różnych dniach, zwrócony zostanie wiek wyliczony w odniesieniu do daty testu, który
+został przeprowadzony najwcześniej.
 }
 
