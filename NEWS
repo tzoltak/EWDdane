@@ -1,5 +1,5 @@
 --------------------
-Zmiany w EWDskalowanie 0.5 (2015-02-17)
+Zmiany w EWDskalowanie 0.5 (2015-02-18)
 
 Zmiana licencji na MIT.
 
@@ -12,14 +12,8 @@ Funkcje, które zostały na razie wyłączone z działania i czekają na przepis
     ZPDzapis;
   - usun_kryteria_ze_skali_es() - potencjalnie do przeniesienia do nowopowstałego
     pakietu ZPDzapis;
-  - zapisz_parametry_skalowania(), wstaw_do_skalowania_elementy(),
-    sprawdz_zgodnosc_kryteriow(), wydziel_kryteria_pseudokryteria() - potencjalnie do
-    przeniesienia do nowopowstałego pakietu ZPDzapis;
-  - zapisz_oszacowania_umiejetnosci() - potencjalnie do przeniesienia do nowopowstałego
-    pakietu ZPDzapis;
   - pobierz_dane_do_skracania();
   - pobierz_dane_uczniow();
-  - pobierz_parametry_skalowania(), zmien_na_mplus();
   - pobierz_wyniki_surowe_ewd_gimn();
   - wielokrotnie_przystepujacy().
 
@@ -27,11 +21,17 @@ Funkcje, które działają w tej wersji pakietu:
   - formaty_zmiennych_baza_na_ewd();
   - sklej_normy();
   - pobierz_dane_szkol();
-  - pobierz_wartosci_wskaznikow().
+  - pobierz_wartosci_wskaznikow_ewd() - zmieniona nazwa (poprzednio:
+    pobierz_wartosci_wskaznikow(), ale wchodziłoby w konflikt z funkcją pakietu ZPD);
+  - pobierz_parametry_skalowania()*, zmien_na_mplus().
+* Do przepisania na korzystanie z pakietu ZPD.
 
 Funkcje przeniesione do innych pakietów:
-  - normy_ekwikwantylowe() - do pakietu ZPD.
-  - stworz_test_z_wielu_czesci() - do pakietu ZPDzapis.
+  - normy_ekwikwantylowe() - do pakietu ZPD;
+  - stworz_test_z_wielu_czesci() - do pakietu ZPDzapis;
+  - zapisz_parametry_skalowania(), wstaw_do_skalowania_elementy(),
+    sprawdz_zgodnosc_kryteriow(), wydziel_kryteria_pseudokryteria() - do pakietu ZPDzapis;
+  - zapisz_oszacowania_umiejetnosci() - do pakietu ZPDzapis.
 
 --------------------
 Zmiany w EWDskalowanie 0.4 (2014-10-23)

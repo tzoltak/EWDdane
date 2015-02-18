@@ -33,6 +33,7 @@
 #' pobierz_parametry_skalowania(nazwa_skali, id_testu, parametryzacja = "mplus")
 #' }
 #' @import RODBCext
+#' @import RODBC
 #' @export
 pobierz_parametry_skalowania = function(nazwa_skali=NULL, id_testu=NULL,
                                          opis_skalowania='.*', idSkalowania=NULL,
