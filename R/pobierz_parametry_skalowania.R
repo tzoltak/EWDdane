@@ -67,15 +67,6 @@ pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_s
     where = paste0(where, " and SA.skalowanie = ? ")
   }
   
-  
-  
-  #   joiny =             "
-  #   from skale AS S
-  #   JOIN skale_elementy AS SE USING(id_skali)
-  #   JOIN skalowania_elementy AS SAE USING(id_skali, kolejnosc)
-  #   JOIN skalowania AS SA USING(id_skali, skalowanie)
-  #   "
-  
   joiny =             "
   from skalowania AS SA
   join skalowania_elementy AS SAE using (id_skali, skalowanie)
@@ -83,18 +74,10 @@ pobierz_parametry_skalowania <- function(nazwa_skali=NULL, id_testu=NULL, opis_s
   join skale AS S using(id_skali)
   "
   
-  #   select id_kryterium, id_pseudokryterium, SAE.model, SAE.parametr, SAE.wartosc, SA.skalowanie, bl_std
-  #   from skalowania AS SA
-  #   join skalowania_elementy AS SAE using (id_skali, skalowanie)
-  #   left join skale_elementy AS SE using (id_skali, kolejnosc)
-  #   join skale AS S using(id_skali)
-  #   where S.nazwa ='ewd;s;2010' and SA.opis = 'testowa estymacja11'
-  #   order by parametr
-  
   zapytanie1 = paste0("
                       select
                       id_kryterium, id_pseudokryterium,
-                      SAE.model, SAE.parametr, SAE.wartosc, SA.skalowanie, bl_std
+                      SAE.model, SAE.parametr, SAE.wartosc, SA.skalowanie, bs, SAE.uwagi
                       ", joiny , where, '\n ORDER BY skalowanie, kolejnosc, parametr')
   
   zapytanie2 = paste0("
@@ -208,24 +191,43 @@ zmien_na_mplus <- function(tablicaDanych){
     stop("Niepoprawne rodzaje parametrów dla modelu 2PL: \n", paste(errInds, collapse="\n"))
   }
   
-  # Jak rozumiem baza gwarantuje, że każdy element skale_elementy posiada kryterium albo pseudokryterium.
   kryt = dwaPL$id_kryterium
   kryt[is.na(kryt)] = dwaPL$id_pseudokryterium[is.na(kryt)]
+  kryt = na.omit(kryt)
+  parSpecjalne = tablicaDanych[ is.na(tablicaDanych$id_kryterium) & is.na(tablicaDanych$id_pseudokryterium) & str_length(tablicaDanych$uwagi) !=0 & tablicaDanych$model == "2PL", ]
   
   ret2PL = data.frame()
   for(krytNum in unique(kryt)){
     czyKryterium = krytNum %in% na.omit(dwaPL$id_kryterium)
     
-    by = dwaPL$wartosc[kryt == krytNum & dwaPL$parametr=="a" ]
-    byStd = dwaPL$bl_std[kryt == krytNum & dwaPL$parametr=="a" ]
+    by = dwaPL$wartosc[((dwaPL$id_kryterium %in% krytNum & czyKryterium) | (dwaPL$id_pseudokryterium %in% krytNum & !czyKryterium)  ) & dwaPL$parametr=="a" ]
+    byStd = dwaPL$bs[((dwaPL$id_kryterium %in% krytNum & czyKryterium) | (dwaPL$id_pseudokryterium %in% krytNum & !czyKryterium)  ) & dwaPL$parametr=="a" ]
     
     zmienna1 = ifelse(czyKryterium, "k", "p")
     zmienna2 = paste0(zmienna1, "_", krytNum)
     
     ret2PL = rbind(ret2PL, data.frame(typ="by", zmienna1, zmienna2, wartosc = by, S.E.= byStd ))
     
-    tres = dwaPL$wartosc[kryt == krytNum & dwaPL$parametr=="trudność" ]
-    tresStd = dwaPL$bl_std[kryt == krytNum & dwaPL$parametr=="trudność" ]
+    tres = dwaPL$wartosc[((dwaPL$id_kryterium %in% krytNum & czyKryterium) | (dwaPL$id_pseudokryterium %in% krytNum & !czyKryterium)  ) & dwaPL$parametr=="trudność" ]
+    tresStd = dwaPL$bs[((dwaPL$id_kryterium %in% krytNum & czyKryterium) | (dwaPL$id_pseudokryterium %in% krytNum & !czyKryterium)  ) & dwaPL$parametr=="trudność" ]
+    
+    ret2PL = rbind(ret2PL, data.frame(typ="treshold", zmienna1=zmienna2, zmienna2=zmienna1,
+                                      wartosc = tres*by, S.E.=tresStd*by ))
+  }
+  
+  #parametry specjalne 2PL
+  
+  for(krytNum in unique(parSpecjalne$uwagi)){
+    by = parSpecjalne$wartosc[parSpecjalne$uwagi == krytNum & parSpecjalne$parametr=="a" ]
+    byStd = parSpecjalne$bs[parSpecjalne$uwagi == krytNum & parSpecjalne$parametr=="a" ]
+    
+    zmienna1 = "spec"
+    zmienna2 =  krytNum
+    
+    ret2PL = rbind(ret2PL, data.frame(typ="by", zmienna1, zmienna2, wartosc = by, S.E.= byStd ))
+    
+    tres = parSpecjalne$wartosc[parSpecjalne$uwagi == krytNum & parSpecjalne$parametr=="trudność" ]
+    tresStd = parSpecjalne$bs[parSpecjalne$uwagi == krytNum & parSpecjalne$parametr=="trudność" ]
     
     ret2PL = rbind(ret2PL, data.frame(typ="treshold", zmienna1=zmienna2, zmienna2=zmienna1,
                                       wartosc = tres*by, S.E.=tresStd*by ))
@@ -240,19 +242,19 @@ zmien_na_mplus <- function(tablicaDanych){
     
     czyKryterium = krytNum %in% tablicaDanych$id_kryterium
     
-    by  = grm[ grm$parametr=="a" & kryt == krytNum, c("wartosc", "bl_std")]
+    by  = grm[ grm$parametr=="a" & kryt == krytNum, c("wartosc", "bs")]
     srednia = grm$wartosc[ grm$parametr=="trudność" & kryt == krytNum] * by$wartosc
-    kPar = grm[ grepl("^b[[:digit:]+]$", grm$parametr) & kryt == krytNum , c("wartosc", "bl_std")]
+    kPar = grm[ grepl("^b[[:digit:]+]$", grm$parametr) & kryt == krytNum , c("wartosc", "bs")]
     
     zmienna1 = ifelse(czyKryterium, "k", "p")
     zmienna2 = paste0(zmienna1, "_", krytNum)
     retGRM = rbind(retGRM,
                    data.frame(typ ='by', zmienna1=zmienna1, zmienna2=zmienna2,
-                              wartosc = by$wartosc, S.E.= by$bl_std  ) )
+                              wartosc = by$wartosc, S.E.= by$bs  ) )
     
     retGRM = rbind(retGRM,
                    data.frame(typ ='treshold', zmienna1=zmienna2, zmienna2=zmienna1,
-                              wartosc = (kPar$wartosc )*by$wartosc + srednia, S.E.=kPar$bl_std*by$wartosc ) )
+                              wartosc = (kPar$wartosc )*by$wartosc + srednia, S.E.=kPar$bs*by$wartosc ) )
   }
   
   ret = rbind(ret2PL, retGRM)

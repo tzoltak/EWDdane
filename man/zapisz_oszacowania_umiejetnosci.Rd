@@ -13,13 +13,13 @@ zapisz_oszacowania_umiejetnosci(oszacowania, skrotCzesci, rEAP, rodzajEgzaminu,
 
 \item{skrotCzesci}{skrócona nazwa częsci egzaminu, np.: gh_p, gh.}
 
-\item{rEAP}{rzetelność empiryczna}
+\item{rEAP}{rzetelność empiryczna.}
 
-\item{rodzajEgzaminu}{rodzaj egzaminu}
+\item{rodzajEgzaminu}{rodzaj egzaminu.}
 
-\item{rokEgzaminu}{rok egzaminu}
+\item{rokEgzaminu}{rok egzaminu.}
 
-\item{nrSkalowania}{numer skalowania dla skali}
+\item{nrSkalowania}{numer skalowania dla skali.}
 
 \item{idSkali}{id skali, z której usuwane są kryteria.}
 

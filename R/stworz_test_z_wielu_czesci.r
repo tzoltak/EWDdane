@@ -52,16 +52,16 @@
       }
       
       zapytanie = paste0("
-        SELECT id_testu, data_egzaminu 
-        FROM testy JOIN arkusze USING (arkusz)
-        WHERE 
-          rodzaj_egzaminu = ? 
-          AND czesc_egzaminu IN (", 
-            paste0(rep('?', length(czesciEgzaminu)), collapse = ', '),
-          ")
-          AND extract(year FROM data_egzaminu) = ?
-          AND ewd = ?
-        ORDER BY data")
+                     SELECT id_testu, data_egzaminu 
+                     FROM testy JOIN arkusze USING (arkusz)
+                         WHERE 
+                         arkusze.rodzaj_egzaminu = ? 
+                         AND arkusze.czesc_egzaminu IN (", 
+                         paste0(rep('?', length(czesciEgzaminu)), collapse = ', '),
+                         ")
+                         AND extract(year FROM data_egzaminu) = ?
+                         AND ewd = ?
+                         ORDER BY data")
       testy = sqlExecute(P, zapytanie, t(c(rodzajEgzaminu, czesciEgzaminu, rokEgzaminu, czyEwd)), T, stringsAsFactors = F)
       
       stopifnot(nrow(testy) > 0)

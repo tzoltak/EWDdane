@@ -5,7 +5,7 @@
 \title{Wstawianie danych do tablicy 'skalowania_elementy'}
 \usage{
 wstaw_do_skalowania_elementy(zrodloODBC, idSkali, kolejnosc, numerSkalowania,
-  nazwaParametru, model, wartosc, odchylenie)
+  nazwaParametru, model, wartosc, odchylenie, uwagi = NULL)
 }
 \arguments{
 \item{zrodloODBC}{źródło danych ODBC.}

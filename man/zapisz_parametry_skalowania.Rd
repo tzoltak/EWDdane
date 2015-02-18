@@ -4,8 +4,9 @@
 \alias{zapisz_parametry_skalowania}
 \title{Zapisywanie parametrow skalowan.}
 \usage{
-zapisz_parametry_skalowania(nazwa_skali = NULL, id_testu = NULL, parametry,
-  opis, estymacja, rEAP = NULL, zrodloDanychODBC = "EWD")
+zapisz_parametry_skalowania(nazwa_skali = NULL, id_testu = NULL,
+  doPrezentacji, parametry, opis, estymacja, rEAP = NULL,
+  zrodloDanychODBC = "EWD")
 }
 \arguments{
 \item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie jest brana pod
@@ -13,6 +14,8 @@ uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
 
 \item{id_testu}{id testu. Kiedy id testu przymuje wartość NULL nie jest brana pod
 uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
+
+\item{doPrezentacji}{wartość boolowska określająca, czy wstawiane skalowanie ma być do prezentacji}
 
 \item{parametry}{ramka danych o strukturze zgodnej z tą, w jakiej zwraca oszacowania parametrów funkcja skaluj().}
 
