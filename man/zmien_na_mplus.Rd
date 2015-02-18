@@ -7,13 +7,15 @@
 zmien_na_mplus(tablicaDanych)
 }
 \arguments{
-\item{tablicaDanych}{tablica w formacie zwracanym przez funkcję pobierz_parametry_skalowania().}
+\item{tablicaDanych}{tablica w formacie zwracanym przez funkcję
+\code{\link{pobierz_parametry_skalowania()}}.}
 }
 \value{
-Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych przez funkcję skaluj().
+Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych przez
+funkcję \code{\link{[EWDskalowanie]skaluj()}}.
 }
 \description{
-Funkcja przekształca tablicę zwracaną w liście przez funkcję pobierz_parametry_skalowania() z parametrem 'baza'
-do postaci mplusa
+Funkcja przekształca tablicę zwracaną w liście przez funkcję
+\code{\link{pobierz_parametry_skalowania()}} z parametrem 'baza' do postaci mplusa
 }
 
