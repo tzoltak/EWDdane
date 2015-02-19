@@ -33,7 +33,7 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
                                       ~ -pna, ~ -poczta, ~ -wielkosc_miejscowosci,
                                       ~ -teryt_szkoly, ~ -rodzaj_gminy)
   szkoly = collect(szkoly)
-  szkoly = group_by_(szkoly, ~ rok)
+  szkoly = group_by_(szkoly, ~ id_szkoly)
   szkoly = mutate_(szkoly, .dots=list(max_rok = "max(rok)"))
   szkoly = filter_(szkoly, ~ rok == max_rok)
   szkoly = select_(szkoly, ~ -max_rok)
