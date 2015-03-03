@@ -1,4 +1,10 @@
 --------------------
+Zmiany w EWDskalowanie 0.5.1 (2015-03-03)
+
+Zmiany w kodzie funkcji pobierz_dane_szkol() i pobierz_wartosci_wskaznikow_ewd(),
+dostosowujące obsługę kodowania polskich znaków do zmian w pakiecie ZPD.
+
+--------------------
 Zmiany w EWDskalowanie 0.5 (2015-02-18)
 
 Zmiana licencji na MIT.

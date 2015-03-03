@@ -23,6 +23,7 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
   stopifnot(idOke %in% c(TRUE, FALSE),
             daneAdresowe %in% c(TRUE, FALSE))
 
+  if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 3 wiersze dalej zadziała
   if (length(typySzkol) == 1) typySzkol = rep(typySzkol, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
   szkoly = pobierz_szkoly(polacz())
   szkoly = filter_(szkoly, ~ rok %in% lata)
@@ -43,9 +44,6 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
   if (any(!typyWWynikach)) warning("Nie znaleziono żadnych szkół typu/ów: ",
                                    paste0(typySzkol[!typyWWynikach], collapse=", "), ".")
 
-  for (i in names(szkoly)[unlist(lapply(szkoly, is.character))]) {
-    Encoding(szkoly[, i]) = "UTF-8"
-  }
   attributes(szkoly)$lata = lata
   return(szkoly)
 }

@@ -106,10 +106,6 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   }
   message("Pobieranie informacji o wartościach wskaźników.")
   wskazniki = as.data.frame(collect(wskazniki))
-  for (i in names(wskazniki)[unlist(lapply(wskazniki, is.character))]) {
-    Encoding(wskazniki[, i]) = "UTF-8"
-    wskazniki[, i] = enc2native(wskazniki[, i])
-  }
   # dalsze przekształcanie
   message("Wyliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))
