@@ -11,7 +11,7 @@ Description: Functions for Educational Value-Added data import/export.
 Depends:
   RODBCext,
   reshape2,
-  ZPD (>= 1.0.1)
+  ZPD (>= 1.1.0)
 Imports:
   RODBC,
   dplyr,
