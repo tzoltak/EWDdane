@@ -166,15 +166,15 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   maska = gsub(")", "[)]", maska, fixed=TRUE)
   maska = paste0("(", maska, ")$")
   sort1 = as.numeric(grepl(maska, nazwy)) + 2 * as.numeric(grepl("^l_uczn_", nazwy))
-  sort2 = sub(maska, "", nazwy)
-  sort2 = factor(sort2, levels=c("dg_pu_srednia", "gg_pu_srednia", "srednia",
+  sort2 = sub(paste0(".*", maska), "\\1", nazwy)
+  sort2 = factor(sort2, levels = nazwyWskaznikow)
+  sort2 = as.numeric(sort2)
+  sort2[is.na(sort2)] = 0
+  sort3 = sub(maska, "", nazwy)
+  sort3 = factor(sort3, levels=c("dg_pu_srednia", "gg_pu_srednia", "srednia",
                                  "dg_pu_ewd"    , "gg_pu_ewd"    , "ewd",
                                  "trend_ewd", "bs_trend_ewd", "korelacja",
                                  "lu_ewd", "kategoria", "wyswietlaj"))
-  sort2 = as.numeric(sort2)
-  sort2[is.na(sort2)] = 0
-  sort3 = sub(paste0(".*", maska), "\\1", nazwy)
-  sort3 = factor(sort3, levels = nazwyWskaznikow)
   sort3 = as.numeric(sort3)
   sort3[is.na(sort3)] = 0
   wskazniki = wskazniki[, order(sort1, sort2, sort3)]
@@ -182,6 +182,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   if (czyPomin) {
     wskazniki = select_(wskazniki, ~ -matches("^(pomin)$"))
   }
+  names(wskazniki) = enc2native(names(wskazniki))
   if (opisoweNazwy) {
     maska = grep("ewd[ _]|srednia[ _]|bs[ _]", names(wskazniki))
     wskazniki[maska] = lapply(wskazniki[maska], round, digits=2)
@@ -206,9 +207,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(wskazniki) = sub("gg_pu_" , "górna granica przedz. ufności dla ", names(wskazniki))
     names(wskazniki) = sub("srednia", "śr. wyników egzaminów", names(wskazniki))
     names(wskazniki) = sub("ewd"    , "EWD", names(wskazniki))
-    names(wskazniki) = sub("^lu_"   , "liczba uczniów ", names(wskazniki))
+    names(wskazniki) = sub("^lu_|^l_uczn_"   , "liczba uczniów ", names(wskazniki))
     names(wskazniki) = sub("_trend_EWD", " trend EWD", names(wskazniki))
-    names(wskazniki) = enc2native(names(wskazniki))
   }
   # porządki
   wskazniki = select_(wskazniki, ~ -matches("^(rok)$"))

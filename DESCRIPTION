@@ -1,7 +1,7 @@
 Encoding: UTF-8
 Package: EWDdane
-Version: 0.5.1
-Date: 2015-03-03
+Version: 0.5.2
+Date: 2015-03-18
 Title: Functions for Educational Value-Added data import/export.
 Authors@R: c(
   person("Tomasz", "Zoltak", , "tomek@zozlak.org", role = c("aut", "cre")),
@@ -11,7 +11,7 @@ Description: Functions for Educational Value-Added data import/export.
 Depends:
   RODBCext,
   reshape2,
-  ZPD (>= 1.1.0)
+  ZPD (>= 1.1.4)
 Imports:
   RODBC,
   dplyr,
