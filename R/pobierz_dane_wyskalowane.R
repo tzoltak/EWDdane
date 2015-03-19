@@ -102,60 +102,62 @@ pobierz_dane_gimnazjalne <- function(src, rok_gim, demo=FALSE){
     "gh" =  "humanistyczna"
   )
   
-  uczniowie      = pobierz_uczniow(src, daneOsobowe = TRUE)  %>% select(id_obserwacji, plec, data_ur)
-  szkoly         = pobierz_szkoly(src) %>% filter(rok %in% rok_gim, !is.na(typ_szkoly) ) %>% 
-    select(id_szkoly, typ_szkoly, publiczna, dla_doroslych, specjalna, przyszpitalna, matura_miedzynarodowa)
+  rok_gim = c(0, rok_gim) # obejście błędu dplyr-a z translacją na SQL warunków "zmienna %in% x", gdzie x ma długość 1
+  
+  uczniowie      = pobierz_uczniow(src, daneOsobowe = TRUE)  %>% select_('id_obserwacji', 'plec', 'data_ur')
+  szkoly         = pobierz_szkoly(src) %>% filter_(~rok %in% rok_gim, ~!is.na(typ_szkoly) ) %>% 
+    select_('id_szkoly', 'typ_szkoly', 'publiczna', 'dla_doroslych', 'specjalna', 'przyszpitalna', 'matura_miedzynarodowa')
   
   ostatniRok = max(rok_gim)
-  szkolyOstatnieDane  = pobierz_szkoly(src) %>% filter(rok == ostatniRok, !is.na(typ_szkoly) ) %>% 
-    select(id_szkoly, teryt_szkoly, wielkosc_miejscowosci) %>% distinct()
+  szkolyOstatnieDane  = pobierz_szkoly(src) %>% filter_(~rok == ostatniRok, ~!is.na(typ_szkoly) ) %>% 
+    select_('id_szkoly', 'teryt_szkoly', 'wielkosc_miejscowosci') %>% distinct()
   
   
   szkoly = inner_join(szkoly, szkolyOstatnieDane) %>% distinct()
   
-  uczniowieTesty = pobierz_dane_uczniowie_testy(src, daneOsobowe = TRUE) %>% # filter(klasa %!~% "^[[:digit:]]$") %>%
-    select(id_obserwacji, id_testu, oke, id_szkoly, dysleksja, laureat, klasa, pop_podejscie, kod_u)   
+  uczniowieTesty = pobierz_dane_uczniowie_testy(src, daneOsobowe = TRUE) %>% # filter_(~klasa %!~% "^[[:digit:]]$") %>%
+    select_('id_obserwacji', 'id_testu', 'oke', 'id_szkoly', 'dysleksja', 'laureat', 'klasa', 'pop_podejscie', 'kod_u')   
   
   if(demo){
     testowe_obserwacje = c(2373787, 2056141, 1829739)
-    uczniowieTesty = uczniowieTesty  %>% filter(id_obserwacji %in% testowe_obserwacje)
+    uczniowieTesty = uczniowieTesty  %>% filter_(~id_obserwacji %in% testowe_obserwacje)
   }
   
-  testy          = pobierz_testy(src)  %>% filter(rodzaj_egzaminu == "egzamin gimnazjalny" , rok %in% rok_gim)
+  testy          = pobierz_testy(src)  %>% filter_(~rodzaj_egzaminu == "egzamin gimnazjalny" , ~rok %in% rok_gim)
   dysLaurRokSzk  = inner_join(uczniowieTesty, testy)  
   
-  dysLaurRok     = dysLaurRokSzk %>% group_by(id_obserwacji, klasa, pop_podejscie, dysleksja, kod_u) %>%
+  dysLaurRok     = dysLaurRokSzk %>% group_by_('id_obserwacji', 'klasa', 'pop_podejscie', 'dysleksja', 'kod_u') %>%
     summarise(data_testu = min(data_testu)) %>% distinct()
   
-  ids_obs        = dysLaurRokSzk %>% select(id_obserwacji) %>% distinct()
-  ids_szkol      = dysLaurRokSzk %>% select(id_szkoly) %>% distinct()
+  ids_obs        = dysLaurRokSzk %>% select_('id_obserwacji') %>% distinct()
+  ids_szkol      = dysLaurRokSzk %>% select_('id_szkoly') %>% distinct()
   
-  oszacowania    = pobierz_oszacowania_uczniow(src)   %>%  filter(estymacja == "EAP")
+  oszacowania    = pobierz_oszacowania_uczniow(src)   %>%  filter_(~estymacja == "EAP")
   oszacowania    = inner_join(oszacowania, ids_obs)
   
-  testy          = pobierz_testy(src) %>% filter(rodzaj_egzaminu == "egzamin gimnazjalny", rok %in% rok_gim) %>%
-    select(id_testu, arkusz, rodzaj_egzaminu, czesc_egzaminu, opis_testu)
+  testy          = pobierz_testy(src) %>% filter_(~rodzaj_egzaminu == "egzamin gimnazjalny", ~rok %in% rok_gim) %>%
+    select_('id_testu', 'arkusz', 'rodzaj_egzaminu', 'czesc_egzaminu', 'opis_testu')
   
-  skale = pobierz_skale(src, doPrezentacji = TRUE) %>% filter(rok %in% rok_gim, rodzaj_skali =="ewd", rodzaj_egzaminu == "egzamin gimnazjalny")  %>% 
-    select(id_skali, id_testu, rok, skalowanie, nazwa_skali)
-  skaleTesty = skale %>% select(id_skali, id_testu, nazwa_skali) 
+  skale = pobierz_skale(src, doPrezentacji = TRUE) %>% filter_(~rok %in% rok_gim, ~rodzaj_skali == "ewd", ~rodzaj_egzaminu == "egzamin gimnazjalny")  %>% 
+    select_('id_skali', 'id_testu', 'rok', 'skalowanie', 'nazwa_skali')
+  skaleTesty = skale %>% select_('id_skali', 'id_testu', 'nazwa_skali') 
   testy = inner_join(testy, skale)
   
   oszacTestyEgzaminy   = inner_join(oszacowania, testy) %>%
-    select(id_obserwacji, id_testu, wynik, bs, opis_testu, id_szkoly, czesc_egzaminu, arkusz,
-           id_skali, rodzaj_egzaminu, czesc_egzaminu, rok, nazwa_skali) 
+    select_('id_obserwacji', 'id_testu', 'wynik', 'bs', 'opis_testu', 'id_szkoly', 'czesc_egzaminu', 'arkusz',
+            'id_skali', 'rodzaj_egzaminu', 'czesc_egzaminu', 'rok', 'nazwa_skali') 
   
-  idTestow  = oszacTestyEgzaminy %>% select(id_testu) %>% distinct()
+  idTestow  = oszacTestyEgzaminy %>% select_('id_testu') %>% distinct()
   
   oceny = tbl(src, sql("select id_obserwacji, id_testu, ocena from odpowiedzi"))
-  oceny = inner_join(oceny, idTestow) %>% inner_join(ids_obs) %>% group_by(id_obserwacji, id_testu) %>% summarise(ocena = sum(ocena)) 
+  oceny = inner_join(oceny, idTestow) %>% inner_join(ids_obs) %>% group_by_('id_obserwacji', 'id_testu') %>% summarise(ocena = sum(ocena)) 
   normy = tbl(src, sql("select id_skali, wartosc as ocena, wartosc_zr as norm from normy_ekwikwantylowe"))
   
   oceny =  left_join(oceny, skaleTesty) %>% left_join(normy)
   
-  oszacTestyMat = left_join(oszacTestyEgzaminy, oceny) %>%  inner_join(uczniowieTesty %>% select(id_testu, id_obserwacji, laureat))  %>% select(-id_skali, -rodzaj_egzaminu) %>% as.data.frame()
+  oszacTestyMat = left_join(oszacTestyEgzaminy, oceny) %>%  inner_join(uczniowieTesty %>% select_('id_testu', 'id_obserwacji', 'laureat'))  %>% select(-id_skali, -rodzaj_egzaminu) %>% as.data.frame()
   
-  ret = data.frame(id_obserwacji = numeric(0), id_szkoly= numeric(0), rok = numeric(0))
+  ret = data.frame(id_obserwacji = numeric(0), id_szkoly = numeric(0), rok = numeric(0))
   for(i in seq_along(powiazania)){
     tmp = oszacTestyMat %>% filter(grepl(powiazania[[i]], czesc_egzaminu))
     names(tmp)[grepl("^id_testu$", names(tmp))  ] = paste0("id_testu_", names(powiazania)[i])
