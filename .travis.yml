@@ -25,3 +25,4 @@ after_success:
 notifications:
   email:
     - zozlak@zozlak.org
+    - t.zoltak@ibe.edu.pl
