@@ -1,5 +1,8 @@
 # EWDdane
 
+[![Travis-CI Build Status](https://travis-ci.org/zozlak/ZPD.png?branch=master)](https://travis-ci.org/tzoltak/EWDdane)
+[![Coverage Status](https://coveralls.io/repos/zozlak/ZPD/badge.svg)](https://coveralls.io/r/tzoltak/EWDdane)
+
 Pakiet zawiera funkcje służące do pobierania i zapisywania danych z bazy (o poziom wyżej niż to, co oferuje pakiet ZPD).
 
 ## Instalacja / aktualizacja
