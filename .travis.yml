@@ -3,6 +3,9 @@ language: r
 
 sudo: required
 
+apt_packages:
+  - unixodbc-dev
+
 r_github_packages:
   - jimhester/covr
   - zozlak/ZPD
