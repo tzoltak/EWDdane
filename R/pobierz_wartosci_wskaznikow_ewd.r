@@ -54,7 +54,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
             is.null(zapis) | length(zapis) == 1,
             is.logical(idOke)                , length(idOke) == 1,
             is.logical(daneAdresowe)         , length(daneAdresowe) == 1,
-            is.logical(opisoweNazwy)           , length(opisoweNazwy) == 1,
+            is.logical(opisoweNazwy)         , length(opisoweNazwy) == 1,
             is.logical(lUcznPrzedm)          , length(lUcznPrzedm) == 1,
             is.logical(dodatkoweInfo)        , length(dodatkoweInfo) == 1,
             is.logical(tylkoWskDoPrezentacji), length(tylkoWskDoPrezentacji) == 1,
