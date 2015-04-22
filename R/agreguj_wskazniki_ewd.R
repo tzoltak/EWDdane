@@ -29,7 +29,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach=TRUE, funk
   if(!is.null(funkcjaGrupujaca) & !is.null(poziom)   ){
     stop("Jeden z parametrów: poziom lub funkcja grupująca musi być nulem.")
   } else if(!is.null(poziom)){
-    funkcjaGrupujaca = funkcja_grupujaca_teryt(poziom, grupujPoLatach)
+    funkcjaGrupujaca = przygotuj_funkcje_grupujaca_teryt(poziom, grupujPoLatach)
   } 
     
   if(length(formals(funkcjaGrupujaca))!=2){
