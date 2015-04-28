@@ -173,12 +173,12 @@ pobierz_parametry_skalowania = function(nazwa_skali=NULL, id_testu=NULL,
 #' @title Zmiana tablicy do formatu funkcji skaluj()
 #' @description
 #' Funkcja przekształca tablicę zwracaną w liście przez funkcję
-#' \code{\link{pobierz_parametry_skalowania()}} z parametrem 'baza' do postaci mplusa
+#' \code{\link{pobierz_parametry_skalowania}} z parametrem 'baza' do postaci mplusa
 #' @param tablicaDanych tablica w formacie zwracanym przez funkcję
-#' \code{\link{pobierz_parametry_skalowania()}}.
+#' \code{\link{pobierz_parametry_skalowania}}.
 #' @return
 #' Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych przez
-#' funkcję \code{\link{[EWDskalowanie]skaluj()}}.
+#' funkcję \code{\link[EWDskalowanie]{skaluj}}.
 zmien_na_mplus = function(tablicaDanych) {
   opis = attributes(tablicaDanych)$opis
   estymacja = attributes(tablicaDanych)$estymacja
