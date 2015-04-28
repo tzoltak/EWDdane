@@ -11,19 +11,32 @@ agreguj_wskazniki_ewd(dane, poziom = NULL, grupujPoLatach = TRUE,
 \arguments{
 \item{dane}{ramka danych zwracana przez funkcję \link{pobierz_wartosci_wskaznikow_ewd}.}
 
-\item{poziom}{ciąg znaków definiujący poziom agregacji: "gmina", "powiat" lub "województwo" lub NULL,
+\item{poziom}{ciąg znaków definiujący poziom agregacji: "gmina", "powiat" lub
+"województwo" lub NULL,
 jeśli podany został parametr 'funkcjaGrupujaca'}
 
-\item{grupujPoLatach}{wartość logiczna (TRUE lub FALSE) wskazująca, czy przy wyróżnianiu grup oprócz TERYTu
-ma być uwzględniona również zmienna opisująca okres, dla którego wyliczony został wskaźnik}
+\item{grupujPoLatach}{wartość logiczna (TRUE lub FALSE) wskazująca, czy przy
+wyróżnianiu grup oprócz TERYTu ma być uwzględniona również zmienna opisująca
+okres, dla którego wyliczony został wskaźnik}
 
-\item{funkcjaGrupujaca}{fukcja przyjmująca jako pierwszy parametr teryt szkoły i zwracająca jednoelementowy obiekt.
-która określa grupowanie wskaźników ewd. W zwracanej ramce danych przez agreguj_wskazniki_ewd()
-jedna kolumna będzie zawierać wynik funkcji grupującej (jeżeli grupujPoLatach=FALSE) lub sześć ostatnich cyfr wyniku tej funkcji (jeżeli grupujPoLatach=TRUE).}
+\item{funkcjaGrupujaca}{fukcja przyjmująca jako pierwszy parametr teryt
+szkoły i zwracająca jednoelementowy obiekt, która określa grupowanie
+wskaźników ewd. W zwracanej ramce danych przez agreguj_wskazniki_ewd()
+jedna kolumna będzie zawierać wynik funkcji grupującej
+(jeżeli grupujPoLatach=FALSE) lub sześć ostatnich cyfr wyniku tej funkcji
+(jeżeli grupujPoLatach=TRUE).}
 
-\item{tylkoWyswietlane}{wartość logiczna (TRUE/FALSE/NA) opisująca, czy przy wyliczaniu agregatów mają zostać uwzględnione tylko te szkoły, których elipsy są pokazywane na stronie lub NA; przy TRUE uwzględniane są tylko te szkoły, których elipsy są wyświetlane; przy FALSE uwzględniane są wszystkie szkoły, bez względu na kategorię (ale z uwzględnieniem paramertu czyPomin); domyślna wartość NA jest tożsama z FALSE z jednym wyjątkiem: jeśli w danej grupie nie ma żadnej szkoły, której elipsa byłaby prezentowana, to wartość wskaźnika danej grupy jest ustawiana na NA.}
+\item{tylkoWyswietlane}{wartość logiczna (TRUE/FALSE/NA) opisująca, czy przy
+wyliczaniu agregatów mają zostać uwzględnione tylko te szkoły, których elipsy
+są pokazywane na stronie lub NA; przy TRUE uwzględniane są tylko te szkoły,
+których elipsy są wyświetlane; przy FALSE uwzględniane są wszystkie szkoły,
+bez względu na kategorię (ale z uwzględnieniem paramertu czyPomin); domyślna
+wartość NA jest tożsama z FALSE z jednym wyjątkiem: jeśli w danej grupie nie
+ma żadnej szkoły, której elipsa byłaby prezentowana, to wartość wskaźnika
+danej grupy jest ustawiana na NA.}
 
-\item{czyPomin}{parametr logiczny. Jeżeli TRUE to w obliczeniach pomijane są szkoły specjalne, dla dorosłych i przyszpitalne.}
+\item{czyPomin}{parametr logiczny. Jeżeli TRUE to w obliczeniach pomijane są
+szkoły specjalne, dla dorosłych i przyszpitalne.}
 
 \item{paramGrupujaca}{lista parametrów dodatkowych funkcji grupującej.}
 }
@@ -35,40 +48,54 @@ Funkcja agreguje wskaźniki EWD.
 }
 \examples{
 \dontrun{
-daneOrg = pobierz_wartosci_wskaznikow_ewd('T', c(2013, 2012), dodatkoweInfo = TRUE, jst = "^2605|^2601", opisoweNazwy = FALSE, tylkoWyswietlane = FALSE, tylkoWskDoPrezentacji = FALSE, czyPomin = FALSE)
+daneOrg = pobierz_wartosci_wskaznikow_ewd('T', c(2013, 2012),
+ dodatkoweInfo = TRUE, jst = "^2605|^2601", opisoweNazwy = FALSE,
+ tylkoWyswietlane = FALSE, tylkoWskDoPrezentacji = FALSE, czyPomin = FALSE)
 jedenWiersz = daneOrg[1, ]
 jedenWiersz$id_szkoly = 123
 jedenWiersz$teryt_szkoly=123456
 jedenWiersz$dla_doroslych= TRUE
-jedenWiersz[, grepl("wyswietlaj_", colnames(jedenWiersz))][1] = 0
+jedenWiersz[, grepl("wyswietlaj_", names(jedenWiersz))][1] = 0
 agreguj_wskazniki_ewd(jedenWiersz,
-                      poziom = "powiat", grupujPoLatach = FALSE, tylkoWyswietlane=NA, czyPomin = TRUE )
+                      poziom = "powiat", grupujPoLatach = FALSE,
+                       tylkoWyswietlane=NA, czyPomin = TRUE )
 agreguj_wskazniki_ewd(jedenWiersz,
-                      poziom = "powiat", grupujPoLatach = FALSE, tylkoWyswietlane=FALSE, czyPomin = TRUE )
+                      poziom = "powiat", grupujPoLatach = FALSE,
+                       tylkoWyswietlane=FALSE, czyPomin = TRUE )
 agreguj_wskazniki_ewd(jedenWiersz,
-                      poziom = "powiat", grupujPoLatach = FALSE, tylkoWyswietlane=TRUE, czyPomin = TRUE )
+                      poziom = "powiat", grupujPoLatach = FALSE,
+                       tylkoWyswietlane=TRUE, czyPomin = TRUE )
 
 agreguj_wskazniki_ewd(jedenWiersz,
-                      poziom = "powiat", grupujPoLatach = FALSE, tylkoWyswietlane=NA, czyPomin = FALSE )
+                      poziom = "powiat", grupujPoLatach = FALSE,
+                       tylkoWyswietlane=NA, czyPomin = FALSE )
 agreguj_wskazniki_ewd(jedenWiersz,
-                      poziom = "powiat", grupujPoLatach = FALSE, tylkoWyswietlane=FALSE, czyPomin = FALSE )
+                      poziom = "powiat", grupujPoLatach = FALSE,
+                       tylkoWyswietlane=FALSE, czyPomin = FALSE )
 agreguj_wskazniki_ewd(jedenWiersz,
-                      poziom = "powiat", grupujPoLatach = FALSE, tylkoWyswietlane=TRUE, czyPomin = FALSE )
+                      poziom = "powiat", grupujPoLatach = FALSE,
+                       tylkoWyswietlane=TRUE, czyPomin = FALSE )
 
 dane = rbind(daneOrg, jedenWiersz)
 agreguj_wskazniki_ewd(dane,
-                      poziom = "powiat", grupujPoLatach = TRUE, tylkoWyswietlane=NA, czyPomin = TRUE )
+                      poziom = "powiat", grupujPoLatach = TRUE,
+                       tylkoWyswietlane=NA, czyPomin = TRUE )
 agreguj_wskazniki_ewd(dane,
-                      poziom = "powiat", grupujPoLatach = TRUE, tylkoWyswietlane=FALSE, czyPomin = TRUE )
+                      poziom = "powiat", grupujPoLatach = TRUE,
+                       tylkoWyswietlane=FALSE, czyPomin = TRUE )
 agreguj_wskazniki_ewd(dane,
-                      poziom = "powiat", grupujPoLatach = TRUE, tylkoWyswietlane=TRUE, czyPomin = TRUE )
+                      poziom = "powiat", grupujPoLatach = TRUE,
+                       tylkoWyswietlane=TRUE, czyPomin = TRUE )
 
 agreguj_wskazniki_ewd(dane,
-                      poziom = "powiat", grupujPoLatach = TRUE, tylkoWyswietlane=NA, czyPomin = FALSE )
+                      poziom = "powiat", grupujPoLatach = TRUE,
+                       tylkoWyswietlane=NA, czyPomin = FALSE )
 agreguj_wskazniki_ewd(dane,
-                      poziom = "powiat", grupujPoLatach = TRUE, tylkoWyswietlane=FALSE, czyPomin = FALSE )
+                      poziom = "powiat", grupujPoLatach = TRUE,
+                       tylkoWyswietlane=FALSE, czyPomin = FALSE )
 agreguj_wskazniki_ewd(dane,
-                      poziom = "powiat", grupujPoLatach = TRUE, tylkoWyswietlane=TRUE, czyPomin = FALSE
+                      poziom = "powiat", grupujPoLatach = TRUE,
+                       tylkoWyswietlane=TRUE, czyPomin = FALSE
 }
 }
 

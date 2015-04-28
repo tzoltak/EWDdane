@@ -4,14 +4,11 @@
 \alias{przygotuj_funkcje_grupujaca_teryt}
 \title{Przygotowanie funkcji grupującej teryt.}
 \usage{
-przygotuj_funkcje_grupujaca_teryt(poziom, grupujPoLatach)
+przygotuj_funkcje_grupujaca_teryt(poziom)
 }
 \arguments{
 \item{poziom}{ciąg znaków definiujący poziom agregacji: "gmina", "powiat" lub "województwo" lub NULL,
 jeśli podany został parametr 'funkcjaGrupujaca'}
-
-\item{grupujPoLatach}{wartość logiczna (TRUE lub FALSE) wskazująca, czy przy wyróżnianiu grup oprócz TERYTu
-ma być uwzględniona również zmienna opisująca okres, dla którego wyliczony został wskaźnik}
 }
 \value{
 funkcja
