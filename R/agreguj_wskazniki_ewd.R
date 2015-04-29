@@ -137,15 +137,21 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
       group_by_(.dots = list(rok_do, nazwaGrupowania, "wskaznik"))
 
     # Gdy tylkoWyswietlane to TRUE, odfiltruj niewyświetlane.
-    if (!is.na(tylkoWyswietlane) & tylkoWyswietlane)  {
+    if (!is.na(tylkoWyswietlane) & tylkoWyswietlane &
+        "wyswietlaj" %in% names(dane))  {
       dane = dane %>% filter_(~ wyswietlaj == 1)
     }
 
     dane = dane %>%
       summarise(ewd =  weighted.mean(ewd, lu_ewd, na.rm = TRUE),
                 srednia = weighted.mean(srednia, lu_ewd, na.rm = TRUE),
-                lu_ewd = sum(lu_ewd, na.rm = TRUE)) %>%
-      melt(c(rok_do, nazwaGrupowania, "wskaznik")) %>%
+                lu_ewd = sum(lu_ewd, na.rm = TRUE),
+                wyswietlaj = any(wyswietlaj == 1))
+    if (is.na(tylkoWyswietlane) & "wyswietlaj" %in% names(dane)) {
+      dane$ewd[!dane$wyswietlaj] = NA
+      dane$srednia[!dane$wyswietlaj] = NA
+    }
+    dane = melt(dane, c(rok_do, nazwaGrupowania, "wskaznik")) %>%
       dcast(as.formula(paste0(paste0(c(rok_do, nazwaGrupowania), collapse = "+"),
                               " ~ wskaznik + variable")))
   } else if ("TERYT gminy" %in% names(dane) ){
