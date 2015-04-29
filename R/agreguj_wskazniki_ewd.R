@@ -75,7 +75,7 @@
 #'                        tylkoWyswietlane=FALSE, czyPomin = FALSE )
 #' agreguj_wskazniki_ewd(dane,
 #'                       poziom = "powiat", grupujPoLatach = TRUE,
-#'                        tylkoWyswietlane=TRUE, czyPomin = FALSE
+#'                        tylkoWyswietlane=TRUE, czyPomin = FALSE)
 #' }
 #' @import dplyr
 #' @import lazyeval
@@ -86,80 +86,87 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
                                   czyPomin = TRUE, paramGrupujaca = list()) {
   stopifnot(!is.null(poziom) | !is.null(funkcjaGrupujaca),
             poziom %in% c("gmina", "powiat", "województwo"))
-
+  
   if (!is.null(funkcjaGrupujaca) & !is.null(poziom) ) {
     stop("Jeden z parametrów: 'poziom' lub 'funkcja_grupujaca' musi być NULLem.")
   } else if (!is.null(poziom)) {
     funkcjaGrupujaca = przygotuj_funkcje_grupujaca_teryt(poziom)
   }
-
-  if ( "teryt_szkoly" %in% names(dane) ){
-    if (grupujPoLatach) {
-      rok_do =  "rok_do"
-    } else {
-      rok_do = NULL
-    }
-
-    grupowanie = do.call(funkcjaGrupujaca, append(list(dane$teryt_szkoly),
-                                                  paramGrupujaca))
-    if( !is.data.frame(grupowanie) |  ncol(grupowanie) != 1 |
-        nrow(grupowanie) != nrow(dane) ){
-      stop("Niepoprawny format danych zwracany przez funkcję grupującą.")
-    }
-    nazwaGrupowania = names(grupowanie)
-    dane = cbind(dane %>% select_(~ -teryt_szkoly), grupowanie)
-
-    #Jeżeli czyPomin true to usuń szkoły specjalne.
-    if (czyPomin) {
-      if ("pomin" %in% names(dane)) {
-        dane = filter(dane, !pomin)
-      } else {
-        # milcząco zakładamy, że brak kolumny 'pomin' w danych to efekt wywołania
-        # funkcji pobierz_wartosci_wskaznikow_ewd(..., czyPomin = TRUE)
-      }
-    }
-    dane = dane[, grepl("^(id_szkoly|rok_do)$|^teryt|^(ewd|lu_ewd|wyswietlaj|srednia)_",
-                        tolower(names(dane)))]
-
-    zmienne = c("id_szkoly", "rok_do", nazwaGrupowania)
-    maskaZmienne = "^(ewd|lu_ewd|wyswietlaj|srednia)_"
-    dane = melt(dane[, c(zmienne,
-                                   names(dane)[grepl(maskaZmienne, names(dane))])],
-                          id = zmienne)
-    dane = cbind(dane,
-                 wskaznik = gsub(maskaZmienne, "", dane$variable))
-    dane$variable = gsub(paste0(maskaZmienne, ".*$"), "\\1",
-                         dane$variable)
-
-    formulaTemp = as.formula(paste0(paste0(zmienne, collapse = "+"),
-                                    " + wskaznik ~ variable"))
-    dane = dcast(dane, formulaTemp, value.var = "value") %>%
-      group_by_(.dots = list(rok_do, nazwaGrupowania, "wskaznik"))
-
-    # Gdy tylkoWyswietlane to TRUE, odfiltruj niewyświetlane.
-    if (!is.na(tylkoWyswietlane) & tylkoWyswietlane &
-        "wyswietlaj" %in% names(dane))  {
-      dane = dane %>% filter_(~ wyswietlaj == 1)
-    }
-
-    dane = dane %>%
-      summarise(ewd =  weighted.mean(ewd, lu_ewd, na.rm = TRUE),
-                srednia = weighted.mean(srednia, lu_ewd, na.rm = TRUE),
-                lu_ewd = sum(lu_ewd, na.rm = TRUE),
-                wyswietlaj = any(wyswietlaj == 1))
-    if (is.na(tylkoWyswietlane) & "wyswietlaj" %in% names(dane)) {
-      dane$ewd[!dane$wyswietlaj] = NA
-      dane$srednia[!dane$wyswietlaj] = NA
-    }
-    dane = melt(dane, c(rok_do, nazwaGrupowania, "wskaznik")) %>%
-      dcast(as.formula(paste0(paste0(c(rok_do, nazwaGrupowania), collapse = "+"),
-                              " ~ wskaznik + variable")))
-  } else if ("TERYT gminy" %in% names(dane) ){
-    stop("Każ Grześkowi dokończyć funkcję.")
+  
+  if ( "teryt_szkoly" %in% colnames(dane) ){
+    czyOpisowe = FALSE
+  } else if ("TERYT gminy" %in% colnames(dane) ){
+    czyOpisowe = TRUE
+    colnames(dane) = konwertuj_nazwy_na_opisowe(colnames(dane), TRUE)
   } else{
     stop("Funkcja nie zawiera zmiennej opisującej teryt")
   }
-
+  
+  if (grupujPoLatach) {
+    rok_do =  "rok_do"
+  } else {
+    rok_do = NULL
+  }
+  
+  grupowanie = do.call(funkcjaGrupujaca, append(list(dane$teryt_szkoly),
+                                                paramGrupujaca))
+  if( !is.data.frame(grupowanie) |  ncol(grupowanie) != 1 |
+        nrow(grupowanie) != nrow(dane) ){
+    stop("Niepoprawny format danych zwracany przez funkcję grupującą.")
+  }
+  nazwaGrupowania = names(grupowanie)
+  dane = cbind(dane %>% select_(~ -teryt_szkoly), grupowanie)
+  
+  #Jeżeli czyPomin true to usuń szkoły specjalne.
+  if (czyPomin) {
+    if ("pomin" %in% names(dane)) {
+      dane = filter(dane, !pomin)
+    } else {
+      # milcząco zakładamy, że brak kolumny 'pomin' w danych to efekt wywołania
+      # funkcji pobierz_wartosci_wskaznikow_ewd(..., czyPomin = TRUE)
+    }
+  }
+  dane = dane[, grepl("^(id_szkoly|rok_do)$|^teryt|^(ewd|lu_ewd|wyswietlaj|srednia)_",
+                      tolower(names(dane)))]
+  
+  zmienne = c("id_szkoly", "rok_do", nazwaGrupowania)
+  maskaZmienne = "^(ewd|lu_ewd|wyswietlaj|srednia)_"
+  dane = melt(dane[, c(zmienne,
+                       names(dane)[grepl(maskaZmienne, names(dane))])],
+              id = zmienne)
+  dane = cbind(dane,
+               wskaznik = gsub(maskaZmienne, "", dane$variable))
+  dane$variable = gsub(paste0(maskaZmienne, ".*$"), "\\1",
+                       dane$variable)
+  
+  formulaTemp = as.formula(paste0(paste0(zmienne, collapse = "+"),
+                                  " + wskaznik ~ variable"))
+  dane = dcast(dane, formulaTemp, value.var = "value") %>%
+    group_by_(.dots = list(rok_do, nazwaGrupowania, "wskaznik"))
+  
+  # Gdy tylkoWyswietlane to TRUE, odfiltruj niewyświetlane.
+  if (!is.na(tylkoWyswietlane) & tylkoWyswietlane &
+        "wyswietlaj" %in% names(dane))  {
+    dane = dane %>% filter_(~ wyswietlaj == 1)
+  }
+  
+  dane = dane %>%
+    summarise(ewd =  weighted.mean(ewd, lu_ewd, na.rm = TRUE),
+              srednia = weighted.mean(srednia, lu_ewd, na.rm = TRUE),
+              lu_ewd = sum(lu_ewd, na.rm = TRUE),
+              wyswietlaj = any(wyswietlaj == 1))
+  if (is.na(tylkoWyswietlane) & "wyswietlaj" %in% names(dane)) {
+    dane$ewd[!dane$wyswietlaj] = NA
+    dane$srednia[!dane$wyswietlaj] = NA
+  }
+  dane = melt(dane, c(rok_do, nazwaGrupowania, "wskaznik")) %>%
+    dcast(as.formula(paste0(paste0(c(rok_do, nazwaGrupowania), collapse = "+"),
+                            " ~ variable + wskaznik")))
+  
+  if(czyOpisowe){
+    colnames(dane) = konwertuj_nazwy_na_opisowe(colnames(dane))
+  }
+  
   return(as.data.frame(dane))
 }
 #' @title Przygotowanie funkcji grupującej teryt.
@@ -182,4 +189,53 @@ przygotuj_funkcje_grupujaca_teryt <- function(poziom){
                }
   )
   return(fun)
+}
+#' @title Kowersja nazw na opisowe
+#' @description
+#' Funkcja konwertuje nazwy kolumn ramki danych zwracanych przez funkcję \code{\link{pobierz_wartosci_wskaznikow_ewd}}.
+#' @param nazwyKolumn nazwy kolumn ramki danych
+#' @param revert parametr logiczny. Jeżeli revert wynosi TRUE to nazwy opisowe są zmienane na zwykłe.
+#' Domyślna wartość FALSE powoduje zmianę nazw zwykłych na nazwy opisowe.
+#' @return wektor ciągów znakowych
+konwertuj_nazwy_na_opisowe <- function(nazwyKolumn, revert = FALSE){
+  klucz = rbind(
+    c("id_szkoly", "id szkoły w bazie EWD"),
+    c("artystyczna"  , "typ szkoły artystycznej" ),
+    c("typ_szkoly", "typ szkoły" ),
+    c("dla_doroslych", "szkoła dla dorosłych" ),
+    c("specjalna", "szkoła specjalna" ),
+    c("przyszpitalna", "szkoła przyszpitalna" ),
+    c("id_szkoly_oke", "kod egzaminacyjny szkoły" ),
+    c("nazwa_szkoly" , "nazwa" ),
+    c("miejscowosc"  , "miejscowość" ),
+    c("pna"          , "kod pocztowy"  ),
+    c("wielkosc_miejscowosci", "wielkość miejscowości" ),
+    c("teryt_szkoly" , "TERYT gminy" ),
+    c("rodzaj_gminy" , "rodzaj gminy" ),
+    c("rok_do"       , "ostatni rok okresu obejmowanego przez wskaźnik" ),
+    c("^pomin$"      , "czy szkoła pomijana na stronie"  ),
+    c("wyswietlaj"   , "czy elipsa wyświetlana -" ),
+    c("dg_pu_" , "dolna granica przedz. ufności dla " ),
+    c("gg_pu_" , "górna granica przedz. ufności dla " ),
+    c("srednia", "śr. wyników egzaminów" ),
+    c("^lu_|^l_uczn_"   , "liczba uczniów " ),
+    c("_trend_EWD", " trend EWD" ),
+    c("ewd", "EWD" ),
+    c("_mtmp_tl_wgr", " wsk. mat.-przyr."),
+    c("_mtp_tl_wgr", " wsk. język polski"),
+    c("_mtm_tl_wgr", " wsk. matematyczny"),
+    c("_mth_tl_wgr", " wsk. humanistyczny"))
+  klucz = data.frame(klucz)
+  if(!revert){
+    colnames(klucz) = c("orginalne", "nowe")
+  } else{
+    colnames(klucz) = c("nowe", "orginalne")
+    klucz$nowe = sub("[:^:]lu_[:|:][:^:]l_uczn_", "lu_", klucz$nowe)
+    klucz$nowe = sub("[:^:]|[:$:]", "", klucz$nowe)
+  }
+  
+  for(k in seq_len(nrow(klucz))){
+    nazwyKolumn = sub(klucz$orginalne[k], klucz$nowe[k], nazwyKolumn)
+  }
+  return(nazwyKolumn)
 }

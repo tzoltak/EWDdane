@@ -95,7 +95,7 @@ agreguj_wskazniki_ewd(dane,
                        tylkoWyswietlane=FALSE, czyPomin = FALSE )
 agreguj_wskazniki_ewd(dane,
                       poziom = "powiat", grupujPoLatach = TRUE,
-                       tylkoWyswietlane=TRUE, czyPomin = FALSE
+                       tylkoWyswietlane=TRUE, czyPomin = FALSE)
 }
 }
 
