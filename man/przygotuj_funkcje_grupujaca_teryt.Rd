@@ -2,18 +2,19 @@
 % Please edit documentation in R/agreguj_wskazniki_ewd.R
 \name{przygotuj_funkcje_grupujaca_teryt}
 \alias{przygotuj_funkcje_grupujaca_teryt}
-\title{Przygotowanie funkcji grupującej teryt.}
+\title{Przygotowanie funkcji grupującej w JST na podstawie TERYTu.}
 \usage{
 przygotuj_funkcje_grupujaca_teryt(poziom)
 }
 \arguments{
-\item{poziom}{ciąg znaków definiujący poziom agregacji: "gmina", "powiat" lub "województwo" lub NULL,
-jeśli podany został parametr 'funkcjaGrupujaca'}
+\item{poziom}{ciąg znaków definiujący poziom agregacji: "gmina", "powiat" lub
+"województwo"}
 }
 \value{
 funkcja
 }
 \description{
-Funkcja przygotowuje funkcję grupującą. Więcej szczegółów w \link{agreguj_wskazniki_ewd}
+Funkcja przygotowuje funkcję grupującą. Więcej szczegółów
+w \link{agreguj_wskazniki_ewd}
 }
 

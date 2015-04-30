@@ -1,17 +1,21 @@
 --------------------
-Zmiany w EWDskalowanie 0.5.1 (2015-03-03)
+Zmiany w EWDdane 0.5.2 (2015-04-30)
 
-Zmiany w kodzie funkcji pobierz_dane_szkol() i pobierz_wartosci_wskaznikow_ewd(),
-dostosowujące nazwy kolumn do zmian w pakiecie ZPD.
+Nowe funkcje:
+  - agreguj_wskazniki_ewd() - pozwala łatwo agregować wartości wskaźników EWD i średnich wyników egzaminów w grup wyróżnionych ze względu na TERYT (w szczególności gmin, powiatów i województw);
+  - przygotuj_funkcje_grupujaca_teryt(), konwertuj_nazwy_na_opisowe() - nieeksportowane funkcje pełniące role służebne względem agreguj_wskazniki_ewd().
+
+Pomniejsze zmiany:
+  - Zmieniono zachowanie funkcji pobierz_wartosci_wskaznikow_ewd() tak, że jeśli została wywoałana z argumentem tylkoWyswietlane=FALSE, to zawsze zwraca kolumny opisujace, czy elipsy poszczególnych szkół są wyświetlane.
 
 --------------------
-Zmiany w EWDskalowanie 0.5.1 (2015-03-03)
+Zmiany w EWDdane 0.5.1 (2015-03-03)
 
 Zmiany w kodzie funkcji pobierz_dane_szkol() i pobierz_wartosci_wskaznikow_ewd(),
 dostosowujące obsługę kodowania polskich znaków do zmian w pakiecie ZPD.
 
 --------------------
-Zmiany w EWDskalowanie 0.5 (2015-02-18)
+Zmiany w EWDdane 0.5 (2015-02-18)
 
 Zmiana licencji na MIT.
 
@@ -46,13 +50,13 @@ Funkcje przeniesione do innych pakietów:
   - zapisz_oszacowania_umiejetnosci() - do pakietu ZPDzapis.
 
 --------------------
-Zmiany w EWDskalowanie 0.4 (2014-10-23)
+Zmiany w EWDdane 0.4 (2014-10-23)
 
 Nowe funkcje:
   - pobierz_wartosci_wskaznikow() - pobiera zestawienia wartości wskaźników EWD.
 
 --------------------
-Zmiany w EWDskalowanie 0.3 (2014-10-14)
+Zmiany w EWDdane 0.3 (2014-10-14)
 
 Nowe funkcje:
   - stworz_test_z_wielu_czesci() - pozwala łatwo tworzyć testy opisujące EWDowe "złożone"

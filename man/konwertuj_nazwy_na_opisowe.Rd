@@ -7,15 +7,17 @@
 konwertuj_nazwy_na_opisowe(nazwyKolumn, revert = FALSE)
 }
 \arguments{
-\item{nazwyKolumn}{nazwy kolumn ramki danych}
+\item{nazwyKolumn}{nazwy kolumn do skonwertowania}
 
-\item{revert}{parametr logiczny. Jeżeli revert wynosi TRUE to nazwy opisowe są zmienane na zwykłe.
-Domyślna wartość FALSE powoduje zmianę nazw zwykłych na nazwy opisowe.}
+\item{revert}{wartość logiczna. Jeżeli revert wynosi TRUE to nazwy opisowe są
+zmienane na zwykłe. Domyślna wartość FALSE powoduje zmianę nazw zwykłych na
+nazwy opisowe.}
 }
 \value{
-wektor ciągów znakowych
+wektor ciągów znaków
 }
 \description{
-Funkcja konwertuje nazwy kolumn ramki danych zwracanych przez funkcję \code{\link{pobierz_wartosci_wskaznikow_ewd}}.
+Funkcja konwertuje nazwy kolumn ramki danych zwracanych przez funkcję
+\code{\link{pobierz_wartosci_wskaznikow_ewd}}.
 }
 

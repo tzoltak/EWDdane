@@ -102,7 +102,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
                      value.var = "przedm_lu")
     names(lUczniow) = sub("podstawowa", "podst", names(lUczniow))
     names(lUczniow) = sub("rozszerzona", "rozsz", names(lUczniow))
-    names(lUczniow) = gsub(" ", "_", names(lUczniow), fixed=TRUE)
+    names(lUczniow) = gsub(" ", "_", names(lUczniow), fixed = TRUE)
   }
   message("Pobieranie informacji o wartościach wskaźników.")
   wskazniki = as.data.frame(collect(wskazniki))
@@ -128,11 +128,12 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
                    measure.vars = zmNaDlugi)
   # usuwanie niepotrzebnych zmiennych (które chwilowo są obserwacjami)
   if (!dodatkoweInfo) {
-    wskazniki = filter_(wskazniki, ~ !(variable %in% c("kategoria", "wyswietlaj",
-                                                       "korelacja")))
+    zmienneUsun = c("kategoria", "korelacja")
+    if (tylkoWyswietlane) zmienneUsun = c(zmienneUsun, "wyswietlaj")
+    wskazniki = filter_(wskazniki, ~ !(variable %in% zmienneUsun))
   }
   # przekształcanie do postaci szerokiej
-  wskazniki = mutate_(wskazniki, .dots=list(variable="levels(variable)[variable]"))
+  wskazniki = mutate_(wskazniki, .dots = list(variable = "levels(variable)[variable]"))
   if (opisoweNazwy) {
     dots = list(variable = 'paste(variable, "wsk.", skrot)')
     nazwyWskaznikow = paste0(" wsk. ", unique(wskazniki$skrot))
@@ -140,7 +141,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     dots = list(variable = 'paste(variable, wskaznik, sep="_")')
     nazwyWskaznikow = paste0("_", unique(wskazniki$wskaznik))
   }
-  wskazniki = mutate_(wskazniki, .dots=dots)
+  wskazniki = mutate_(wskazniki, .dots = dots)
   wskazniki = dcast(wskazniki, rok_do + id_szkoly + pomin + lu_wszyscy ~ variable,
                     identity, fill = NA_real_, value.var = "value")
   # łączenie z danymi szkół
@@ -156,14 +157,14 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   }
   wskazniki = suppressMessages(inner_join(daneSzkol, wskazniki))
   # filtrowanie JST
-  if(!is.null(jst)){
+  if (!is.null(jst)) {
     wskazniki = filter_(wskazniki, ~ grepl(jst, teryt_szkoly))
   }
   # układanie kolumn w odpowiedniej kolejności
   nazwy = colnames(wskazniki)
-  maska = paste(nazwyWskaznikow, collapse="|")
-  maska = gsub("(", "[(]", maska, fixed=TRUE)
-  maska = gsub(")", "[)]", maska, fixed=TRUE)
+  maska = paste(nazwyWskaznikow, collapse = "|")
+  maska = gsub("(", "[(]", maska, fixed = TRUE)
+  maska = gsub(")", "[)]", maska, fixed = TRUE)
   maska = paste0("(", maska, ")$")
   sort1 = as.numeric(grepl(maska, nazwy)) + 2 * as.numeric(grepl("^l_uczn_", nazwy))
   sort2 = sub(paste0(".*", maska), "\\1", nazwy)
@@ -171,10 +172,10 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   sort2 = as.numeric(sort2)
   sort2[is.na(sort2)] = 0
   sort3 = sub(maska, "", nazwy)
-  sort3 = factor(sort3, levels=c("dg_pu_srednia", "gg_pu_srednia", "srednia",
-                                 "dg_pu_ewd"    , "gg_pu_ewd"    , "ewd",
-                                 "trend_ewd", "bs_trend_ewd", "korelacja",
-                                 "lu_ewd", "kategoria", "wyswietlaj"))
+  sort3 = factor(sort3, levels = c("dg_pu_srednia", "gg_pu_srednia", "srednia",
+                                   "dg_pu_ewd"    , "gg_pu_ewd"    , "ewd",
+                                   "trend_ewd", "bs_trend_ewd", "korelacja",
+                                   "lu_ewd", "kategoria", "wyswietlaj"))
   sort3 = as.numeric(sort3)
   sort3[is.na(sort3)] = 0
   wskazniki = wskazniki[, order(sort1, sort2, sort3)]
@@ -185,7 +186,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   names(wskazniki) = enc2native(names(wskazniki))
   if (opisoweNazwy) {
     maska = grep("ewd[ _]|srednia[ _]|bs[ _]", names(wskazniki))
-    wskazniki[maska] = lapply(wskazniki[maska], round, digits=2)
+    wskazniki[maska] = lapply(wskazniki[maska], round, digits = 2)
     names(wskazniki) = sub("id_szkoly" , "id szkoły w bazie EWD", names(wskazniki))
     names(wskazniki) = sub("typ_szkoly", "typ szkoły", names(wskazniki))
     names(wskazniki) = sub("dla_doroslych", "szkoła dla dorosłych", names(wskazniki))
@@ -217,7 +218,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
  	# zapis
  	if (!is.null(zapis)) {
  	  message("Zapis.")
- 	  write.csv2(wskazniki, zapis, row.names=FALSE, na="", fileEncoding=fileEncoding)
+ 	  write.csv2(wskazniki, zapis, row.names = FALSE, na = "",
+ 	             fileEncoding = fileEncoding)
  	  invisible(wskazniki)
  	} else {
      return(wskazniki)
