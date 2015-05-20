@@ -2,6 +2,7 @@
 
 export(agreguj_wskazniki_ewd)
 export(pobierz_dane_do_skracania)
+export(pobierz_dane_kontekstowe)
 export(pobierz_dane_szkol)
 export(pobierz_dane_uczniow)
 export(pobierz_parametry_skalowania)

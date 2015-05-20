@@ -1,4 +1,10 @@
 --------------------
+Zmiany w EWDdane 0.5.2 (2015-05-20)
+
+Nowe funkcje:
+  - pobierz_dane_kontekstowe() - pobiera wszelkie dane kontekstowe o uczniach (i szkołach) potrzebne przy wyliczaniu EWD
+
+--------------------
 Zmiany w EWDdane 0.5.2 (2015-04-30)
 
 Nowe funkcje:
