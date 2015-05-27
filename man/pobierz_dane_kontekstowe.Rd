@@ -4,14 +4,12 @@
 \alias{pobierz_dane_kontekstowe}
 \title{Pobieranie danych kontekstowych o uczniach.}
 \usage{
-pobierz_dane_kontekstowe(src, rodzajEgzaminu, wyjscie)
+pobierz_dane_kontekstowe(src, rodzajEgzaminu)
 }
 \arguments{
 \item{src}{połączenie z bazą danych IBE zwracane przez ZPD::polacz()}
 
 \item{rodzajEgzaminu}{rodzaj egzaminu}
-
-\item{wyjscie}{TRUE/FALSE - dane dla egzaminu na wyjściu czy na wejściu}
 }
 \value{
 data.frame

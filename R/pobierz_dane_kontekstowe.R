@@ -26,16 +26,14 @@
 #' wykonywałoby się wieki.
 #' @param src połączenie z bazą danych IBE zwracane przez ZPD::polacz()
 #' @param rodzajEgzaminu rodzaj egzaminu
-#' @param wyjscie TRUE/FALSE - dane dla egzaminu na wyjściu czy na wejściu
 #' @return data.frame
 #' @import dplyr
 #' @import ZPD
 #' @export
-pobierz_dane_kontekstowe = function(src, rodzajEgzaminu, wyjscie){
+pobierz_dane_kontekstowe = function(src, rodzajEgzaminu){
   stopifnot(
     is.src(src),
-    is.vector(rodzajEgzaminu), is.character(rodzajEgzaminu), length(rodzajEgzaminu) == 1, all(!is.na(rodzajEgzaminu)),
-    is.vector(wyjscie), is.logical(wyjscie), length(wyjscie) == 1, all(!is.na(wyjscie))
+    is.vector(rodzajEgzaminu), is.character(rodzajEgzaminu), length(rodzajEgzaminu) == 1, all(!is.na(rodzajEgzaminu))
   )
 
   # sprawdzanie poziomu uprawnień
@@ -44,37 +42,10 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu, wyjscie){
     tmp = tbl(src, sql("SELECT * FROM dane_osobowe.obserwacje LIMIT 1"))
     daneOsobowe = TRUE
   }, silent = TRUE)
-    
-  # pobieranie danych cząstkowych z bazy
-  podejscia = filtruj_przystapienia(src, pierwsze = wyjscie, rodzajEgzaminu = rodzajEgzaminu, czescEgzaminu = NULL, czyEwd = TRUE) %>%
-    select_('-rodzaj_egzaminu', 'dane_ewd') %>%
-    collect()
-  obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
-    select_('-id_cke') %>%
-    collect()
-  testy = suppressMessages(
-    pobierz_testy(src) %>%
-    filter_(~dane_ewd == TRUE, ~rodzaj_egzaminu == rodzajEgzaminu, ~czy_egzamin == TRUE) %>%
-    inner_join(tbl(src, sql('SELECT * FROM sl_czesci_egzaminow'))) %>%
-    select_('id_testu', 'prefiks')
-  )
-  uczniowieTesty = suppressMessages(
-    pobierz_dane_uczniowie_testy(src, daneOsobowe = daneOsobowe) %>%
-    inner_join(testy) %>%
-    select_('-pop_podejscie', '-oke', '-zrodlo', '-id_testu') %>%
-    collect()
-  )
-  szkoly = pobierz_szkoly(src) %>%
-    select_('id_szkoly', 'rok', 'typ_szkoly', 'publiczna', 'specjalna', 'dla_doroslych', 'przyszpitalna', 'artystyczna') %>%
-    collect()
   
-  dane = suppressMessages(
-    uczniowieTesty %>%
-    inner_join(podejscia)
-  )
-
-  # obliczanie agregatów na poziomie uczniów
+  # definicje agregatów na poziomie {uczeń, rodzajEgzaminu, rok}
   dotsSummarize = list(
+    data       = ~min(data_testu, na.rm = T),
     id_szkoly  = ~min(id_szkoly, na.rm = T), 
     dysleksja  = ~all(dysleksja, na.rm = T), 
     id_szkoly2 = ~max(id_szkoly, na.rm = T), 
@@ -98,32 +69,81 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu, wyjscie){
     ))
     dotsSelect = append(dotsSelect, c('-klasa2', '-kod_u2'))
   }
-  agregaty = suppressWarnings(
-    dane %>%
-    group_by_('id_obserwacji') %>%
-    summarize_(.dots = dotsSummarize) %>%
-    ungroup() %>%
-    mutate_(.dots = dotsMutate) %>%
-    select_(.dots = dotsSelect)
+  
+  # pobranie danych na poziomie {uczeń, rodzajEgzaminu, czescEgzaminu, rok} i agregacja do {uczeń, rok}
+  testy = suppressMessages(
+    pobierz_testy(src) %>%
+      filter_(~dane_ewd == TRUE, ~rodzaj_egzaminu == rodzajEgzaminu, ~czy_egzamin == TRUE) %>%
+      inner_join(tbl(src, sql('SELECT * FROM sl_czesci_egzaminow'))) %>%
+      select_('id_testu', 'prefiks', 'data_testu')
+  )
+  uczniowieTesty = suppressMessages(
+    pobierz_dane_uczniowie_testy(src, daneOsobowe = daneOsobowe) %>%
+      inner_join(testy) %>%
+      select_('-pop_podejscie', '-oke', '-zrodlo', '-id_testu') %>%
+      collect()
+  )
+  dane = suppressWarnings(
+    uczniowieTesty %>%
+      group_by_('id_obserwacji', 'rok') %>%
+      summarize_(.dots = dotsSummarize) %>%
+      ungroup() %>%
+      mutate_(.dots = dotsMutate) %>%
+      select_(.dots = dotsSelect)
   )
   
   # konwersja informacji o byciu laureatem do postaci szerokiej
-  laureaci = dane %>%
+  laureaci = uczniowieTesty %>%
     mutate_(prefiks = ~paste0('laur_', prefiks)) %>%
-    reshape2::dcast(id_obserwacji ~ prefiks, value.var = 'laureat')
+    reshape2::dcast(id_obserwacji + rok ~ prefiks, value.var = 'laureat')
   
-  # złączenie wszystkiego w całość
-  dane = suppressMessages(
-    obserwacje %>%
-    inner_join(podejscia) %>%
-    inner_join(agregaty) %>%
-    inner_join(szkoly) %>%
-    inner_join(laureaci)
-  )
+  # złączenie i usunięcie zbędnych danych
+  rm(uczniowieTesty)
+  dane = suppressMessages(inner_join(dane, laureaci))
+  rm(laureaci)
+  
+  # dołączenie informacji o szkołach
+  szkoly = pobierz_szkoly(src) %>%
+    select_('id_szkoly', 'rok', 'typ_szkoly', 'publiczna', 'specjalna', 'dla_doroslych', 'przyszpitalna', 'artystyczna') %>%
+    collect()
+  dane = suppressMessages(inner_join(dane, szkoly))
+  rm(szkoly)
+  
+  # dołączanie informacji o obserwacjach
+  obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
+    select_('-id_cke') %>%
+    collect()
+  dane = suppressMessages(inner_join(dane, obserwacje))
+  rm(obserwacje)
 
+  # oznaczamy pierwsze przystąpienia
+  pierwsze = filtruj_przystapienia(src, pierwsze = TRUE, rodzajEgzaminu = rodzajEgzaminu, czescEgzaminu = NULL, czyEwd = TRUE) %>%
+    collect() %>%
+    select_('-rodzaj_egzaminu', '-dane_ewd') %>%
+    mutate_(pierwsze = TRUE)
+  dane = suppressMessages(left_join(dane, pierwsze))
+  rm(pierwsze)
+  
+  # oznaczamy ostatnie przystąpienia
+  ostatnie = filtruj_przystapienia(src, pierwsze = FALSE, rodzajEgzaminu = rodzajEgzaminu, czescEgzaminu = NULL, czyEwd = TRUE) %>%
+    collect() %>%
+    select_('-rodzaj_egzaminu', '-dane_ewd') %>%
+    mutate_(ostatnie = TRUE)
+  dane = suppressMessages(left_join(dane, ostatnie))
+  rm(ostatnie)
+  
   # wygenerowanie zmiennej określającej populację
   dane = dane %>%
-    mutate_(populacja = ~publiczna %in% TRUE & specjalna %in% FALSE & dla_doroslych %in% FALSE & przyszpitalna %in% FALSE)
+    mutate_(
+      populacja_we = ~publiczna %in% TRUE & specjalna %in% FALSE & dla_doroslych %in% FALSE & przyszpitalna %in% FALSE & ostatnie %in% TRUE,
+      populacja_wy = ~publiczna %in% TRUE & specjalna %in% FALSE & dla_doroslych %in% FALSE & przyszpitalna %in% FALSE & pierwsze %in% TRUE
+    )
+  if(daneOsobowe){
+    dane = dane %>%
+      mutate(wiek = as.numeric(substr(dane$data, 1, 4)) * 12 + as.numeric(substr(dane$data, 6, 7)) - as.numeric(substr(dane$data_ur, 1, 4)) * 12 - as.numeric(substr(dane$data_ur, 6, 7)))
+  }
+  dane = dane %>%
+    select_('-data')
   
   return(dane)
 }
