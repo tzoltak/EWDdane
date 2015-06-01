@@ -50,7 +50,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     is.character(rodzajEgzaminu), length(rodzajEgzaminu) == 1,
     all(rodzajEgzaminu %in% c("sprawdzian", "egzamin gimnazjalny", "matura")),
     is.numeric(lata) | is.null(lata), length(lata) > 0 | is.null(lata),
-    all(as.integer(lata)) == lata,
+    all(as.integer(lata) == lata),
     all(nadpisz %in% c(TRUE, FALSE)), length(nadpisz) == 1,
     all(daneKontekstowe %in% c(TRUE, FALSE)), length(daneKontekstowe) == 1,
     is.src(src) | is.null(src)
@@ -62,8 +62,9 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     lata = pobierz_testy(src) %>%
       filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
       select(.dots = ~rok) %>%
-      collect %>%
-      unique %>% as.list %>% unlist
+      distinct %>%
+      as.list %>%
+      unlist
   }
 
   # sprawdzanie, co jest na dysku
@@ -90,7 +91,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     }
   }
 
-  message(rodzajEgzaminu)
+  message(rodzajEgzaminu, "\n", format(Sys.time(), "(%Y.%m.%d, %H:%M:%S)"))
   # pobieranie i zapis wyników
   for (i in lata) {
     message("\nRok ", i, ":")
@@ -120,19 +121,23 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
       rm(temp)
     }
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, " ", i, ".RData")
-    save(list = czesciEgzaminu$prefiks, nazwaPliku)
-    message(" zapisano do pliku: ", nazwaPliku)
+    save(list = czesciEgzaminu$prefiks, file = nazwaPliku)
+    message("  zapisano do pliku: ", nazwaPliku,
+            format(Sys.time(), "\n  (%Y.%m.%d, %H:%M:%S)"))
   }
   pliki = paste0("dane surowe/", rodzajEgzaminu, " ", lata, ".RData")
   # pobieranie i zapis danych kontekstowych
   if (daneKontekstowe) {
     message("\nDane o uczniach i szkołach:")
     temp = pobierz_dane_kontekstowe(src, rodzajEgzaminu)
+    class(temp) = append(class(temp), "daneKontekstowe")
+    attributes(temp)$dataPobrania = Sys.time()
     assign(paste0(substr(rodzajEgzaminu, 1, 1), "Kontekstowe"), temp)
     rm(temp)
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "- kontekstowe.RData")
-    save(list = paste0(substr(rodzajEgzaminu, 1, 1), "Kontekstowe"), nazwaPliku)
-    message(" zapisano do pliku: ", nazwaPliku)
+    save(list = paste0(substr(rodzajEgzaminu, 1, 1), "Kontekstowe"), file = nazwaPliku)
+    message("  zapisano do pliku: ", nazwaPliku,
+            format(Sys.time(), "\n  (%Y.%m.%d, %H:%M:%S)"))
     pliki = append(pliki, nazwaPliku)
   }
 
