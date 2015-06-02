@@ -103,7 +103,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
       czyEwd = TRUE
     }
     czesciEgzaminu = pobierz_testy(src) %>%
-      filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rok == i) %>%
+      filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rok == i, ~czy_egzamin) %>%
       select_(.dots = list(~czesc_egzaminu, ~prefiks)) %>%
       collect %>%
       unique
@@ -122,8 +122,8 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     }
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, " ", i, ".RData")
     save(list = czesciEgzaminu$prefiks, file = nazwaPliku)
-    message("  zapisano do pliku: ", nazwaPliku,
-            format(Sys.time(), "\n  (%Y.%m.%d, %H:%M:%S)"))
+    message(" zapisano do pliku: ", nazwaPliku,
+            format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
   }
   pliki = paste0("dane surowe/", rodzajEgzaminu, " ", lata, ".RData")
   # pobieranie i zapis danych kontekstowych
@@ -136,8 +136,8 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     rm(temp)
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "- kontekstowe.RData")
     save(list = paste0(substr(rodzajEgzaminu, 1, 1), "Kontekstowe"), file = nazwaPliku)
-    message("  zapisano do pliku: ", nazwaPliku,
-            format(Sys.time(), "\n  (%Y.%m.%d, %H:%M:%S)"))
+    message(" zapisano do pliku: ", nazwaPliku,
+            format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
     pliki = append(pliki, nazwaPliku)
   }
 
