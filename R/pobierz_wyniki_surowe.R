@@ -132,9 +132,9 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     temp = pobierz_dane_kontekstowe(src, rodzajEgzaminu)
     class(temp) = append(class(temp), "daneKontekstowe")
     attributes(temp)$dataPobrania = Sys.time()
-    assign(paste0(substr(rodzajEgzaminu, 1, 1), "Kontekstowe"), temp)
+    assign(paste0(substr(czesciEgzaminu$prefiks[1], 1, 1), "Kontekstowe"), temp)
     rm(temp)
-    nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "- kontekstowe.RData")
+    nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "-kontekstowe.RData")
     save(list = paste0(substr(rodzajEgzaminu, 1, 1), "Kontekstowe"), file = nazwaPliku)
     message(" zapisano do pliku: ", nazwaPliku,
             format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
