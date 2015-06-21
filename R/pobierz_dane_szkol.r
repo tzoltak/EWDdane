@@ -25,7 +25,8 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
 
   if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 3 wiersze dalej zadziała
   if (length(typySzkol) == 1) typySzkol = rep(typySzkol, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
-  szkoly = pobierz_szkoly(polacz())
+  src = polacz()
+  szkoly = pobierz_szkoly(src)
   szkoly = filter_(szkoly, ~ rok %in% lata)
   szkoly = select_(szkoly, ~ -wojewodztwo_szkoly, ~ -powiat_szkoly, ~ -gmina_szkoly)
   if (!is.null(typySzkol)) szkoly = filter_(szkoly, ~ typ_szkoly %in% typySzkol)
@@ -34,6 +35,7 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
                                       ~ -pna, ~ -poczta, ~ -wielkosc_miejscowosci,
                                       ~ -teryt_szkoly, ~ -rodzaj_gminy)
   szkoly = collect(szkoly)
+  rozlacz(src)
   szkoly = group_by_(szkoly, ~ id_szkoly)
   szkoly = mutate_(szkoly, .dots=list(max_rok = "max(rok)"))
   szkoly = filter_(szkoly, ~ rok == max_rok)

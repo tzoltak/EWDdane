@@ -1,4 +1,12 @@
 --------------------
+Zmiany w EWDdane ? (?)
+
+Dodano zamykanie połączeń z bazą w funkcjach:
+- pobierz_wyniki_surowe() (gdy wywoływana z argumentem src = NULL),
+- pobierz_dane_szkol(),
+-
+
+--------------------
 Zmiany w EWDdane 0.5.3 (2015-05-27)
 
 Funkcja pobierz_dane_kontekstowe():

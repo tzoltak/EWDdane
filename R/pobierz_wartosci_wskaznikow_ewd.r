@@ -105,7 +105,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(lUczniow) = gsub(" ", "_", names(lUczniow), fixed = TRUE)
   }
   message("Pobieranie informacji o wartościach wskaźników.")
-  wskazniki = as.data.frame(collect(wskazniki))
+  wskazniki = collect(wskazniki)
+  rozlacz(src)
   # dalsze przekształcanie
   message("Wyliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))

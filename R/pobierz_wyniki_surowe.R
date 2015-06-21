@@ -55,8 +55,10 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     all(daneKontekstowe %in% c(TRUE, FALSE)), length(daneKontekstowe) == 1,
     is.src(src) | is.null(src)
   )
+  czyZamykacSrc = FALSE
   if (is.null(src)) {
     src = polacz()
+    czyZamykacSrc = TRUE
   }
   if (is.null(lata)) {
     lata = pobierz_testy(src) %>%
@@ -141,5 +143,8 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     pliki = append(pliki, nazwaPliku)
   }
 
+  if (czyZamykacSrc) {
+    rozlacz(src)
+  }
   invisible(pliki)
 }
