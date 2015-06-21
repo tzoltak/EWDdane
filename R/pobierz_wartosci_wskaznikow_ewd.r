@@ -75,6 +75,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   # pobieranie z bazy
   if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
   src = polacz()
+  on.exit(rozlacz(src))
   wskazniki = pobierz_wskazniki(src)
   wskazniki = filter_(wskazniki, ~ rodzaj_wsk == "ewd", ~ typ_szkoly == typSzkoly,
                       ~ rok_do %in% lata)
@@ -106,7 +107,6 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   }
   message("Pobieranie informacji o wartościach wskaźników.")
   wskazniki = collect(wskazniki)
-  rozlacz(src)
   # dalsze przekształcanie
   message("Wyliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))
