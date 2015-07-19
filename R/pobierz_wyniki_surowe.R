@@ -63,10 +63,12 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   if (is.null(lata)) {
     lata = pobierz_testy(src) %>%
       filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
-      select(.dots = ~rok) %>%
+      select_(.dots = ~rok) %>%
       distinct %>%
+      collect %>%
       as.list %>%
-      unlist
+      unlist %>%
+      sort
   }
 
   # sprawdzanie, co jest na dysku
