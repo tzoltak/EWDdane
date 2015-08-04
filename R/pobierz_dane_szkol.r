@@ -1,4 +1,4 @@
-#' @title Pobieranie danych o szkołach.
+#' @title Pobieranie danych o szkolach.
 #' @description
 #' Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie, adresowe
 #' i o lokalizacji.

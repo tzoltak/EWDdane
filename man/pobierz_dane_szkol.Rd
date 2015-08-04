@@ -2,7 +2,7 @@
 % Please edit documentation in R/pobierz_dane_szkol.r
 \name{pobierz_dane_szkol}
 \alias{pobierz_dane_szkol}
-\title{Pobieranie danych o szkołach.}
+\title{Pobieranie danych o szkolach.}
 \usage{
 pobierz_dane_szkol(lata, typySzkol = NULL, idOke = FALSE,
   daneAdresowe = FALSE)
