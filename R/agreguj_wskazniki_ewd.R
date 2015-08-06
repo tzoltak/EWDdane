@@ -9,10 +9,10 @@
 #' również zmienna opisująca okres, dla którego wyliczony został wskaźnik
 #' @param funkcjaGrupujaca NULL lub fukcja przyjmująca jako pierwszy parametr
 #' TERYT szkoły (w postaci wektora liczb całkowitych) i zwracająca jednoelementowy
-#' data frame (lub listę), który opisuje przydział szkół do grup.
-#' @param tylkoWyswietlane wartość logiczna (\code{TRUE/FALSE/NA}) opisująca, czy przy
-#' wyliczaniu agregatów mają zostać uwzględnione tylko te szkoły, których elipsy
-#' są pokazywane na stronie - p. sekcja Details
+#' data frame (lub listę), który opisuje przydział szkół do grup
+#' @param tylkoWyswietlane wartość logiczna (\code{TRUE/FALSE/NA}) opisująca,
+#' czy przy wyliczaniu agregatów mają zostać uwzględnione tylko te szkoły,
+#' których elipsy są pokazywane na stronie - p. sekcja Details
 #' @param paramGrupujaca opcjonalnie lista dodatkowych parametrów, które zostaną
 #' przekazane funkcji grupującej
 #' @details
@@ -146,7 +146,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
 
   return(as.data.frame(dane))
 }
-#' @title Przygotowanie funkcji grupującej w JST na podstawie TERYTu.
+#' @title Przygotowanie funkcji grupującej w JST na podstawie TERYTu
 #' @description
 #' Funkcja przygotowuje funkcję grupującą. Więcej szczegółów
 #' w \link{agreguj_wskazniki_ewd}

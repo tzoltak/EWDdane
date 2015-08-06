@@ -2,34 +2,34 @@
 % Please edit documentation in R/pobierz_parametry_skalowania.R
 \name{pobierz_parametry_skalowania}
 \alias{pobierz_parametry_skalowania}
-\title{Pobieranie parametrow skalowan.}
+\title{Pobieranie parametrow skalowan}
 \usage{
 pobierz_parametry_skalowania(nazwa_skali = NULL, id_testu = NULL,
   opis_skalowania = ".*", idSkalowania = NULL, zrodloDanychODBC = "EWD",
   parametryzacja = "baza")
 }
 \arguments{
-\item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie jest brana
+\item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie
+jest brana pod uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
+
+\item{id_testu}{id testu.Kiedy id testu przymuje wartość NULL nie jest brana
 pod uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
 
-\item{id_testu}{id testu.Kiedy id testu przymuje wartość NULL nie jest brana pod uwagę
-w wyszukiwaniu. Wartość domyślna to NULL.}
+\item{opis_skalowania}{wyrażenie regularne określające opis skalowania.
+Domyślna wartość to '\%'.}
 
-\item{opis_skalowania}{wyrażenie regularne określające opis skalowania. Domyślna
-wartość to '\%'.}
+\item{idSkalowania}{numer skalowania, domyślnie ustawiony na NULL. Gdy
+argument nie ma wartości NULL to parametr \code{opis_skalowania} jest
+ignorowany.}
 
-\item{idSkalowania}{numer skalowania, domyślnie ustawiony na NULL. Gdy argument nie ma
-wartości NULL to parametr 'opis_skalowania' jest ignorowany.}
+\item{zrodloDanychODBC}{string określający źródło danych.}
 
-\item{zrodloDanychODBC}{string określający źródło danych. docelowa wartość domyślna to
-'EWD'. Obecnie 'ewd_grzes'.}
-
-\item{parametryzacja}{parametr określający format zwracanego wyniku. Domyślna wartość
-to 'baza'.
-Inna możliwa wartość to 'mplus'.}
+\item{parametryzacja}{parametr określający format zwracanego wyniku. Domyślna
+wartość to 'baza'. Inna możliwa wartość to 'mplus'.}
 }
 \value{
-W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką, że:
+W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką,
+że:
 \itemize{
    \item{każdy element listy opisuje parametry innego skalowania;}
    \item{każdy element listy ma też przypisane jako atrybuty wartości kolumn:
@@ -37,12 +37,13 @@ W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką, że:
    \item{zwracana lista ma przypisane jako atrybuty wartości wszystkich kolumn
          z tablicy 'skale';}
 }
-W przyopadku użycia parametryzacji 'mplus' funkcja zwraca parametry skalowania w formie
-ramki danych, która jest w postaci zwracanej przez funkcję skaluj().
+W przyopadku użycia parametryzacji 'mplus' funkcja zwraca parametry
+skalowania w formie ramki danych, która jest w postaci zwracanej przez
+funkcję skaluj().
 }
 \description{
-Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu oraz których
-opis skalowań spełnia podane wyrażenie regularne.
+Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu
+oraz których opis skalowań spełnia podane wyrażenie regularne.
 }
 \examples{
 \dontrun{

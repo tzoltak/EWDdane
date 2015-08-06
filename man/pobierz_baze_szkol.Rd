@@ -2,7 +2,7 @@
 % Please edit documentation in R/pobierz_baze_szkol.R
 \name{pobierz_baze_szkol}
 \alias{pobierz_baze_szkol}
-\title{Aktualizacja bazy danych szkol.}
+\title{Aktualizacja bazy danych szkol}
 \usage{
 pobierz_baze_szkol(typySzkol, zapis = NULL)
 }

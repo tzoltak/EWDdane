@@ -1,21 +1,21 @@
-#' @title Pobieranie parametrow skalowan.
+#' @title Pobieranie parametrow skalowan
 #' @description
-#' Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu oraz których
-#' opis skalowań spełnia podane wyrażenie regularne.
-#' @param nazwa_skali nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie jest brana
+#' Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu
+#' oraz których opis skalowań spełnia podane wyrażenie regularne.
+#' @param nazwa_skali nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie
+#' jest brana pod uwagę w wyszukiwaniu. Wartość domyślna to NULL.
+#' @param id_testu id testu.Kiedy id testu przymuje wartość NULL nie jest brana
 #' pod uwagę w wyszukiwaniu. Wartość domyślna to NULL.
-#' @param id_testu id testu.Kiedy id testu przymuje wartość NULL nie jest brana pod uwagę
-#' w wyszukiwaniu. Wartość domyślna to NULL.
-#' @param opis_skalowania wyrażenie regularne określające opis skalowania. Domyślna
-#' wartość to '\%'.
-#' @param idSkalowania numer skalowania, domyślnie ustawiony na NULL. Gdy argument nie ma
-#' wartości NULL to parametr 'opis_skalowania' jest ignorowany.
-#' @param zrodloDanychODBC string określający źródło danych. docelowa wartość domyślna to
-#' 'EWD'. Obecnie 'ewd_grzes'.
-#' @param parametryzacja parametr określający format zwracanego wyniku. Domyślna wartość
-#' to 'baza'.
-#' Inna możliwa wartość to 'mplus'.
-#' @return W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką, że:
+#' @param opis_skalowania wyrażenie regularne określające opis skalowania.
+#' Domyślna wartość to '\%'.
+#' @param idSkalowania numer skalowania, domyślnie ustawiony na NULL. Gdy
+#' argument nie ma wartości NULL to parametr \code{opis_skalowania} jest
+#' ignorowany.
+#' @param zrodloDanychODBC string określający źródło danych.
+#' @param parametryzacja parametr określający format zwracanego wyniku. Domyślna
+#' wartość to 'baza'. Inna możliwa wartość to 'mplus'.
+#' @return W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką,
+#' że:
 #' \itemize{
 #'    \item{każdy element listy opisuje parametry innego skalowania;}
 #'    \item{każdy element listy ma też przypisane jako atrybuty wartości kolumn:
@@ -23,8 +23,9 @@
 #'    \item{zwracana lista ma przypisane jako atrybuty wartości wszystkich kolumn
 #'          z tablicy 'skale';}
 #' }
-#' W przyopadku użycia parametryzacji 'mplus' funkcja zwraca parametry skalowania w formie
-#' ramki danych, która jest w postaci zwracanej przez funkcję skaluj().
+#' W przyopadku użycia parametryzacji 'mplus' funkcja zwraca parametry
+#' skalowania w formie ramki danych, która jest w postaci zwracanej przez
+#' funkcję skaluj().
 #' @examples
 #' \dontrun{
 #' id_testu = 1128
@@ -173,12 +174,13 @@ pobierz_parametry_skalowania = function(nazwa_skali=NULL, id_testu=NULL,
 #' @title Zmiana tablicy do formatu funkcji skaluj()
 #' @description
 #' Funkcja przekształca tablicę zwracaną w liście przez funkcję
-#' \code{\link{pobierz_parametry_skalowania}} z parametrem 'baza' do postaci mplusa
+#' \code{\link{pobierz_parametry_skalowania}} z parametrem \code{baza} do
+#' postaci mplusa
 #' @param tablicaDanych tablica w formacie zwracanym przez funkcję
 #' \code{\link{pobierz_parametry_skalowania}}.
 #' @return
-#' Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych przez
-#' funkcję \code{\link[EWDskalowanie]{skaluj}}.
+#' Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych
+#' przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
 zmien_na_mplus = function(tablicaDanych) {
   opis = attributes(tablicaDanych)$opis
   estymacja = attributes(tablicaDanych)$estymacja

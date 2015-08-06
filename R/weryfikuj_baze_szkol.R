@@ -1,4 +1,4 @@
-#' @title Aktualizacja bazy danych szkol.
+#' @title Aktualizacja bazy danych szkol
 #' @description
 #' Funkcja weryfikuje poprawność bazy szkół, przygotowanej w pliku csv, po
 #' przeprowadzeniu jej ręcznej aktualizacji.

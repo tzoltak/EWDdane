@@ -1,4 +1,4 @@
-#' @title Pobieranie wartosci wskaznikow EWD.
+#' @title Pobieranie wartosci wskaznikow EWD
 #' @description
 #' Funkcja pobiera z bazy wartości wskaźników EWD. Domyślne wartości argumentów zostały
 #' dobrane pod kątem wydawania wskazńików na zewnątrz.

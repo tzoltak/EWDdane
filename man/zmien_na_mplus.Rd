@@ -11,11 +11,12 @@ zmien_na_mplus(tablicaDanych)
 \code{\link{pobierz_parametry_skalowania}}.}
 }
 \value{
-Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych przez
-funkcję \code{\link[EWDskalowanie]{skaluj}}.
+Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych
+przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
 }
 \description{
 Funkcja przekształca tablicę zwracaną w liście przez funkcję
-\code{\link{pobierz_parametry_skalowania}} z parametrem 'baza' do postaci mplusa
+\code{\link{pobierz_parametry_skalowania}} z parametrem \code{baza} do
+postaci mplusa
 }
 

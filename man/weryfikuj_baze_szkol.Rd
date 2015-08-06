@@ -2,7 +2,7 @@
 % Please edit documentation in R/weryfikuj_baze_szkol.R
 \name{weryfikuj_baze_szkol}
 \alias{weryfikuj_baze_szkol}
-\title{Aktualizacja bazy danych szkol.}
+\title{Aktualizacja bazy danych szkol}
 \usage{
 weryfikuj_baze_szkol(bazaZakt, bazaZrzut = NULL)
 }
@@ -13,6 +13,9 @@ zawierającego zaktualizowaną bazę szkół lub data frame z taką wczytaną ba
 \item{bazaZrzut}{opcjonalnie nazwa (ścieżka do) pliku w formacie csv
 zawierającego zrzut bazy szkół, na który nanoszona była aktualizacja lub data
 frame z taką wczytaną bazą}
+}
+\value{
+lista data frame'ów
 }
 \description{
 Funkcja weryfikuje poprawność bazy szkół, przygotowanej w pliku csv, po

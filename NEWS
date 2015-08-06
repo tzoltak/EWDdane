@@ -5,6 +5,12 @@ Nowe funkcje:
   - pobierz_baze_szkol() - zamknięcie do pakietu procesu aktualizacji bazy szkół;
   - weryfikuj_baze_szkol() - j.w.;
 
+Usunięte funkcje:
+  - pobierz_dane_wyskalowane();
+  - pobierz_wyniki_surowe_ewd_gimn() - zastąpiona przez
+  - zapisz_normy_do_bazy() - przeniesiona do pakietu ZPDzapis;
+  - sklej_normy() - przeniesiona do pakietu EWDwskaźniki;
+
 Dodano zamykanie połączeń z bazą w funkcjach:
 - pobierz_wyniki_surowe() (gdy wywoływana z argumentem src = NULL),
 - pobierz_dane_szkol(),

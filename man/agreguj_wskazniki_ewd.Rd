@@ -19,11 +19,11 @@ również zmienna opisująca okres, dla którego wyliczony został wskaźnik}
 
 \item{funkcjaGrupujaca}{NULL lub fukcja przyjmująca jako pierwszy parametr
 TERYT szkoły (w postaci wektora liczb całkowitych) i zwracająca jednoelementowy
-data frame (lub listę), który opisuje przydział szkół do grup.}
+data frame (lub listę), który opisuje przydział szkół do grup}
 
-\item{tylkoWyswietlane}{wartość logiczna (\code{TRUE/FALSE/NA}) opisująca, czy przy
-wyliczaniu agregatów mają zostać uwzględnione tylko te szkoły, których elipsy
-są pokazywane na stronie - p. sekcja Details}
+\item{tylkoWyswietlane}{wartość logiczna (\code{TRUE/FALSE/NA}) opisująca,
+czy przy wyliczaniu agregatów mają zostać uwzględnione tylko te szkoły,
+których elipsy są pokazywane na stronie - p. sekcja Details}
 
 \item{paramGrupujaca}{opcjonalnie lista dodatkowych parametrów, które zostaną
 przekazane funkcji grupującej}

@@ -1,4 +1,4 @@
-#' @title Aktualizacja bazy danych szkol.
+#' @title Aktualizacja bazy danych szkol
 #' @description
 #' Funkcja pobiera dane o szkołach, potrzebne do dokonania aktualizacji bazy
 #' szkół (wykonuje zrzut bazy szkół).

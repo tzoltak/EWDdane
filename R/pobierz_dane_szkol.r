@@ -1,14 +1,14 @@
-#' @title Pobieranie danych o szkolach.
+#' @title Pobieranie danych o szkolach
 #' @description
-#' Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie, adresowe
-#' i o lokalizacji.
-#' @param lata wektor liczb całkowitych - lata, których mają dotyczyć dane (dla każdej
-#' szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)
-#' @param typySzkol opcjonalny wektor tekstowy z typami szkół, które mają zostać zwrócone
-#' (lub NULL - zwraca informacje o wszystkich szkołach)
+#' Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie,
+#' adresowe i o lokalizacji.
+#' @param lata wektor liczb całkowitych - lata, których mają dotyczyć dane (dla
+#' każdej szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)
+#' @param typySzkol opcjonalny wektor tekstowy z typami szkół, które mają zostać
+#' zwrócone (lub NULL - zwraca informacje o wszystkich szkołach)
 #' @param idOke wartość logiczna (domyślnie FALSE) - czy dołączać kody OKE szkół?
-#' @param daneAdresowe wartość logiczna (domyślnie FALSE) - czy dołączać nazwę i dane
-#' adresowe?
+#' @param daneAdresowe wartość logiczna (domyślnie FALSE) - czy dołączać nazwę
+#' i dane adresowe?
 #' @return data frame
 #' @import dplyr
 #' @import ZPD
