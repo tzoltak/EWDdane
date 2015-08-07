@@ -33,42 +33,42 @@
 #' pobierz_parametry_skalowania(nazwa_skali, id_testu)
 #' pobierz_parametry_skalowania(nazwa_skali, id_testu, parametryzacja = "mplus")
 #' }
+#' @importFrom RODBC odbcConnect odbcClose
 #' @import RODBCext
-#' @import RODBC
 #' @export
 pobierz_parametry_skalowania = function(nazwa_skali=NULL, id_testu=NULL,
                                          opis_skalowania='.*', idSkalowania=NULL,
                                          zrodloDanychODBC='EWD', parametryzacja="baza") {
-  if(!parametryzacja %in% c("baza", "mplus")){
+  if (!parametryzacja %in% c("baza", "mplus")) {
     stop("Niepoprawna wartość parametru 'parametryzacja': ",parametryzacja)
   }
-  if(is.null(nazwa_skali) & is.null(id_testu)  ){
+  if (is.null(nazwa_skali) & is.null(id_testu)) {
     stop("Nazwa skali oraz id testu nie mogą mieć jednocześnie wartości null.")
   }
-  if(  !is.null(nazwa_skali)  & !is.character(nazwa_skali) ){
+  if (!is.null(nazwa_skali)  & !is.character(nazwa_skali)) {
     stop("Nazwa skali nie jest ciągiem znaków.")
   }
-  if( !is.null(id_testu)  & !is.numeric(id_testu) ){
+  if (!is.null(id_testu)  & !is.numeric(id_testu)) {
     stop("Id testu nie jest liczbą.")
   }
-  if( !is.character(opis_skalowania) ){
+  if (!is.character(opis_skalowania)) {
     stop("Opis_skalowania nie jest ciągiem znaków.")
   }
-  if( !is.character(zrodloDanychODBC) ){
+  if (!is.character(zrodloDanychODBC)) {
     stop("ZrodloDanychODBC nie jest ciągiem znaków.")
   }
 
   where = "where"
-  if( !is.null(nazwa_skali) ){
+  if ( !is.null(nazwa_skali) ) {
     where = paste0(where, " nazwa = ? " )
 
-    if(!is.null(id_testu)){
+    if (!is.null(id_testu)) {
       where = paste0(where, " and id_testu = ? ")
     }
   } else {
     where = paste0(where, " id_testu = ? ")
   }
-  if(is.null(idSkalowania)){
+  if (is.null(idSkalowania)) {
     where = paste0(where, " and SA.opis ~* ? ")
   } else{
     where = paste0(where, " and SA.skalowanie = ? ")
@@ -95,17 +95,17 @@ pobierz_parametry_skalowania = function(nazwa_skali=NULL, id_testu=NULL,
                       S.*
                       ", joiny , where)
 
-  if(is.null(idSkalowania)){
+  if (is.null(idSkalowania)) {
     parSkalowania = opis_skalowania
-  } else{
+  } else {
     parSkalowania = idSkalowania
   }
 
-  if( !is.null(nazwa_skali) & !is.null(id_testu) ){
+  if (!is.null(nazwa_skali) & !is.null(id_testu)) {
     sqlFrame = data.frame(nazwa_skali, id_testu, parSkalowania)
-  } else if( !is.null(nazwa_skali) & is.null(id_testu) ){
+  } else if (!is.null(nazwa_skali) & is.null(id_testu)) {
     sqlFrame = data.frame(nazwa_skali, parSkalowania)
-  } else  {
+  } else {
     sqlFrame = data.frame(id_testu, parSkalowania)
   }
 
@@ -116,22 +116,22 @@ pobierz_parametry_skalowania = function(nazwa_skali=NULL, id_testu=NULL,
     skale         = sqlExecute(P, zapytanie3, data = sqlFrame, fetch = TRUE, stringsAsFactors = FALSE)
     odbcClose(P)
   },
-  error=function(e) {
+  error = function(e) {
     odbcClose(P)
     stop(e)
   }
   )
 
-  if(nrow(tablicaDanych)==0){
+  if (nrow(tablicaDanych) == 0) {
     warning("Nie znalezniono danych spełniających kryteria wyszukiwania")
     return(NULL)
   }
 
-  for(ind in 1:(ncol(tablicaDanych))){
+  for (ind in 1:(ncol(tablicaDanych))) {
     omitTmp = na.omit(as.character(tablicaDanych[,ind]))
     numbersTmp = suppressWarnings(as.numeric(omitTmp))
-    if( length(numbersTmp)!=0 && all((!is.na(numbersTmp)))){
-      if(is.null(attr(omitTmp,"na.action"))){
+    if (length(numbersTmp) != 0 && all((!is.na(numbersTmp)))) {
+      if (is.null(attr(omitTmp,"na.action"))) {
         tablicaDanych[,ind] = numbersTmp
       }else{
         tablicaDanych[,ind] = NA
@@ -142,30 +142,30 @@ pobierz_parametry_skalowania = function(nazwa_skali=NULL, id_testu=NULL,
 
   ret = list()
 
-  for(ind in 1:nrow(opisSkalowan)){
+  for (ind in 1:nrow(opisSkalowan)) {
     ret[[ind]] = tablicaDanych[
       tablicaDanych[, "skalowanie"] == opisSkalowan[,ind],
       colnames(tablicaDanych) != "skalowanie"
       ]
 
-    for(k in 2:ncol(opisSkalowan)){
+    for (k in 2:ncol(opisSkalowan)) {
       attr(ret[[ind]], colnames(opisSkalowan)[k]) = as.character(opisSkalowan[ind, k])
     }
   }
 
-  if( nrow(skale) > 1 ){
+  if ( nrow(skale) > 1 ) {
     cat("Skale spełniające kryteria wyszukiwania: \n")
     print(skale)
 
     stop("Więcej niż jedna skala przypisana do wyników.")
   }
 
-  for( k in 1:ncol(skale) ){
+  for (k in 1:ncol(skale)) {
     attr(ret, colnames(skale)[k]) = as.character(skale[1, k])
   }
 
-  if( parametryzacja=="mplus" ){
-    for(ilist in seq_along(ret)){
+  if (parametryzacja == "mplus") {
+    for(ilist in seq_along(ret)) {
       ret[[ilist]] = zmien_na_mplus(ret[[ilist]])
     }
   }
@@ -185,17 +185,17 @@ zmien_na_mplus = function(tablicaDanych) {
   opis = attributes(tablicaDanych)$opis
   estymacja = attributes(tablicaDanych)$estymacja
 
-  grm = tablicaDanych[tablicaDanych$model=="GRM", ]
-  dwaPL = tablicaDanych[tablicaDanych$model=="2PL",]
+  grm = tablicaDanych[tablicaDanych$model == "GRM", ]
+  dwaPL = tablicaDanych[tablicaDanych$model == "2PL",]
 
-  if(nrow(grm)==0 && nrow(dwaPL)==0 ){
+  if(nrow(grm) == 0 && nrow(dwaPL) == 0 ){
     stop("Brak parametrów modeli 2PL i GRM.")
   }
 
   # 2PL
 
-  if( length ( errInds <- which( ! dwaPL$parametr %in% c("a","trudność")  ) ) != 0 ){
-    stop("Niepoprawne rodzaje parametrów dla modelu 2PL: \n", paste(errInds, collapse="\n"))
+  if (length ( errInds <- which( ! dwaPL$parametr %in% c("a","trudność")  ) ) != 0 ) {
+    stop("Niepoprawne rodzaje parametrów dla modelu 2PL: \n", paste(errInds, collapse = "\n"))
   }
 
   kryt = dwaPL$id_kryterium

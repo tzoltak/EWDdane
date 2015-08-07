@@ -13,13 +13,13 @@
 #' @param x data frame zawierający dane
 #' @return data frame
 formaty_zmiennych_baza_na_ewd = function(x) {
-  for (i in grep("^dla_doroslych_|^specjalna_|^przyszpitalna_", names(x))) {
-    x[, i] = factor(x[, i], levels=0:1, labels=c("nie", "tak"))
+  for (i in grep("^(dla_doroslych|specjalna|przyszpitalna|publiczna)_", names(x))) {
+    x[, i] = factor(as.numeric(x[[i]]), levels = 0:1, labels = c("nie", "tak"))
   }
-  for (i in grep("^dysleksja_|^laureat_", names(x))) {
-    x[, i] = factor(x[, i], levels=0:1, labels=c("nie", "tak"))
+  for (i in grep("^(dysl|dysleksja|laur|laureat)_", names(x))) {
+    x[, i] = factor(as.numeric(x[[i]]), levels = 0:1, labels = c("nie", "tak"))
   }
-  x$plec=factor(x$plec, levels=c("m", "k"), labels=c("mężczyzna", "kobieta"))
+  x$plec = factor(x$plec, levels = c("m", "k"), labels = c("mężczyzna", "kobieta"))
   if (all(c("rok_g", "rok_s") %in% names(x))) {
     x = cbind(x, wydl = factor(x$rok_g - 3 - x$rok_s))
   } else if (all(c("rok_m", "rok_g") %in% names(x))) {

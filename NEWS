@@ -1,9 +1,14 @@
 --------------------
-Zmiany w EWDdane ? (?)
+Zmiany w EWDdane 0.6.0 (2015-08-07)
 
 Nowe funkcje:
   - pobierz_baze_szkol() - zamknięcie do pakietu procesu aktualizacji bazy szkół;
   - weryfikuj_baze_szkol() - j.w.;
+  - przygotuj_dane_surowe_do_ewd() - pozwala przygotowywać pliki z wynikami
+    surowymi i znormalizowanymi ekwikwantylowo, używane do wyliczania modeli EWD;
+    - wczytaj_dane_kontekstowe(), wczytaj_wyniki_egzaminu() - nieeksportowane
+      funkcje służące do wczytywania odpowiednich danych z dysku i łączenia
+      ich w postać szeroką;
 
 Usunięte funkcje:
   - pobierz_dane_wyskalowane();

@@ -146,14 +146,13 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   )
 
   # konwersja informacji o byciu laureatem do postaci szerokiej
-  laureaci = uczniowieTesty %>%
+  uczniowieTesty = uczniowieTesty %>%
     mutate_(prefiks = ~paste0('laur_', prefiks)) %>%
     reshape2::dcast(id_obserwacji + rok ~ prefiks, value.var = 'laureat')
 
   # złączenie i usunięcie zbędnych danych
+  dane = suppressMessages(inner_join(dane, uczniowieTesty))
   rm(uczniowieTesty)
-  dane = suppressMessages(inner_join(dane, laureaci))
-  rm(laureaci)
 
   # dołączenie informacji o szkołach
   szkoly = pobierz_szkoly(src) %>%
@@ -204,11 +203,21 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   # wygenerowanie zmiennej określającej populację
   dane = dane %>%
     mutate_(
-      populacja_we = ~specjalna %in% FALSE & dla_doroslych %in% FALSE &
-        przyszpitalna %in% FALSE & ostatnie %in% TRUE,
-      populacja_wy = ~specjalna %in% FALSE & dla_doroslych %in% FALSE &
-        przyszpitalna %in% FALSE & pierwsze %in% TRUE
+      populacja_we = ~ostatnie %in% TRUE & id_szkoly > 0,
+      populacja_wy = ~pierwsze %in% TRUE & id_szkoly > 0
     )
+  if (rodzajEgzaminu == "sprawdzian") {
+    dane = dane %>%
+      mutate_(
+        pomin_szkole = ~!(dla_doroslych %in% FALSE)
+      )
+  } else {
+    dane = dane %>%
+      mutate_(
+        pomin_szkole = ~!(specjalna %in% FALSE & dla_doroslych %in% FALSE &
+                            przyszpitalna %in% FALSE)
+      )
+  }
   if (daneOsobowe) {
     if (rodzajEgzaminu == "sprawdzian") {
       wiekWzor = 153.5
@@ -237,6 +246,18 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     warning("Ze względu na zbyt niski poziom uprawnień dostępu do bazy ",
             "niemożliwe było wykorzystanie informacji o wieku i kodzie klasy ",
             "przy tworzeniu zmiennych 'populacja_we' i 'populacja_wy'.")
+  }
+
+  # obsługa bycia laureatem w egzaminie gimnazjalnym
+  if (rodzajEgzaminu == "egzamin gimnazjalny") {
+    if (all(c("laur_gh", "laur_gh_h", "laur_gh_p") %in% names(dane))) {
+      dane = mutate_(dane, laur_gh = ~ifelse(rok < 2012, laur_gh,
+                                             laur_gh_h & laur_gh_p))
+    }
+    if (all(c("laur_gm", "laur_gm_m", "laur_gm_p") %in% names(dane))) {
+      dane = mutate_(dane, laur_gm = ~ifelse(rok < 2012, laur_gm,
+                                             laur_gm_m & laur_gm_p))
+    }
   }
 
   return(dane)
