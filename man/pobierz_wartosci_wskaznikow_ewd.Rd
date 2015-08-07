@@ -2,7 +2,7 @@
 % Please edit documentation in R/pobierz_wartosci_wskaznikow_ewd.r
 \name{pobierz_wartosci_wskaznikow_ewd}
 \alias{pobierz_wartosci_wskaznikow_ewd}
-\title{Pobieranie wartosci wskaznikow EWD.}
+\title{Pobieranie wartosci wskaznikow EWD}
 \usage{
 pobierz_wartosci_wskaznikow_ewd(typSzkoly, lata, zapis = NULL, jst = NULL,
   idOke = FALSE, daneAdresowe = TRUE, opisoweNazwy = TRUE,

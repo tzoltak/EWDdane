@@ -1,4 +1,4 @@
-#' @title Pobieranie wartosci wskaznikow EWD.
+#' @title Pobieranie wartosci wskaznikow EWD
 #' @description
 #' Funkcja pobiera z bazy wartości wskaźników EWD. Domyślne wartości argumentów zostały
 #' dobrane pod kątem wydawania wskazńików na zewnątrz.
@@ -75,6 +75,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   # pobieranie z bazy
   if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
   src = polacz()
+  on.exit(rozlacz(src))
   wskazniki = pobierz_wskazniki(src)
   wskazniki = filter_(wskazniki, ~ rodzaj_wsk == "ewd", ~ typ_szkoly == typSzkoly,
                       ~ rok_do %in% lata)
@@ -105,7 +106,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(lUczniow) = gsub(" ", "_", names(lUczniow), fixed = TRUE)
   }
   message("Pobieranie informacji o wartościach wskaźników.")
-  wskazniki = as.data.frame(collect(wskazniki))
+  wskazniki = collect(wskazniki)
   # dalsze przekształcanie
   message("Wyliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))

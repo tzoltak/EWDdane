@@ -1,14 +1,14 @@
-#' @title Pobieranie danych o szkołach.
+#' @title Pobieranie danych o szkolach
 #' @description
-#' Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie, adresowe
-#' i o lokalizacji.
-#' @param lata wektor liczb całkowitych - lata, których mają dotyczyć dane (dla każdej
-#' szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)
-#' @param typySzkol opcjonalny wektor tekstowy z typami szkół, które mają zostać zwrócone
-#' (lub NULL - zwraca informacje o wszystkich szkołach)
+#' Funkcja pobiera z bazy dane o szkołach - o ich typie i specyfice, nazwie,
+#' adresowe i o lokalizacji.
+#' @param lata wektor liczb całkowitych - lata, których mają dotyczyć dane (dla
+#' każdej szkoły zwrócone zostaną tylko najświeższe dane w ramach tego okresu)
+#' @param typySzkol opcjonalny wektor tekstowy z typami szkół, które mają zostać
+#' zwrócone (lub NULL - zwraca informacje o wszystkich szkołach)
 #' @param idOke wartość logiczna (domyślnie FALSE) - czy dołączać kody OKE szkół?
-#' @param daneAdresowe wartość logiczna (domyślnie FALSE) - czy dołączać nazwę i dane
-#' adresowe?
+#' @param daneAdresowe wartość logiczna (domyślnie FALSE) - czy dołączać nazwę
+#' i dane adresowe?
 #' @return data frame
 #' @import dplyr
 #' @import ZPD
@@ -25,7 +25,9 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
 
   if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 3 wiersze dalej zadziała
   if (length(typySzkol) == 1) typySzkol = rep(typySzkol, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
-  szkoly = pobierz_szkoly(polacz())
+  src = polacz()
+  on.exit(rozlacz(src))
+  szkoly = pobierz_szkoly(src)
   szkoly = filter_(szkoly, ~ rok %in% lata)
   szkoly = select_(szkoly, ~ -wojewodztwo_szkoly, ~ -powiat_szkoly, ~ -gmina_szkoly)
   if (!is.null(typySzkol)) szkoly = filter_(szkoly, ~ typ_szkoly %in% typySzkol)
