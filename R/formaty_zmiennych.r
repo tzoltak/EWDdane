@@ -13,10 +13,12 @@
 #' @param x data frame zawierający dane
 #' @return data frame
 formaty_zmiennych_baza_na_ewd = function(x) {
+  names(x) = sub("laur_", "laureat_", names(x))
+  names(x) = sub("dysl_", "dysleksja_", names(x))
   for (i in grep("^(dla_doroslych|specjalna|przyszpitalna|publiczna)_", names(x))) {
     x[, i] = factor(as.numeric(x[[i]]), levels = 0:1, labels = c("nie", "tak"))
   }
-  for (i in grep("^(dysl|dysleksja|laur|laureat)_", names(x))) {
+  for (i in grep("^(dysleksja|laureat)_", names(x))) {
     x[, i] = factor(as.numeric(x[[i]]), levels = 0:1, labels = c("nie", "tak"))
   }
   x$plec = factor(x$plec, levels = c("m", "k"), labels = c("mężczyzna", "kobieta"))

@@ -1,6 +1,7 @@
 #' @title Przygotowywanie danych do wyliczania modeli EWD
 #' @description Funkcja przygotowuje pliki z danymi do wyliczania modeli EWD,
-#' wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo.
+#' wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo
+#' i zapisuje go w aktywnym katalogu.
 #' @details Funkcja działa w oparciu o dane dostępne lokalnie, ściągnięte
 #' wcześniej przy pomocy funkcji \code{\link{pobierz_wyniki_surowe}}. Normy
 #' ekwikwantylowe pobierane są z bazy, z użyciem funkcji
@@ -49,6 +50,7 @@ przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
   # wczytywanie danych kontekstowych
   message("Wczytywanie danych kontekstowych.")
   setwd(katalogZDanymi)
+  katalogZDanymi = getwd()
   plikiZDanymi = c(paste0(egzaminNaWejsciu, "-kontekstowe.RData"),
                    paste0(egzaminNaWyjsciu, "-kontekstowe.RData"))
   if (any(!file.exists(plikiZDanymi))) {
@@ -116,6 +118,8 @@ przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
     attributes(dane)$egzaminNaWejsciu = egzaminNaWejsciu
     attributes(dane)$lata = i:(i - liczbaRocznikow + 1)
     attributes(dane)$wydluzenie = wydluzenie
+    attributes(dane)$normy = c(attributes(daneNaWyjsciu)$normy,
+                               attributes(daneNaWejsciu)$normy)
     setwd(katalogRoboczy)
     save(dane, file = plikZapis)
     plikiZapis = c(plikiZapis, plikZapis)
@@ -186,6 +190,7 @@ wczytaj_wyniki_egzaminu = function(nazwyPlikow, daneKontekstowe = NULL) {
     skrotEgzaminu = ""
   }
   skaleTesty = list()
+  normy = list()
   for (i in nazwyPlikow) {
     obiekty = load(i)
     # obsługa części egzaminu gimnazjalnego
@@ -229,6 +234,11 @@ wczytaj_wyniki_egzaminu = function(nazwyPlikow, daneKontekstowe = NULL) {
         if (!is.null(idSkali) & !is.null(skalowanie) & grupa == '') {
           temp = normalizuj_ekwikwantylowo(temp, src = polacz(), idSkali = idSkali,
                                            skalowanie = skalowanie, grupa = grupa)
+          normy[[length(normy) + 1]] = pobierz_normy(polacz()) %>%
+            filter_(~id_skali == idSkali, ~skalowanie == skalowanie, ~grupa == grupa) %>%
+            as.data.frame() %>%
+            mutate_(rok = ~temp$rok[1], konstrukt = ~konstrukt)
+          names(normy)[length(normy)] = paste0(konstrukt, "_", temp$rok[1])
         } else if (is.null(idSkali)) {
           warning("Nie przypisano normalizacji ekwikwantylowej wynikom konstruktu '",
                   konstrukt, "' z ", temp$rok[1], " roku. ",
@@ -269,5 +279,6 @@ wczytaj_wyniki_egzaminu = function(nazwyPlikow, daneKontekstowe = NULL) {
     dane = suppressMessages(inner_join(daneKontekstowe, dane))
   }
   attributes(dane)$skaleTesty = skaleTesty
+  attributes(dane)$normy = normy
   return(dane)
 }
