@@ -30,7 +30,8 @@ wektor z nazwami zapisanych plików (niewidocznie)
 }
 \description{
 Funkcja przygotowuje pliki z danymi do wyliczania modeli EWD,
-wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo.
+wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo
+i zapisuje go w aktywnym katalogu.
 }
 \details{
 Funkcja działa w oparciu o dane dostępne lokalnie, ściągnięte
