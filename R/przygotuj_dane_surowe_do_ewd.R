@@ -138,6 +138,7 @@ przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
 #' @param lata opcjonalnie wektor liczb całkowitych - lata egzaminu, do jakich
 #' ma zostać zawężony zwracany zestaw danych
 #' @return data table
+#' @import dplyr
 wczytaj_dane_kontekstowe = function(nazwaPliku, czyWyjscie = TRUE, lata = NULL) {
   stopifnot(is.character(nazwaPliku), length(nazwaPliku) == 1,
             all(czyWyjscie) %in% c(TRUE, FALSE), length(czyWyjscie) == 1,
@@ -155,16 +156,19 @@ wczytaj_dane_kontekstowe = function(nazwaPliku, czyWyjscie = TRUE, lata = NULL) 
   }
   if (czyWyjscie) {
     daneKontekstowe = subset(daneKontekstowe, get("populacja_wy") %in% TRUE)
+    daneKontekstowe = group_by_(daneKontekstowe, ~id_szkoly) %>%
+      mutate_(lu_wszyscy = ~n())
     maska = paste0("^(plec|id|rok|laur|dysleksja|klasa|publiczna|specjalna)|",
                    "^(typ_szkoly|przyszpitalna|dla_doroslych|artystyczna|wiek)|",
-                   "^pomin_szkole")
+                   "^(pomin_szkole|lu_)")
   } else {
     daneKontekstowe = subset(daneKontekstowe, get("populacja_we") %in% TRUE)
     maska = paste0("^(id|rok|laur|dysleksja)")
   }
   daneKontekstowe = daneKontekstowe[, grep(maska, names(daneKontekstowe))]
 
-  maska = !grepl("^(id_obserwacji|plec|pomin_szkole)$|^laur_", names(daneKontekstowe))
+  maska = !grepl("^(id_obserwacji|plec|pomin_szkole|lu_wszyscy)$|^laur_",
+                 names(daneKontekstowe))
   names(daneKontekstowe)[maska] = paste0(names(daneKontekstowe)[maska],
                                          skrotEgzaminu)
   return(daneKontekstowe)

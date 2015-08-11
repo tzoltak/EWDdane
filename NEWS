@@ -1,9 +1,12 @@
 --------------------
-Zmiany w EWDdane 0.6.1 (2015-08-10)
+Zmiany w EWDdane 0.6.1 (2015-08-11)
 
 Nowe funkcjonalności:
-  - przygotuj_dane_surowe_do_ewd() zapisuje tablice z normami jako atrybuty
-    tworzonych obiektów;
+  - przygotuj_dane_surowe_do_ewd():
+    - zapisuje tablice z normami jako atrybuty tworzonych obiektów;
+    - tworzy zmienną 'lu_wszyscy', zdającą sprawę z liczby uczniów szkoły
+      ("na wyjściu") po dokonaniu wykluczeń indywidualnych, ale przed
+      przyłączeniem wyników "na wejściu";
   - formaty_zmiennych_baza_na_ewd() zamienia w nazwach zmiennych "laur_" na
     "laureat_", co jest zgodne z konwencją zapisu z 2014 r. i bardziej logiczne
     wobec faktu, że "dysleksja" jest opisywana pełnym wyrazem, a nie skrótem;
