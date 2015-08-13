@@ -1,4 +1,4 @@
-#' @title Pobieranie surowych wyników egzaminu
+#' @title Pobieranie surowych wynikow egzaminu
 #' @description
 #' Funkcja pobiera surowe wyniki egzaminu i zapisuje je na dysku w postaci
 #' plików RData.

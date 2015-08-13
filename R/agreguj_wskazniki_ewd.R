@@ -1,4 +1,4 @@
-#' @title Agregowanie wskaźników EWD
+#' @title Agregowanie wskaznikow EWD
 #' @description
 #' Funkcja agreguje wskaźniki EWD.
 #' @param dane ramka danych zwracana przez funkcję \link{pobierz_wartosci_wskaznikow_ewd}.
@@ -81,7 +81,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
   }
   nazwaGrupowania = names(grupowanie)
   names(dane) = enc2native(names(dane))  # jako że select() nie radzi sobie z UTFem
-  dane = cbind(dane %>% select_(~ -teryt_szkoly), grupowanie)
+  dane = cbind(dane %>% select_(~-teryt_szkoly), grupowanie)
 
   dane = dane[, grepl("^(id_szkoly|rok_do)$|^teryt|^(ewd|lu_ewd|wyswietlaj|srednia)[_ ]",
                       tolower(names(dane)))]
@@ -103,7 +103,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
 
   # Gdy tylkoWyswietlane to TRUE, odfiltruj niewyświetlane.
   if (tylkoWyswietlane %in% TRUE & "wyswietlaj" %in% names(dane)) {
-    dane = dane %>% filter_(~ wyswietlaj == 1)
+    dane = dane %>% filter_(~wyswietlaj == 1)
   } else if (tylkoWyswietlane %in% TRUE) {
     message("W danych brak informacji o tym, dla których szkół wyświetlane są elipsy. ",
             "Aby mieć pewność, że szkoły, dla których elipsy nie są wyświetlane, ",
@@ -126,15 +126,15 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
   if (!("wyswietlaj" %in% names(dane))) dane = mutate(dane, wyswietlaj = NA)
 
   dane = dane %>%
-    summarise_(.dots = list(ewd = ~ weighted.mean(ewd, lu_ewd, na.rm = TRUE),
-                            srednia = ~ weighted.mean(srednia, lu_ewd, na.rm = TRUE),
-                            lu_ewd = ~ sum(lu_ewd, na.rm = TRUE),
-                            wyswietlaj = ~ any(wyswietlaj == 1) ))
+    summarise_(.dots = list(ewd = ~weighted.mean(ewd, lu_ewd, na.rm = TRUE),
+                            srednia = ~weighted.mean(srednia, lu_ewd, na.rm = TRUE),
+                            lu_ewd = ~sum(lu_ewd, na.rm = TRUE),
+                            wyswietlaj = ~any(wyswietlaj == 1) ))
   if (is.na(tylkoWyswietlane) & "wyswietlaj" %in% names(dane)) {
     dane$ewd[!dane$wyswietlaj] = NA
     dane$srednia[!dane$wyswietlaj] = NA
   }
-  dane = select_(dane, ~ -wyswietlaj) %>%
+  dane = select_(dane, ~-wyswietlaj) %>%
     melt(c(rok_do, nazwaGrupowania, "wskaznik")) %>%
     dcast(as.formula(paste0(paste0(c(rok_do, nazwaGrupowania), collapse = "+"),
                             " ~ wskaznik + variable")))
@@ -146,7 +146,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
 
   return(as.data.frame(dane))
 }
-#' @title Przygotowanie funkcji grupującej w JST na podstawie TERYTu
+#' @title Przygotowanie funkcji grupujacej w JST na podstawie TERYTu
 #' @description
 #' Funkcja przygotowuje funkcję grupującą. Więcej szczegółów
 #' w \link{agreguj_wskazniki_ewd}
