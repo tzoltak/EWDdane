@@ -2,7 +2,7 @@
 % Please edit documentation in R/agreguj_wskazniki_ewd.R
 \name{przygotuj_funkcje_grupujaca_teryt}
 \alias{przygotuj_funkcje_grupujaca_teryt}
-\title{Przygotowanie funkcji grupującej w JST na podstawie TERYTu}
+\title{Przygotowanie funkcji grupujacej w JST na podstawie TERYTu}
 \usage{
 przygotuj_funkcje_grupujaca_teryt(poziom)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/agreguj_wskazniki_ewd.R
 \name{agreguj_wskazniki_ewd}
 \alias{agreguj_wskazniki_ewd}
-\title{Agregowanie wskaźników EWD}
+\title{Agregowanie wskaznikow EWD}
 \usage{
 agreguj_wskazniki_ewd(dane, poziom = NULL, grupujPoLatach = TRUE,
   funkcjaGrupujaca = NULL, tylkoWyswietlane = NA, paramGrupujaca = list())

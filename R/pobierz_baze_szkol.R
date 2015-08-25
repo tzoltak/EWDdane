@@ -12,9 +12,13 @@
 #' @export
 pobierz_baze_szkol = function(typySzkol, zapis = NULL) {
   stopifnot(is.character(typySzkol),
-            all(typySzkol %in% c("gimn.", "LO", "LP", "T")),
+            all(typySzkol %in% c("SP", "gimn.", "LO", "LP", "T")),
             is.character(zapis) | is.null(zapis)
   )
+  if (any(typySzkol %in% "SP")) {
+    warning("Informacje o SP dotyczące bycia szkołą publiczną, dla dorosłych, specjalną i przyszpitalną mogą być mało wiarygodne.",
+            immediate. = TRUE)
+  }
   if (!is.null(zapis)) {
     stopifnot(length(zapis) == 1)
     if (!grepl("[.](csv|txt|dat)$", zapis)) {
