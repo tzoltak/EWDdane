@@ -2,7 +2,7 @@
 % Please edit documentation in R/pobierz_wyniki_surowe.R
 \name{pobierz_wyniki_surowe}
 \alias{pobierz_wyniki_surowe}
-\title{Pobieranie surowych wyników egzaminu}
+\title{Pobieranie surowych wynikow egzaminu}
 \usage{
 pobierz_wyniki_surowe(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   daneKontekstowe = TRUE, src = NULL)
