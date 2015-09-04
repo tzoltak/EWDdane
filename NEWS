@@ -1,4 +1,13 @@
 --------------------
+Zmiany w EWDdane 0.6.3 (2015-09-??)
+
+Nowe funkcjonalności:
+  - pobierz_parametry_skalowania() umożliwa wygodne pobieranie parametrów
+    skalowań (lub dowiedzenie się, że ich w bazie nie ma), w tym również
+    w formacie zdatnym do zastosowania w skalowaniu przy pomocy funkcji skaluk()
+    z pakietu EWDskalowanie;
+
+--------------------
 Zmiany w EWDdane 0.6.2 (2015-08-25)
 
 Nowe funkcjonalności:

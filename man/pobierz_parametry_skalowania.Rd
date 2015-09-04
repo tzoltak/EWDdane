@@ -4,31 +4,26 @@
 \alias{pobierz_parametry_skalowania}
 \title{Pobieranie parametrow skalowan}
 \usage{
-pobierz_parametry_skalowania(nazwa_skali = NULL, id_testu = NULL,
-  opis_skalowania = ".*", idSkalowania = NULL, zrodloDanychODBC = "EWD",
+pobierz_parametry_skalowania(skala, skalowanie = NULL, doPrezentacji = NA,
   parametryzacja = "baza")
 }
 \arguments{
-\item{nazwa_skali}{nazwa skali. Kiedy nazwa skali przymuje wartość NULL nie
-jest brana pod uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
+\item{skala}{id_skali (liczba naturalna) lub ciąg znaków z wyrażeniem
+regularnym, do którego ma pasować opis skali}
 
-\item{id_testu}{id testu.Kiedy id testu przymuje wartość NULL nie jest brana
-pod uwagę w wyszukiwaniu. Wartość domyślna to NULL.}
+\item{skalowanie}{opcjonalnie numer skalowania (liczba naturalna) lub ciąg
+znaków z wyrażeniem regularnym, do którego ma pasować opis skalowania}
 
-\item{opis_skalowania}{wyrażenie regularne określające opis skalowania.
-Domyślna wartość to '\%'.}
-
-\item{idSkalowania}{numer skalowania, domyślnie ustawiony na NULL. Gdy
-argument nie ma wartości NULL to parametr \code{opis_skalowania} jest
-ignorowany.}
-
-\item{zrodloDanychODBC}{string określający źródło danych.}
+\item{doPrezentacji}{wartość logiczna - czy zwracać skale/skalowania
+oznaczone jako do prezentacji (\code{TRUE} - tylko oznaczone jako do
+prezentacji, \code{FALSE} - tylko oznaczone jako nie do prezentacji,
+\code{NA} - wszystkie, bez względu na to, czy są do prezentacji, czy nie)}
 
 \item{parametryzacja}{parametr określający format zwracanego wyniku. Domyślna
 wartość to 'baza'. Inna możliwa wartość to 'mplus'.}
 }
 \value{
-W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką,
+W przypadku użycia parametryzacji 'baza', funkcja zwraca listę taką,
 że:
 \itemize{
    \item{każdy element listy opisuje parametry innego skalowania;}
@@ -37,20 +32,12 @@ W przyopadku użycia parametryzacji 'baza', funkcja zwraca listę taką,
    \item{zwracana lista ma przypisane jako atrybuty wartości wszystkich kolumn
          z tablicy 'skale';}
 }
-W przyopadku użycia parametryzacji 'mplus' funkcja zwraca parametry
+W przypadku użycia parametryzacji 'mplus' funkcja zwraca parametry
 skalowania w formie ramki danych, która jest w postaci zwracanej przez
 funkcję skaluj().
 }
 \description{
 Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu
 oraz których opis skalowań spełnia podane wyrażenie regularne.
-}
-\examples{
-\dontrun{
-id_testu = 1128
-nazwa_skali = "ktt;1128"
-pobierz_parametry_skalowania(nazwa_skali, id_testu)
-pobierz_parametry_skalowania(nazwa_skali, id_testu, parametryzacja = "mplus")
-}
 }
 
