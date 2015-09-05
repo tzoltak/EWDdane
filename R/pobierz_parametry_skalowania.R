@@ -12,18 +12,18 @@
 #' \code{NA} - wszystkie, bez względu na to, czy są do prezentacji, czy nie)
 #' @param parametryzacja parametr określający format zwracanego wyniku. Domyślna
 #' wartość to 'baza'. Inna możliwa wartość to 'mplus'.
-#' @return W przypadku użycia parametryzacji 'baza', funkcja zwraca listę taką,
-#' że:
+#' @return data frame (data table) o kolumnach:
 #' \itemize{
-#'    \item{każdy element listy opisuje parametry innego skalowania;}
-#'    \item{każdy element listy ma też przypisane jako atrybuty wartości kolumn:
-#'          'skalowanie', 'opis', 'estymacja';}
-#'    \item{zwracana lista ma przypisane jako atrybuty wartości wszystkich kolumn
-#'          z tablicy 'skale';}
+#'    \item{id_skali;}
+#'    \item{rodzaj_egzaminu;}
+#'    \item{opis_skali;}
+#'    \item{skalowaie;}
+#'    \item{parametry.}
 #' }
-#' W przypadku użycia parametryzacji 'mplus' funkcja zwraca parametry
-#' skalowania w formie ramki danych, która jest w postaci zwracanej przez
-#' funkcję skaluj().
+#' Ostatnie kolumna zawiera data frame'y z wartościami parametrów skalowań.
+#' W zależności od wartości argumentu \code{parametryzacja} albo w formacie
+#' zwracanym przez funkcję \code{\link[ZPD]{pobierz_parametry}}, albo w formacie
+#' wykorzystywanym przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
 #' @import ZPD
 #' @export
 pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
@@ -86,7 +86,8 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 
   # pobieranie parametrów
   skaleZeSkalowaniem = filter_(skale, ~wybrane_skalowanie) %>%
-    select_(~id_skali, ~skalowanie, ~opis_skali, ~max_skalowanie) %>%
+    select_(~id_skali, ~rodzaj_egzaminu, ~skalowanie, ~opis_skali,
+            ~max_skalowanie) %>%
     distinct()
   parametry = suppressMessages(
     pobierz_parametry(polacz()) %>%
@@ -95,9 +96,12 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   )
   if (ncol(parametry) == 0) {
     # jeśli w wyniku semi_joina wypadają wszystkie wiersze, to wyparowują też kolumny
-    parametry = matrix(nrow = 0, ncol = 2,
-                       dimnames = list(NULL, c("id_skali", "skalowanie"))) %>%
+    parametry = matrix(nrow = 0, ncol = 4,
+                       dimnames = list(NULL, c("id_skali", "rodzaj_egzaminu",
+                                               "opis_skali", "skalowanie"))) %>%
       as.data.frame()
+    mode(parametry$rodzaj_egzaminu) = "character"
+    mode(parametry$opis_skali) = "character"
   }
 
   skaleZeSkalowaniem = suppressMessages(
@@ -114,7 +118,8 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   }
 
   # przekształcanie parametrów
-  parametry = group_by_(parametry, ~id_skali, ~skalowanie, ~opis_skali) %>%
+  parametry = group_by_(parametry, ~id_skali, ~rodzaj_egzaminu, ~opis_skali,
+                        ~skalowanie) %>%
     summarise_(.dots = setNames(list(~list(data.frame(grupa = grupa,
                                                       kryterium = kryterium,
                                                       #uwagi = uwagi,
@@ -125,15 +130,16 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
                                 "parametry")) %>%
     ungroup()  # jeśli jest tylko jedno skalowanie, to zostało właśnie zgubione grupowanie po nim
   if (parametryzacja == "mplus") {
-    parametry = group_by_(parametry, ~id_skali, ~skalowanie, ~opis_skali) %>%
+    parametry = group_by_(parametry, ~id_skali, ~rodzaj_egzaminu, ~opis_skali,
+                          ~skalowanie) %>%
       do_(.dots = setNames(list(~zmien_na_mplus(.)), "parametry")) %>%
       ungroup()
   }
-  parametry = select_(parametry, ~-opis_skali)
+  #parametry = select_(parametry, ~-rodzaj_egzaminu, ~-opis_skali)
 
   # skale, dla których nic mądrego nie znaleźliśmy (i informowanie o nich użytkownika)
   skale = suppressMessages(
-    group_by_(skale, ~id_skali) %>%
+    group_by_(skale, ~id_skali, ~rodzaj_egzaminu, ~opis_skali) %>%
       summarise_(.dots = setNames(list(~brak_skalowan[1], ~any(wybrane_skalowanie),
                                        ~max_skalowanie[1]),
                                   c("brak_skalowan", "jest_wybrane_skalowanie",
@@ -166,7 +172,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   skale = filter_(skale, ~!jest_wybrane_skalowanie | is.na(ma_parametry)) %>%
     mutate_(.dots = setNames(list(~max_skalowanie + 1, ~NA),
                              c("skalowanie", "parametry"))) %>%
-    select_(~id_skali, ~skalowanie, ~parametry)
+    select_(~id_skali, ~rodzaj_egzaminu, ~opis_skali, ~skalowanie, ~parametry)
 
   # koniec
   return(bind_rows(skale, parametry) %>%

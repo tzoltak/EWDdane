@@ -23,18 +23,18 @@ prezentacji, \code{FALSE} - tylko oznaczone jako nie do prezentacji,
 wartość to 'baza'. Inna możliwa wartość to 'mplus'.}
 }
 \value{
-W przypadku użycia parametryzacji 'baza', funkcja zwraca listę taką,
-że:
+data frame (data table) o kolumnach:
 \itemize{
-   \item{każdy element listy opisuje parametry innego skalowania;}
-   \item{każdy element listy ma też przypisane jako atrybuty wartości kolumn:
-         'skalowanie', 'opis', 'estymacja';}
-   \item{zwracana lista ma przypisane jako atrybuty wartości wszystkich kolumn
-         z tablicy 'skale';}
+   \item{id_skali;}
+   \item{rodzaj_egzaminu;}
+   \item{opis_skali;}
+   \item{skalowaie;}
+   \item{parametry.}
 }
-W przypadku użycia parametryzacji 'mplus' funkcja zwraca parametry
-skalowania w formie ramki danych, która jest w postaci zwracanej przez
-funkcję skaluj().
+Ostatnie kolumna zawiera data frame'y z wartościami parametrów skalowań.
+W zależności od wartości argumentu \code{parametryzacja} albo w formacie
+zwracanym przez funkcję \code{\link[ZPD]{pobierz_parametry}}, albo w formacie
+wykorzystywanym przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
 }
 \description{
 Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu
