@@ -122,7 +122,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
                         ~skalowanie) %>%
     summarise_(.dots = setNames(list(~list(data.frame(grupa = grupa,
                                                       kryterium = kryterium,
-                                                      #uwagi = uwagi,
+                                                      uwagi = uwagi,
                                                       parametr = parametr,
                                                       model = model,
                                                       wartosc = wartosc, bs = bs,
@@ -198,8 +198,8 @@ zmien_na_mplus = function(x) {
     nazwaKonstruktu = "theta"
   }
   x = x$parametry[[1]]
-  #maska = is.na(x$kryterium) & !is.na(x$uwagi)
-  #x$kryterium[maska] = x$uwagi[maska]
+  maska = is.na(x$kryterium) & !is.na(x$uwagi)
+  x$kryterium[maska] = x$uwagi[maska]
   grm   = filter_(x, ~model %in% "GRM")
   dwaPL = filter_(x, ~model %in% "2PL")
   grupowe  = filter_(x, ~!is.na(grupa))
