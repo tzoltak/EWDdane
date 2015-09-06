@@ -119,13 +119,14 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 
   # przekształcanie parametrów
   parametry = group_by_(parametry, ~id_skali, ~rodzaj_egzaminu, ~opis_skali,
-                        ~skalowanie) %>%
-    summarise_(.dots = setNames(list(~list(data.frame(grupa = grupa,
-                                                      kryterium = kryterium,
-                                                      uwagi = uwagi,
-                                                      parametr = parametr,
-                                                      model = model,
-                                                      wartosc = wartosc, bs = bs,
+                        ~skalowanie) %>%  # dramatycznie zawikłana składnia pod dplyr-a
+    summarise_(.dots = setNames(list(~list(data.frame(grupa = grupa[1:n()],
+                                                      kryterium = kryterium[1:n()],
+                                                      uwagi = parametr_uwagi[1:n()],
+                                                      parametr = parametr[1:n()],
+                                                      model = model[1:n()],
+                                                      wartosc = wartosc[1:n()],
+                                                      bs = bs[1:n()],
                                                       stringsAsFactors = FALSE))),
                                 "parametry")) %>%
     ungroup()  # jeśli jest tylko jedno skalowanie, to zostało właśnie zgubione grupowanie po nim
@@ -201,48 +202,48 @@ zmien_na_mplus = function(x) {
   maska = is.na(x$kryterium) & !is.na(x$uwagi)
   x$kryterium[maska] = x$uwagi[maska]
   grm   = filter_(x, ~model %in% "GRM")
-  dwaPL = filter_(x, ~model %in% "2PL")
+  binarne = filter_(x, ~model %in% "2PL")
   grupowe  = filter_(x, ~!is.na(grupa))
 
-  if ((nrow(grm) + nrow(dwaPL) + nrow(grupowe)) !=
+  if ((nrow(grm) + nrow(binarne) + nrow(grupowe)) !=
       nrow(filter_(x, ~parametr != "r EAP"))) {
     stop("Przy konwersji parametrów na format 'mplus' obsługowane są wyłącznie ",
          "zadania 2PL lub SGR oraz ew. średnie i odchylenia standardowe ",
          "konstruktu w ramach grup.")
   }
 
-  # 2PL
-  maska = dwaPL$parametr %in% c("a", "trudność")
+  # zadania binarne
+  maska = binarne$parametr %in% c("a", "trudność")
   if (!all(maska)) {
     stop("Niepoprawne rodzaje parametrów dla modelu 2PL:\n  ",
-         paste(dwaPL$parametr[maska], collapse = "\n - "))
+         paste(binarne$parametr[maska], collapse = "\n - "))
   }
-  dwaPL = list(
-    a = with(filter_(dwaPL, ~parametr == "a"),
-             data.frame(typ = "by",
-                        zmienna1 = nazwaKonstruktu,
+  binarne = list(
+    a = with(filter_(binarne, ~parametr == "a"),
+             data.frame(typ = rep("by", length(wartosc)),
+                        zmienna1 = rep(nazwaKonstruktu, length(wartosc)),
                         zmienna2 = kryterium,
                         wartosc = wartosc,
                         "S.E." = bs,
                         stringsAsFactors = FALSE)),
-    b = with(filter_(dwaPL, ~parametr == "trudność"),
-             data.frame(typ = "threshold",
+    b = with(filter_(binarne, ~parametr == "trudność"),
+             data.frame(typ = rep("threshold", length(wartosc)),
                         zmienna1 = kryterium,
-                        zmienna2 = "1",
+                        zmienna2 = rep("1", length(wartosc)),
                         wartosc = wartosc,
                         "S.E." = bs,
                         stringsAsFactors = FALSE))
   )
-  dwaPL$b = suppressMessages(
-    full_join(dwaPL$b, with(dwaPL$a, data.frame(zmienna1 = zmienna2, a = wartosc,
+  binarne$b = suppressMessages(
+    full_join(binarne$b, with(binarne$a, data.frame(zmienna1 = zmienna2, a = wartosc,
                                                 stringsAsFactors = FALSE)))
   )
-  dwaPL$b = within(dwaPL$b, {
+  binarne$b = within(binarne$b, {
     wartosc = get("wartosc") * get("a")
     S.E. = get("S.E.") * get("a")
   })
-  dwaPL$b = select_(dwaPL$b, ~-a)
-  dwaPL = bind_rows(dwaPL)
+  binarne$b = select_(binarne$b, ~-a)
+  binarne = bind_rows(binarne)
 
   #GRM
   maska = grm$parametr %in% c("a", "trudność", paste0("b", 1:9))
@@ -252,14 +253,14 @@ zmien_na_mplus = function(x) {
   }
   grm = list(
     a = with(filter_(grm, ~parametr == "a"),
-             data.frame(typ = "by",
-                        zmienna1 = nazwaKonstruktu,
+             data.frame(typ = rep("by", length(wartosc)),
+                        zmienna1 = rep(nazwaKonstruktu, length(wartosc)),
                         zmienna2 = kryterium,
                         wartosc = wartosc,
                         "S.E." = bs,
                         stringsAsFactors = FALSE)),
     b = with(filter_(grm, ~substr(parametr, 1, 1) == "b"),
-             data.frame(typ = "threshold",
+             data.frame(typ = rep("threshold", length(wartosc)),
                         zmienna1 = kryterium,
                         zmienna2 = sub("^b([[:digit:]]+)$", "\\1", parametr),
                         wartosc = wartosc,
@@ -303,7 +304,7 @@ zmien_na_mplus = function(x) {
   )
   grupowe$typ
 
-  wynik = bind_rows(dwaPL, grm) %>%
+  wynik = bind_rows(binarne, grm) %>%
     arrange_(~typ, ~zmienna1, ~zmienna2) %>%
     bind_rows(grupowe)
   # r EAP
