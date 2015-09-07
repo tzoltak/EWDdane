@@ -308,7 +308,7 @@ zmien_na_mplus = function(x) {
     arrange_(~typ, ~zmienna1, ~zmienna2) %>%
     bind_rows(grupowe)
   # r EAP
-  rEAP = filter_(x, ~parametr != "r EAP")
+  rEAP = filter_(x, ~parametr == "r EAP")
   if (nrow(rEAP) > 0) {
     attributes(wynik)$"r EAP" = rEAP$wartosc
   }

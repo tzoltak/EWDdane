@@ -4,6 +4,7 @@ Zmiany w EWDdane 0.6.3 (2015-09-06)
 Nowe funkcjonalności:
   - pobierz_parametry_skalowania() przepisana i dopasowana do nowej struktury
     bazy (tak samo nieeksportowana zmien_na_mplus());
+  - pobierz_dane_kontekstowe() wyświetla komunikaty o postępach swoich prac;
 
 --------------------
 Zmiany w EWDdane 0.6.2 (2015-08-25)
