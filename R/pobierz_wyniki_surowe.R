@@ -135,8 +135,6 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   if (daneKontekstowe) {
     message("\nDane o uczniach i szkołach:")
     temp = pobierz_dane_kontekstowe(src, rodzajEgzaminu)
-    class(temp) = append(class(temp), "daneKontekstowe")
-    attributes(temp)$dataPobrania = Sys.time()
     assign(paste0(skrotEgzaminu, "Kontekstowe"), temp)
     rm(temp)
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "-kontekstowe.RData")
