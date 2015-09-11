@@ -170,7 +170,8 @@ wczytaj_wyniki_egzaminu = function(nazwyPlikow, daneKontekstowe = NULL) {
 wczytaj_wyniki_skalowania = function(nazwyPlikow) {
   stopifnot(is.character(nazwyPlikow), length(nazwyPlikow) > 0)
 
-  wyniki = data.frame()
+  oszacowania = data.frame()
+  skale = data.frame()
   for (i in nazwyPlikow) {
     obiekty = load(i)
     for (j in (obiekty)) {
@@ -182,10 +183,14 @@ wczytaj_wyniki_skalowania = function(nazwyPlikow) {
         if (!is.na(rok)) {
           cbind(rok = rok)
         }
-        wyniki = bind_rows(wyniki, temp)
+        oszacowania = bind_rows(oszacowania, temp)
+        temp = lapply(get(j), function(x) {return(x$skalowania)}) %>%
+          bind_rows()
+        skale = bind_rows(skale, temp)
       }
       rm(list = j)
     }
   }
-  return(wyniki)
+  attributes(oszacowania)$skale = skale
+  return(oszacowania)
 }
