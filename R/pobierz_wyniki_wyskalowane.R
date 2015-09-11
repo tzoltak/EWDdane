@@ -32,22 +32,34 @@
 #' zostaną wyniki tylko z lat, dla których pliki jeszcze nie istnieją
 #' @param daneKontekstowe wartość logiczna - czy pobrać również plik z danymi
 #' kontekstowymi (tj. o uczniach i szkołach)?
-#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' @param src opcjonalnie połączenie z bazą danych IBE zwracane przez funkcję
 #' \code{\link[ZPD]{polacz}}; pozwala posłużyć się połączeniem o wyższych niż
 #' domyślne prawach dostępu, co ma znaczenie dla zakresu pobieranych danych
 #' kontekstowych
+#' @param katalogWyskalowane opcjonalnie ciąg znaków - ścieżka do katalogu,
+#' w którym znajdują się pliki .RData z wynikami skalowania, zapisane przez
+#' funkcje \code{\link[EWDskale]{skaluj_spr}},
+#' \code{\link[EWDskale]{skaluj_egz_gimn}} lub
+#' \code{\link[EWDskale]{skaluj_matura}}. Jeśli podany, wyniki wyskalowane
+#' zostaną wczytane z tych plików, a nie z bazy.
 #' @return lista z nazwami zapisanych plików (niewidocznie)
 #' @import ZPD
 #' @export
 pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, nadpisz = FALSE,
-                                      daneKontekstowe = TRUE, src = NULL) {
+                                      daneKontekstowe = TRUE, src = NULL,
+                                      katalogWyskalowane = NULL) {
   stopifnot(
     is.character(rodzajEgzaminu), length(rodzajEgzaminu) == 1,
     all(rodzajEgzaminu %in% c("sprawdzian", "egzamin gimnazjalny", "matura")),
     all(nadpisz %in% c(TRUE, FALSE)), length(nadpisz) == 1,
     all(daneKontekstowe %in% c(TRUE, FALSE)), length(daneKontekstowe) == 1,
-    is.src(src) | is.null(src)
+    is.src(src) | is.null(src),
+    is.character(katalogWyskalowane) | is.null(katalogWyskalowane)
   )
+  if (!is.null(katalogWyskalowane)) {
+    stopifnot(length(katalogWyskalowane) == 1)
+    stopifnot(dir.exists(katalogWyskalowane))
+  }
   czyZamykacSrc = FALSE
   if (is.null(src)) {
     src = polacz()
@@ -88,19 +100,24 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, nadpisz = FALSE,
 
   # pobieranie wyników
   message(rodzajEgzaminu, "\n", format(Sys.time(), "(%Y.%m.%d, %H:%M:%S)"))
-  if (length(lata) == 1) {
-    lata = rep(lata, 2)  # głupie, ale sprawia, że się filter() nie wypnie
+  if (is.null(katalogWyskalowane)) {
+    if (length(lata) == 1) {
+      lata = rep(lata, 2)  # głupie, ale sprawia, że się filter() nie wypnie
+    }
+    skale =
+      pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE, PvEap = FALSE) %>%
+      filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rodzaj_skali == "ewd",
+              ~rok %in% lata) %>%
+      select_(~id_skali)
+    oszacowania = suppressMessages(
+      pobierz_oszacowania_uczniow(src) %>%
+        semi_join(skale) %>%
+        collect()
+    )
+  } else {
+    pliki = list.files(katalogWyskalowane, "Skalowanie.RData$", full.names = TRUE)
+    oszacowania = wczytaj_wyniki_skalowania(pliki)
   }
-  skale =
-    pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE, PvEap = FALSE) %>%
-    filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rodzaj_skali == "ewd",
-            ~rok %in% lata) %>%
-    select_(~id_skali)
-  oszacowania = suppressMessages(
-    pobierz_oszacowania_uczniow(src) %>%
-      semi_join(skale) %>%
-      collect()
-  )
 
   # kosmetyka i zapis
   if (ncol(oszacowania) == 0) {
@@ -113,7 +130,12 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, nadpisz = FALSE,
       select_(~-id_testu, ~-grupa, ~-posiada_normy) %>%
       collect() %>%
       unique()
+    names(skale) = sub("^estymacja$", "skala_estymacja", names(skale))
     skale = suppressMessages(semi_join(skale, oszacowania))
+    if (!("rok" %in% names(oszacowania))) {
+      oszacowania = suppressMessages(
+        left_join(oszacowania, select_(skale, ~id_skali, ~rok)))
+    }
     oszacowania = select_(oszacowania, ~id_skali, ~skalowanie, ~id_obserwacji,
                           ~rok, ~nr_pv, ~wynik, ~bs, ~grupa)
     attributes(oszacowania)$skale = skale
