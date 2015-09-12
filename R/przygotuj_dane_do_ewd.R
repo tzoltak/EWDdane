@@ -1,11 +1,20 @@
 #' @title Przygotowywanie danych do wyliczania modeli EWD
 #' @description Funkcja przygotowuje pliki z danymi do wyliczania modeli EWD,
-#' wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo
-#' i zapisuje go w aktywnym katalogu.
-#' @details Funkcja działa w oparciu o dane dostępne lokalnie, ściągnięte
-#' wcześniej przy pomocy funkcji \code{\link{pobierz_wyniki_surowe}}. Normy
-#' ekwikwantylowe pobierane są z bazy, z użyciem funkcji
+#' wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo lub
+#' wyskalowane - w zależności od tego, jakie znajdzie w katalogu podanym
+#' argumentem \code{katalogZDanymi} - i zapisuje go w aktywnym katalogu.
+#' @details
+#' Funkcja działa w oparciu o dane dostępne lokalnie, ściągnięte
+#' wcześniej przy pomocy funkcji \code{\link{pobierz_wyniki_surowe}} lub
+#' \code{\link{pobierz_wyniki_wyskalowane}}.
+#'
+#' Normy #' ekwikwantylowe pobierane są z bazy, z użyciem funkcji
 #' \code{\link[ZPD]{normalizuj_ekwikwantylowo}}.
+#'
+#' Reguły wyboru, które wyniki zostaną zwrócone w sytuacji, gdy wykorzystywane
+#' są wyniki wyskalowane i dla jakiejś skali dostępne są wyniki z kilku różńych
+#' skalowań, opisane są w pomocy do funkcji
+#' \code{\link{wczytaj_wyniki_wyskalowane}}.
 #' @param katalogZDanymi ciąg znaków - ścieżka do katalogu, w którym znajdują
 #' się pliki .RData z wynikami surowymi egzaminów i danymi kontekstowymi
 #' o uczniach i szkołach
@@ -20,7 +29,7 @@
 #' uczniowie o toku kształcenia wydłużonym maksymalnie o tyle lat
 #' @return wektor z nazwami zapisanych plików (niewidocznie)
 #' @export
-przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
+przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                         lataDo, liczbaRocznikow = 1,
                                         wydluzenie = 1) {
   stopifnot(is.character(katalogZDanymi), length(katalogZDanymi) == 1,
@@ -40,8 +49,7 @@ przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
   egzaminNaWyjsciu = list("gimn." = "egzamin gimnazjalny",
                           "LO" = "matura",
                           "T"  = "matura")[typSzkoly][[1]]
-  skrotyNazwEgzaminow = list("sprawdzian" = "s", "egzamin gimnazjalny" = "g",
-                             "matura" = "m")
+
   tok = list("gimn." = 3, "LO" = 3, "T"  = 4)[typSzkoly][[1]]
   plikiZapis = vector(mode = "character")
   katalogRoboczy = getwd()
@@ -62,6 +70,7 @@ przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
   lataWyjscie = max(lataDo):(min(lataDo) - liczbaRocznikow + 1)
   kontekstoweNaWejsciu = wczytaj_dane_kontekstowe(plikiZDanymi[1], FALSE, lataWejscie)
   kontekstoweNaWyjsciu = wczytaj_dane_kontekstowe(plikiZDanymi[2], TRUE, lataWyjscie)
+  skrotEgzaminu = sub("e", "g", substr(egzaminNaWyjsciu, 1, 1))
 
   # tworzenie wynikowych plików
   for (i in lataDo) {
@@ -110,9 +119,18 @@ przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
     }
 
     dane = suppressMessages(left_join(daneNaWyjsciu, daneNaWejsciu))
+    dane = subset(dane, get(paste0("typ_szkoly_", skrotEgzaminu)) == typSzkoly)
     dane = formaty_zmiennych_baza_na_ewd(dane)
-    class(dane) = c(class(dane), "daneDoWyliczaniaEwd", "daneSurowe",
-                    "daneZnormalizowane")
+    class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
+    if (any(grepl("_suma$", names(dane)))) {
+      class(dane) = c(class(dane), "daneSurowe")
+    }
+    if (any(grepl("_suma$", names(dane)))) {
+      class(dane) = c(class(dane), "daneZnormalizowane")
+    }
+    if (any(grepl("_irt$", names(dane)))) {
+      class(dane) = c(class(dane), "daneWyskalowane")
+    }
     attributes(dane)$dataUtworzenia = Sys.time()
     attributes(dane)$egzaminNaWyjsciu = egzaminNaWyjsciu
     attributes(dane)$egzaminNaWejsciu = egzaminNaWejsciu
@@ -120,6 +138,8 @@ przygotuj_dane_surowe_do_ewd = function(katalogZDanymi, typSzkoly,
     attributes(dane)$wydluzenie = wydluzenie
     attributes(dane)$normy = c(attributes(daneNaWyjsciu)$normy,
                                attributes(daneNaWejsciu)$normy)
+    attributes(dane)$skale = rbind(attributes(daneNaWyjsciu)$skale,
+                                   attributes(daneNaWejsciu)$skale)
     setwd(katalogRoboczy)
     save(dane, file = plikZapis)
     plikiZapis = c(plikiZapis, plikZapis)

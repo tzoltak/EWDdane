@@ -18,7 +18,13 @@ kontekstowymi, typowo wynik wywołania funkcji
 data table
 }
 \description{
-Funkcja wczytuje wyniki surowe egzaminu z podanych plików,
-łączy je w jeden zbiór i łączy z podanymi danymi kontekstowymi.
+Funkcja wczytuje wyniki egzaminu (surowe lub wyskalowane)
+z podanych plików, łączy je w jeden zbiór i ewentualnie łączy z podanymi
+danymi kontekstowymi.
+
+Reguły wyboru, które wyniki zostaną zwrócone w sytuacji, gdy wykorzystywane
+są wyniki wyskalowane i dla jakiejś skali dostępne są wyniki z kilku różńych
+skalowań, opisane są w pomocy do funkcji
+\code{\link{wczytaj_wyniki_wyskalowane}}.
 }
 

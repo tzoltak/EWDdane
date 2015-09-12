@@ -44,83 +44,87 @@ przygotuj_dane_wyskalowane_do_ewd = function(katalogZDanymi, typSzkoly,
   katalogRoboczy = getwd()
   on.exit(setwd(katalogRoboczy))
 
-#   # wczytywanie danych kontekstowych
-#   message("Wczytywanie danych kontekstowych.")
-#   setwd(katalogZDanymi)
-#   katalogZDanymi = getwd()
-#   plikiZDanymi = c(paste0(egzaminNaWejsciu, "-kontekstowe.RData"),
-#                    paste0(egzaminNaWyjsciu, "-kontekstowe.RData"))
-#   if (any(!file.exists(plikiZDanymi))) {
-#     stop("Nie znaleziono plików z danymi kontestowymi:\n  '",
-#          paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
-#          "'.")
-#   }
-#   lataWejscie = max(lataDo - tok):(min(lataDo) - liczbaRocznikow + 1 - tok - wydluzenie)
-#   lataWyjscie = max(lataDo):(min(lataDo) - liczbaRocznikow + 1)
-#   kontekstoweNaWejsciu = wczytaj_dane_kontekstowe(plikiZDanymi[1], FALSE, lataWejscie)
-#   kontekstoweNaWyjsciu = wczytaj_dane_kontekstowe(plikiZDanymi[2], TRUE, lataWyjscie)
-#
-#   # tworzenie wynikowych plików
-#   for (i in lataDo) {
-#     if (liczbaRocznikow > 1) {
-#       rok = paste0(substring(as.character(i), 3, 4), "-",
-#                    substring(as.character(i - liczbaRocznikow + 1), 3, 4))
-#     } else {
-#       rok = substring(as.character(i), 3, 4)
-#     }
-#     plikZapis = paste0("dane_ewd_", sub("[.]", "", typSzkoly), rok, ".RData")
-#     message("Przygotowywanie pliku '", plikZapis, "'.")
-#
-#     setwd(katalogZDanymi)
-#     plikiNaWejsciu = paste0(egzaminNaWejsciu, " ",
-#                             (i - tok):(i - tok - liczbaRocznikow + 1 - wydluzenie),
-#                             ".RData")
-#     plikiNaWyjsciu = paste0(egzaminNaWyjsciu, " ",
-#                             i:(i - liczbaRocznikow + 1), ".RData")
-#     plikiZDanymi = c(plikiNaWejsciu, plikiNaWyjsciu)
-#     if (any(!file.exists(plikiZDanymi))) {
-#       warning("Nie udało się utworzyć pliku obejmującego roczniki absolwentów z lat ",
-#               i, "-", i - liczbaRocznikow + 1, ". Nie znaleziono plików z wynikami:\n  '",
-#               paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
-#               "'.", immediate. = TRUE)
-#       next
-#     }
-#     daneNaWejsciu = try(wczytaj_wyniki_egzaminu(plikiNaWejsciu, kontekstoweNaWejsciu),
-#                         silent = TRUE)
-#     if ("try-error" %in% class(daneNaWejsciu)) {
-#       warning("Nie udało się utworzyć pliku obejmującego roczniki absolwentów z lat ",
-#               i, "-", i - liczbaRocznikow + 1, ". W pliku z wynikami: '",
-#               attributes(daneNaWejsciu)$condition$message,
-#               "' nie znaleziono żadnego obiektu z surowymi wynikami egzaminów.",
-#               immediate. = TRUE)
-#       next
-#     }
-#     daneNaWyjsciu = try(wczytaj_wyniki_egzaminu(plikiNaWyjsciu, kontekstoweNaWyjsciu),
-#                         silent = TRUE)
-#     if ("try-error" %in% class(daneNaWyjsciu)) {
-#       warning("Nie udało się utworzyć pliku obejmującego roczniki absolwentów z lat ",
-#               i, "-", i - liczbaRocznikow + 1, ". W pliku z wynikami: '",
-#               attributes(daneNaWyjsciu)$condition$message,
-#               "' nie znaleziono żadnego obiektu z surowymi wynikami egzaminów.",
-#               immediate. = TRUE)
-#       next
-#     }
-#
-#     dane = suppressMessages(left_join(daneNaWyjsciu, daneNaWejsciu))
-#     dane = formaty_zmiennych_baza_na_ewd(dane)
-#     class(dane) = c(class(dane), "daneDoWyliczaniaEwd", "daneSurowe",
-#                     "daneZnormalizowane")
-#     attributes(dane)$dataUtworzenia = Sys.time()
-#     attributes(dane)$egzaminNaWyjsciu = egzaminNaWyjsciu
-#     attributes(dane)$egzaminNaWejsciu = egzaminNaWejsciu
-#     attributes(dane)$lata = i:(i - liczbaRocznikow + 1)
-#     attributes(dane)$wydluzenie = wydluzenie
-#     attributes(dane)$normy = c(attributes(daneNaWyjsciu)$normy,
-#                                attributes(daneNaWejsciu)$normy)
-#     setwd(katalogRoboczy)
-#     save(dane, file = plikZapis)
-#     plikiZapis = c(plikiZapis, plikZapis)
-#     message("  Zapisano ", format(nrow(dane), big.mark = "'"), " obserwacji.")
-#   }
+   # wczytywanie danych kontekstowych
+   message("Wczytywanie danych kontekstowych.")
+   setwd(katalogZDanymi)
+   katalogZDanymi = getwd()
+   plikiZDanymi = c(paste0(egzaminNaWejsciu, "-kontekstowe.RData"),
+                    paste0(egzaminNaWyjsciu, "-kontekstowe.RData"))
+   if (any(!file.exists(plikiZDanymi))) {
+     stop("Nie znaleziono plików z danymi kontestowymi:\n  '",
+          paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
+          "'.")
+   }
+   lataWejscie = max(lataDo - tok):(min(lataDo) - liczbaRocznikow + 1 - tok - wydluzenie)
+   lataWyjscie = max(lataDo):(min(lataDo) - liczbaRocznikow + 1)
+   kontekstoweNaWejsciu = wczytaj_dane_kontekstowe(plikiZDanymi[1], FALSE, lataWejscie)
+   kontekstoweNaWyjsciu = wczytaj_dane_kontekstowe(plikiZDanymi[2], TRUE, lataWyjscie)
+
+   # tworzenie wynikowych plików
+   for (i in lataDo) {
+     if (liczbaRocznikow > 1) {
+       rok = paste0(substring(as.character(i), 3, 4), "-",
+                    substring(as.character(i - liczbaRocznikow + 1), 3, 4))
+     } else {
+       rok = substring(as.character(i), 3, 4)
+     }
+     plikZapis = paste0("dane_ewd_", sub("[.]", "", typSzkoly), rok, ".RData")
+     message("Przygotowywanie pliku '", plikZapis, "'.")
+
+     setwd(katalogZDanymi)
+     plikiNaWejsciu = paste0(egzaminNaWejsciu, " ",
+                             (i - tok):(i - tok - liczbaRocznikow + 1 - wydluzenie),
+                             ".RData")
+     plikiNaWyjsciu = paste0(egzaminNaWyjsciu, " ",
+                             i:(i - liczbaRocznikow + 1), ".RData")
+     plikiZDanymi = c(plikiNaWejsciu, plikiNaWyjsciu)
+     if (any(!file.exists(plikiZDanymi))) {
+       warning("Nie udało się utworzyć pliku obejmującego roczniki absolwentów z lat ",
+               i, "-", i - liczbaRocznikow + 1, ". Nie znaleziono plików z wynikami:\n  '",
+               paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
+               "'.", immediate. = TRUE)
+       next
+     }
+    daneNaWejsciu = try(wczytaj_wyniki_egzaminu(plikiNaWejsciu, kontekstoweNaWejsciu),
+                        silent = TRUE)
+    if ("try-error" %in% class(daneNaWejsciu)) {
+      warning("Nie udało się utworzyć pliku obejmującego roczniki absolwentów z lat ",
+              i, "-", i - liczbaRocznikow + 1, ". W pliku z wynikami: '",
+              attributes(daneNaWejsciu)$condition$message,
+              "' nie znaleziono żadnego obiektu z surowymi wynikami egzaminów.",
+              immediate. = TRUE)
+      next
+    }
+    daneNaWyjsciu = try(wczytaj_wyniki_egzaminu(plikiNaWyjsciu, kontekstoweNaWyjsciu),
+                        silent = TRUE)
+    if ("try-error" %in% class(daneNaWyjsciu)) {
+      warning("Nie udało się utworzyć pliku obejmującego roczniki absolwentów z lat ",
+              i, "-", i - liczbaRocznikow + 1, ". W pliku z wynikami: '",
+              attributes(daneNaWyjsciu)$condition$message,
+              "' nie znaleziono żadnego obiektu z surowymi wynikami egzaminów.",
+              immediate. = TRUE)
+      next
+    }
+
+    dane = suppressMessages(left_join(daneNaWyjsciu, daneNaWejsciu))
+    dane = formaty_zmiennych_baza_na_ewd(dane)
+# tu coś trzeba zifować
+    class(dane) = c(class(dane), "daneDoWyliczaniaEwd", "daneSurowe",
+                    "daneZnormalizowane")
+    attributes(dane)$dataUtworzenia = Sys.time()
+    attributes(dane)$egzaminNaWyjsciu = egzaminNaWyjsciu
+    attributes(dane)$egzaminNaWejsciu = egzaminNaWejsciu
+    attributes(dane)$lata = i:(i - liczbaRocznikow + 1)
+    attributes(dane)$wydluzenie = wydluzenie
+    if ("normy" %in% c(names(attributes(daneNaWyjsciu)),
+                     names(attributes(daneNaWejsciu)))) {
+      attributes(dane)$normy = c(attributes(daneNaWyjsciu)$normy,
+                                 attributes(daneNaWejsciu)$normy)
+    }
+    setwd(katalogRoboczy)
+    save(dane, file = plikZapis)
+    plikiZapis = c(plikiZapis, plikZapis)
+    message("  Zapisano ", format(nrow(dane), big.mark = "'"), " obserwacji.")
+  }
   invisible(plikiZapis)
 }
