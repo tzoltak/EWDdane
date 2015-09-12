@@ -121,6 +121,8 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
     dane = suppressMessages(left_join(daneNaWyjsciu, daneNaWejsciu))
     dane = subset(dane, get(paste0("typ_szkoly_", skrotEgzaminu)) == typSzkoly)
     dane = formaty_zmiennych_baza_na_ewd(dane)
+    dane = subset(dane, as.numeric(levels(get("wydl")))[get("wydl")] %in% (0:wydluzenie))
+    dane$wydl = factor(as.numeric(levels(dane$wydl))[dane$wydl])
     class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
     if (any(grepl("_suma$", names(dane)))) {
       class(dane) = c(class(dane), "daneSurowe")
