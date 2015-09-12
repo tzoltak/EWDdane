@@ -4,11 +4,14 @@
 \alias{pobierz_wyniki_wyskalowane}
 \title{Pobieranie surowych wynikow egzaminu}
 \usage{
-pobierz_wyniki_wyskalowane(rodzajEgzaminu, nadpisz = FALSE,
+pobierz_wyniki_wyskalowane(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   daneKontekstowe = TRUE, src = NULL, katalogWyskalowane = NULL)
 }
 \arguments{
 \item{rodzajEgzaminu}{ciąg znaków - rodzaj egzaminu}
+
+\item{lata}{NULL lub wektor liczb - lata, dla których mają zostać pobrane
+wyniki; jeśli NULL pobrane zostaną wyniki z wszystkich dostępnych lat}
 
 \item{nadpisz}{wartość logiczna - jeśli w miejscu, w którym mają być zapisane
 wyniki są już pliki z wynikami, to czy je nadpisać? jeśli FALSE, pobrane

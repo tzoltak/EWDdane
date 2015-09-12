@@ -27,6 +27,8 @@
 #' gimn., \code{m} - matura), będącą wynikiem wywołania funkcji
 #' \code{\link{pobierz_dane_kontekstowe}}.
 #' @param rodzajEgzaminu ciąg znaków - rodzaj egzaminu
+#' @param lata NULL lub wektor liczb - lata, dla których mają zostać pobrane
+#' wyniki; jeśli NULL pobrane zostaną wyniki z wszystkich dostępnych lat
 #' @param nadpisz wartość logiczna - jeśli w miejscu, w którym mają być zapisane
 #' wyniki są już pliki z wynikami, to czy je nadpisać? jeśli FALSE, pobrane
 #' zostaną wyniki tylko z lat, dla których pliki jeszcze nie istnieją
@@ -45,12 +47,13 @@
 #' @return lista z nazwami zapisanych plików (niewidocznie)
 #' @import ZPD
 #' @export
-pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, nadpisz = FALSE,
-                                      daneKontekstowe = TRUE, src = NULL,
-                                      katalogWyskalowane = NULL) {
+pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
+                                      nadpisz = FALSE, daneKontekstowe = TRUE,
+                                      src = NULL, katalogWyskalowane = NULL) {
   stopifnot(
     is.character(rodzajEgzaminu), length(rodzajEgzaminu) == 1,
     all(rodzajEgzaminu %in% c("sprawdzian", "egzamin gimnazjalny", "matura")),
+    is.numeric(lata) | is.null(lata), length(lata) > 0 | is.null(lata),
     all(nadpisz %in% c(TRUE, FALSE)), length(nadpisz) == 1,
     all(daneKontekstowe %in% c(TRUE, FALSE)), length(daneKontekstowe) == 1,
     is.src(src) | is.null(src),
@@ -65,15 +68,17 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, nadpisz = FALSE,
     src = polacz()
     czyZamykacSrc = TRUE
   }
-  lata = pobierz_testy(src) %>%
-    filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
-    select_(.dots = ~rok) %>%
-    distinct %>%
-    collect %>%
-    as.list %>%
-    unlist %>%
-    sort %>%
-    unname
+  if (is.null(lata)) {
+    lata = pobierz_testy(src) %>%
+      filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
+      select_(.dots = ~rok) %>%
+      distinct %>%
+      collect %>%
+      as.list %>%
+      unlist %>%
+      sort %>%
+      unname
+  }
   skrotEgzaminu = sub("e", "g", substr(rodzajEgzaminu, 1, 1))
 
   # sprawdzanie, co jest na dysku
@@ -81,15 +86,14 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, nadpisz = FALSE,
     dir.create("dane wyskalowane")
     message("Utworzono katalog 'dane wyskalowane' w aktywnym katalogu:\n'", getwd(),"'\n")
   }
-  czyPobrane = file.exists(paste0("dane wyskalowane/", rodzajEgzaminu, ".RData"))
-  if (czyPobrane) {
-    message("Istnieje już zapisany plik z wynikami tego egzaminu.\n",
+  czyPobrane = file.exists(paste0("dane wyskalowane/", rodzajEgzaminu, " ",
+                                  lata, ".RData"))
+  if (any(czyPobrane)) {
+    message("Istnieją już zapisane pliki z wynikami tego egzaminu z lat: ",
+            paste0(lata[czyPobrane], collapse = ", "), ".\n",
             ifelse(nadpisz,
                    "Zostanie on nadpisany nowo pobranymi danymi.\n",
                    "Podjęta zostanie próba dopisania do niego nowych danych.\n"))
-    stareOszacowania = load(paste0("dane wyskalowane/", rodzajEgzaminu, ".RData"))
-    stareOszacowania = mget(paste0(skrotEgzaminu, "Wyskalowane"),
-                            ifnotfound = list(NULL))[[1]]  # w przyszłości możnaprzejść na get0()
   } else {
     stareOszacowania = NULL
   }
@@ -101,106 +105,134 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, nadpisz = FALSE,
     }
   }
 
-  # pobieranie wyników
-  message(rodzajEgzaminu, "\n", format(Sys.time(), "(%Y.%m.%d, %H:%M:%S)"))
-  if (length(lata) == 1) {
-    lata = rep(lata, 2)  # głupie, ale sprawia, że się filter() nie wypnie
-  }
-  skale =
+  # pobieranie informacji o skalach
+  # trochę zachodu z odsianiem powiązań testy-skale idących nie przez 'skale_testy'
+  # a przez wspólne kryteria oceny
+  skale = suppressMessages(
     pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE, PvEap = FALSE) %>%
-    filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rodzaj_skali == "ewd",
-            ~rok %in% lata) %>%
-    select_(~id_skali, ~rok)
-  if (is.null(katalogWyskalowane)) {
-    oszacowania = suppressMessages(
-      pobierz_oszacowania_uczniow(src) %>%
-        semi_join(skale) %>%
-        collect()
-    )
-    skalowaniaZDysku = NULL
-  } else {
-    pliki = list.files(katalogWyskalowane, "Skalowanie.RData$", full.names = TRUE)
-    oszacowania = wczytaj_wyniki_skalowania(pliki)
-    skalowaniaZDysku = attributes(oszacowania)$skale
-    if (!("rok" %in% names(oszacowania))) {
-      oszacowania = suppressMessages(
-        left_join(oszacowania, collect(skale)))
-    }
-  }
-
-  # kosmetyka i zapis
-  if (ncol(oszacowania) == 0) {
-    oszacowania = NULL
-  } else {
-    # sprawdzanie, czy nie ma konfliktów z tym, co już na dysku i ew. dopisanie
-    oszacowania = select_(oszacowania, ~id_skali, ~skalowanie, ~id_obserwacji,
-                          ~rok, ~nr_pv, ~wynik, ~bs, ~grupa)
-    if (!is.null(stareOszacowania) & !nadpisz) {
-      lNowych = nrow(oszacowania)
-      oszacowania = bind_rows(stareOszacowania, oszacowania) %>% distinct()
-      lRoznych = select_(oszacowania, ~id_skali, ~skalowanie, ~id_obserwacji) %>%
-        distinct() %>%
-        nrow()
-      message("Wśród ", format(nrow(stareOszacowania), big.mark = "'"),
-              " wcześniej zapisanych\n    i ", format(lNowych, big.mark = "'"),
-              " właśnie wczytanych oszacowań są:\n * ",
-              format(lNowych + nrow(stareOszacowania) - lRoznych,
-                     big.mark = "'"), " rekordy/ów wspólne/ych;\n",
-              " * ", format(nrow(oszacowania) - lRoznych, big.mark = "'"),
-               " konflikty/ów.")
-      if (nrow(oszacowania) > lRoznych) {
-        stop("Wykryto konflikty pomiędzy wcześniej zapisanymi danymi, ",
-             "a danymi właśnie pobieranymi. Usuń konflikty i spróbuj ponownie, ",
-             "lub nadpisz wcześniej zapisane dane, wywołując funkcję ",
-             "z argumentem nadpisz = TRUE.")
-      }
-      message( "Do danych dopisane zostanie ",
-               format(nrow(oszacowania) - nrow(stareOszacowania)),
-               " nowy/e/ych rekord(y/ów).\n",
-               "Informacje o skalach zostaną nadpisane nowymi, ",
-               "właśnie pobranymi z bazy.")
-    }
-    # pobieranie informacji o skalach
-    skale =
-      pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE, PvEap = FALSE) %>%
       filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rodzaj_skali == "ewd",
-              ~rok %in% lata) %>%
+              ~rok %in% c(lata, lata)) %>%
+      left_join(pobierz_testy(src) %>% select_(~id_testu, ~czy_egzamin)) %>%
       select_(~-id_testu, ~-grupa, ~-posiada_normy) %>%
       collect() %>%
-      unique()
-    names(skale) = sub("^estymacja$", "skala_estymacja", names(skale))
-    # ew. przyłącznie informacji o skalowaniach wczytanych z dysku
-    names(skalowaniaZDysku) = sub("^opis$", "opis_skalowania",
-                                  names(skalowaniaZDysku))
-    names(skalowaniaZDysku) = sub("^data$", "data_skalowania",
-                                  names(skalowaniaZDysku))
-    names(skalowaniaZDysku) = sub("^do_prezentacji$", "skalowanie_do_prezentacji",
-                                  names(skalowaniaZDysku))
-    names(skalowaniaZDysku) = sub("^estymacja$", "skala_estymacja",
-                                  names(skalowaniaZDysku))
-    # dopisujemy informacje o skalach do wczytanych skalowań
-    skaleTemp = skale[, !(names(skale) %in% intersect(names(skale),
-                                                      names(skalowaniaZDysku))) |
-                        names(skale) %in% "id_skali"] %>% distinct()
-    skalowaniaZDysku = left_join(skalowaniaZDysku, skaleTemp)
-    # i nadpisujemy/dołączamy do informacje/i o skalowaniach z bazy
-    skale = anti_join(skale, select_(skalowaniaZDysku, ~id_skali, ~skalowanie)) %>%
-      bind_rows(skalowaniaZDysku)
-    skale = suppressMessages(semi_join(skale, oszacowania))
+      distinct() %>%
+      group_by_(~id_skali, ~skalowanie) %>%
+      mutate_(.dots = setNames(list(~!czy_egzamin | all(czy_egzamin)),
+                               "czy_egzamin")) %>%
+      ungroup() %>%
+      filter_(~czy_egzamin) %>%
+      select_(~-czy_egzamin)
+  )
+  names(skale) = sub("^estymacja$", "skala_estymacja", names(skale))
 
-    # końcowa estetyka
-    attributes(oszacowania)$skale = skale
-    attributes(oszacowania)$dataPobrania = Sys.time()
-    class(oszacowania) = append(class(oszacowania), c("wynikiWyskalowane"))
+  # pobieranie wyników
+  message(rodzajEgzaminu, "\n", format(Sys.time(), "(%Y.%m.%d, %H:%M:%S)\n"))
+  # pobieranie i zapis wyników
+  for (i in 1:length(lata)) {
+    message("Rok ", lata[i], ":")
+    skaleRok = filter_(skale, ~rok == lata[i])
+
+    # ew. wczytywanie już zapisanych oszacowan
+    if (czyPobrane[i]) {
+      if (!nadpisz) {
+        stareOszacowania = load(paste0("dane wyskalowane/", rodzajEgzaminu, " ",
+                                       lata[i], ".RData"))
+        stareOszacowania = mget(paste0(skrotEgzaminu, "Wyskalowane"),
+                                ifnotfound = list(NULL))[[1]]  # w przyszłości możnaprzejść na get0()
+      } else {
+        stareOszacowania = NULL
+      }
+    } else {
+      stareOszacowania = NULL
+    }
+
+    if (is.null(katalogWyskalowane)) {
+      oszacowania = suppressMessages(
+        pobierz_oszacowania_uczniow(src) %>%
+          semi_join(select_(skaleRok, ~id_skali, ~rok), copy = TRUE) %>%
+          collect()
+      )
+      skalowaniaZDysku = NULL
+    } else {
+      pliki = list.files(katalogWyskalowane, paste0(lata[i], "Skalowanie.RData$"),
+                         full.names = TRUE)
+      oszacowania = wczytaj_wyniki_skalowania(pliki)
+      skalowaniaZDysku = attributes(oszacowania)$skale
+      if (!("rok" %in% names(oszacowania))) {
+        oszacowania = within(oszacowania, {rok = lata[[i]]})
+      }
+    }
+
+    # kosmetyka i zapis
+    if (ncol(oszacowania) == 0) {
+      oszacowania = NULL
+    } else {
+      # sprawdzanie, czy nie ma konfliktów z tym, co już na dysku i ew. dopisanie
+      oszacowania = select_(oszacowania, ~id_skali, ~skalowanie, ~id_obserwacji,
+                            ~rok, ~nr_pv, ~wynik, ~bs, ~grupa)
+      if (!is.null(stareOszacowania) & !nadpisz) {
+        lNowych = nrow(oszacowania)
+        oszacowania = bind_rows(stareOszacowania, oszacowania) %>% distinct()
+        lRoznych = select_(oszacowania, ~id_skali, ~skalowanie, ~id_obserwacji) %>%
+          distinct() %>%
+          nrow()
+        message(" Wśród ", format(nrow(stareOszacowania), big.mark = "'"),
+                "  wcześniej zapisanych\n     i ", format(lNowych, big.mark = "'"),
+                "  właśnie wczytanych oszacowań są:\n * ",
+                format(lNowych + nrow(stareOszacowania) - lRoznych,
+                       big.mark = "'"), " rekordy/ów wspólne/ych;\n",
+                " * ", format(nrow(oszacowania) - lRoznych, big.mark = "'"),
+                " konflikty/ów.")
+        if (nrow(oszacowania) > lRoznych) {
+          stop("Wykryto konflikty pomiędzy wcześniej zapisanymi danymi, ",
+               "a danymi właśnie pobieranymi. Usuń konflikty i spróbuj ponownie, ",
+               "lub nadpisz wcześniej zapisane dane, wywołując funkcję ",
+               "z argumentem nadpisz = TRUE.")
+        }
+        message( " Do danych dopisane zostanie ",
+                 format(nrow(oszacowania) - nrow(stareOszacowania)),
+                 " nowy/e/ych rekord(y/ów).\n",
+                 " Informacje o skalach zostaną nadpisane nowymi, ",
+                 "właśnie pobranymi z bazy.")
+      }
+      # ew. przyłącznie informacji o skalowaniach wczytanych z dysku
+      if (!is.null(skalowaniaZDysku)) {
+        names(skalowaniaZDysku) = sub("^opis$", "opis_skalowania",
+                                      names(skalowaniaZDysku))
+        names(skalowaniaZDysku) = sub("^data$", "data_skalowania",
+                                      names(skalowaniaZDysku))
+        names(skalowaniaZDysku) = sub("^do_prezentacji$", "skalowanie_do_prezentacji",
+                                      names(skalowaniaZDysku))
+        names(skalowaniaZDysku) = sub("^estymacja$", "skala_estymacja",
+                                      names(skalowaniaZDysku))
+        # dopisujemy informacje o skalach do wczytanych skalowań
+        skaleTemp = skaleRok[, !(names(skaleRok) %in%
+                                   intersect(names(skaleRok),
+                                             names(skalowaniaZDysku))) |
+                               names(skaleRok) %in% "id_skali"] %>% distinct()
+        skalowaniaZDysku = suppressMessages(left_join(skalowaniaZDysku, skaleTemp))
+        # i nadpisujemy/dołączamy do informacje/i o skalowaniach z bazy
+        skaleRok = suppressMessages(
+          anti_join(skaleRok, select_(skalowaniaZDysku, ~id_skali, ~skalowanie)) %>%
+            bind_rows(skalowaniaZDysku)
+        )
+      }
+      skaleRok = suppressMessages(semi_join(skaleRok, oszacowania))
+
+      # końcowa estetyka
+      attributes(oszacowania)$skale = skaleRok
+      attributes(oszacowania)$dataPobrania = Sys.time()
+      class(oszacowania) = append(class(oszacowania), c("wynikiWyskalowane"))
+    }
+    assign(paste0(skrotEgzaminu, "Wyskalowane"), oszacowania)
+    rm(oszacowania)
+
+    nazwaPliku = paste0("dane wyskalowane/", rodzajEgzaminu, " ", lata[i], ".RData")
+    save(list = paste0(skrotEgzaminu, "Wyskalowane"), file = nazwaPliku)
+    message(" Zapisano do pliku: ", nazwaPliku,
+            format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)\n"))
   }
-  assign(paste0(skrotEgzaminu, "Wyskalowane"), oszacowania)
-  rm(oszacowania)
-
-  nazwaPliku = paste0("dane wyskalowane/", rodzajEgzaminu, ".RData")
-  save(list = paste0(skrotEgzaminu, "Wyskalowane"), file = nazwaPliku)
-  message(" zapisano do pliku: ", nazwaPliku,
-          format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
-  pliki = nazwaPliku
+  pliki = paste0("dane wyskalowane/", rodzajEgzaminu, " ", lata, ".RData")
 
   # pobieranie i zapis danych kontekstowych
   if (daneKontekstowe & !is.null(get(paste0(skrotEgzaminu, "Wyskalowane")))) {

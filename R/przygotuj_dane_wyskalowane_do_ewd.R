@@ -27,7 +27,7 @@ przygotuj_dane_wyskalowane_do_ewd = function(katalogZDanymi, typSzkoly,
             is.numeric(wydluzenie), length(wydluzenie) == 1)
   stopifnot(typSzkoly %in% c("gimn.", "LO", "T"),
             dir.exists(katalogZDanymi))
-  stopifnot(lataDo >= 2006, all(as.integer(lataDo) == lataDo),
+  stopifnot(lataDo >= 2005, all(as.integer(lataDo) == lataDo),
             liczbaRocznikow %in% 0:3,
             wydluzenie %in% 0:2)
 
