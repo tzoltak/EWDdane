@@ -236,13 +236,13 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   if (daneOsobowe) {
     if (rodzajEgzaminu == "sprawdzian") {
       wiekWzor = 153.5
-      rokSprawdzWiek = 2008
+      rokSprawdzWiek = 2005
     } else if (rodzajEgzaminu == "egzamin gimnazjalny") {
       wiekWzor = 189.5
-      rokSprawdzWiek = 2005
+      rokSprawdzWiek = 2008
     } else {
       wiekWzor = 225.5
-      rokSprawdzWiek = 2008
+      rokSprawdzWiek = 2010
     }
     dane = dane %>%
       mutate_(
