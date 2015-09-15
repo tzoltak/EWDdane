@@ -67,13 +67,15 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
             "'.")
   }
   lataWejscie = max(lataDo - tok):(min(lataDo) - liczbaRocznikow + 1 - tok - wydluzenie)
-  lataWyjscie = max(lataDo):(min(lataDo) - liczbaRocznikow + 1)
   kontekstoweNaWejsciu = wczytaj_dane_kontekstowe(plikiZDanymi[1], FALSE, lataWejscie)
-  kontekstoweNaWyjsciu = wczytaj_dane_kontekstowe(plikiZDanymi[2], TRUE, lataWyjscie)
   skrotEgzaminu = sub("e", "g", substr(egzaminNaWyjsciu, 1, 1))
 
   # tworzenie wynikowych plików
   for (i in lataDo) {
+    # lataWyjście w pętli, bo od tego, co podamy wczytaj_dane_kontekstowe() zależy,
+    # na jakiej grupie wylicza się wartość zmiennej 'lu_wszyscy'
+    lataWyjscie = i:(i - liczbaRocznikow + 1)
+    kontekstoweNaWyjsciu = wczytaj_dane_kontekstowe(plikiZDanymi[2], TRUE, lataWyjscie)
     if (liczbaRocznikow > 1) {
       rok = paste0(substring(as.character(i), 3, 4), "-",
                    substring(as.character(i - liczbaRocznikow + 1), 3, 4))

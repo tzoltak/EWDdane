@@ -1,5 +1,5 @@
 --------------------
-Zmiany w EWDdane 0.6.3 (2015-09-14)
+Zmiany w EWDdane 0.6.3 (2015-09-15)
 
 Nowe funkcje:
   - wczytaj_wyniki_skalowania() (nieeksportowana) - wczytuje oszacowania
@@ -25,6 +25,7 @@ Naprawione błędy:
   - pobierz_dane_kontekstowe() przy generowaniu zmiennej 'populacja_wy' sprawdza
     wiek dla sprawdzianu od 2005 r., a dla egzaminu gimnazjalnego od 2008 r.,
     a nie na odwrót.
+  - przygotuj_dane_do_ewd() poprawnie wylicza wartość zmiennej 'lu_wszyscy'.
 
 --------------------
 Zmiany w EWDdane 0.6.2 (2015-08-25)
