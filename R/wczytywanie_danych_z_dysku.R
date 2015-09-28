@@ -151,7 +151,7 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
     obiekty = c(obiekty, "gm")
   }
 
-  skale = pobierz_skale(polacz(), doPrezentacji = NA, PvEap = FALSE) %>%
+  skale = pobierz_skale(polacz(), doPrezentacji = NA) %>%
     filter_(~opis_skalowania == "normalizacja ekwikwantylowa EWD") %>%
     collect()
   skaleTesty = list()

@@ -39,8 +39,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   }
 
   # szukamy skal
-  skale = pobierz_skale(polacz(), doPrezentacji = doPrezentacji, czyKtt = FALSE,
-                        PvEap = FALSE) %>%
+  skale = pobierz_skale(polacz(), doPrezentacji = doPrezentacji, czyKtt = FALSE) %>%
     select_(~-id_testu, ~-grupa) %>%
     collect(skale) %>%
     distinct()

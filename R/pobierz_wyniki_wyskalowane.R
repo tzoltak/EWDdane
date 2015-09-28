@@ -109,7 +109,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
   # trochę zachodu z odsianiem powiązań testy-skale idących nie przez 'skale_testy'
   # a przez wspólne kryteria oceny
   skale = suppressMessages(
-    pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE, PvEap = FALSE) %>%
+    pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE) %>%
       filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rodzaj_skali == "ewd",
               ~rok %in% c(lata, lata)) %>%
       left_join(pobierz_testy(src) %>% select_(~id_testu, ~czy_egzamin)) %>%
