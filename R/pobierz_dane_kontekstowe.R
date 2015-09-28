@@ -175,6 +175,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
     select_('-id_cke') %>%
+    distinct() %>%
     collect()
   dane = suppressMessages(inner_join(dane, obserwacje))
   rm(obserwacje)

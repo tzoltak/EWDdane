@@ -9,7 +9,7 @@
 #' \code{\link{pobierz_wyniki_wyskalowane}}.
 #'
 #' Normy #' ekwikwantylowe pobierane są z bazy, z użyciem funkcji
-#' \code{\link[ZPD]{normalizuj_ekwikwantylowo}}.
+#' \code{\link[ZPD]{normalizuj}}.
 #'
 #' Reguły wyboru, które wyniki zostaną zwrócone w sytuacji, gdy wykorzystywane
 #' są wyniki wyskalowane i dla jakiejś skali dostępne są wyniki z kilku różńych

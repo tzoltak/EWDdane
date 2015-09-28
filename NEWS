@@ -3,6 +3,10 @@ Zmiany w EWDdane 0.7 (2015-09-28)
 
 Przystosowano pakiet do współpracy z pakietem ZPD w wersji 1.5.0.
 
+Naprawione błędy:
+  - pobierz_dane_kontekstowe() nie zwraca duplikatów dla osób, które mają
+    w bazie to samo id_obserwacji, ale różnią się id_cke.
+
 --------------------
 Zmiany w EWDdane 0.6.3 (2015-09-15)
 

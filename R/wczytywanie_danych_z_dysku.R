@@ -176,8 +176,8 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
       skalowanie = last(filter_(idSkali, ~posiada_normy == TRUE)$skalowanie, default = NULL)
       idSkali = last(filter_(idSkali, ~posiada_normy == TRUE)$id_skali, default = NULL)
       if (!is.null(idSkali) & !is.null(skalowanie) & grupa == '') {
-        temp = normalizuj_ekwikwantylowo(temp, src = polacz(), idSkali = idSkali,
-                                         skalowanie = skalowanie, grupa = grupa)
+        temp = normalizuj(temp, src = polacz(), idSkali = idSkali,
+                          skalowanie = skalowanie, grupa = grupa)
         normy[[length(normy) + 1]] = pobierz_normy(polacz()) %>%
           filter_(~id_skali == idSkali, ~skalowanie == skalowanie, ~grupa == grupa) %>%
           as.data.frame() %>%
