@@ -312,7 +312,7 @@ zmien_na_mplus = function(x) {
   # r EAP
   rEAP = filter_(x, ~parametr == "r EAP")
   if (nrow(rEAP) > 0) {
-    attributes(wynik)$"r EAP" = rEAP$wartosc
+    attributes(wynik)$"r EAP" = rEAP[ c("grupa", "wartosc")]
   }
 
   return(wynik)
