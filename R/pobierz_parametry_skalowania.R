@@ -39,10 +39,13 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   }
 
   # szukamy skal
-  skale = pobierz_skale(polacz(), doPrezentacji = doPrezentacji, czyKtt = FALSE) %>%
+  skale = pobierz_skale(polacz(), doPrezentacji = NA, czyKtt = FALSE) %>%
     select_(~-id_testu, ~-grupa) %>%
     collect(skale) %>%
     distinct()
+  if (!is.na(doPrezentacji)) {
+    skale = filter_(skale, ~skala_do_prezentacji == doPrezentacji)
+  }
   if (is.character(skala)) {
     skale = filter_(skale, ~grepl(skala, opis_skali))
     lSkal = length(unique(skale$id_skali))
