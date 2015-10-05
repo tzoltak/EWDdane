@@ -136,19 +136,28 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
         select_(~id_skali, ~skalowanie, ~rok, ~zmienna)
       normy = suppressMessages(
         inner_join(pobierz_normy(polacz()), skaleNormy, copy = TRUE) %>%
-          select_(~-id_skali, ~-skalowanie) %>%
           collect()
       )
       for (j in unique(normy$zmienna)) {
         skrotEgz = substr(j, 1, 1)
-        temp = filter_(normy, ~zmienna == j) %>% select_(~-zmienna)
-        names(temp) = sub("^wartosc$", paste0(sub("_irt$", "", j), "_suma"), names(temp))
+        temp = filter_(normy, ~zmienna == j) %>%
+          select_(~-id_skali, ~-skalowanie, ~-zmienna)
+        names(temp) = sub("^wartosc$", paste0(sub("_irt$", "", j), "_suma"),
+                          names(temp))
         names(temp) = sub("^wartosc_zr$", j, names(temp))
         names(temp) = sub("^rok$", paste0("rok_", skrotEgz), names(temp))
         names(temp) = sub("^grupa$", paste0("grupa_", skrotEgz), names(temp))
         dane = suppressMessages(left_join(dane, temp))
       }
-
+      names(normy) = sub("zmienna", "konstrukt", names(normy))
+      normy$konstrukt = sub("_irt$", "", normy$konstrukt)
+      normyU = unique(normy[, c("konstrukt", "rok")])
+      normyTemp = vector(mode = "list", length = nrow(normyU))
+      names(normyTemp) = paste0(normyU$konstrukt, "_", normyU$rok)
+      for (j in 1:nrow(normyU)) {
+        normyTemp[[j]] = semi_join(normy, normyU[j, ])
+      }
+      normy = normyTemp
     }
 
     class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
