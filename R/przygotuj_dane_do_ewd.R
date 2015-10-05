@@ -125,6 +125,32 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
     dane = formaty_zmiennych_baza_na_ewd(dane)
     dane = subset(dane, as.numeric(levels(get("wydl")))[get("wydl")] %in% (0:wydluzenie))
     dane$wydl = factor(as.numeric(levels(dane$wydl))[dane$wydl])
+
+    # przypisywanie sum punktów skalom raschowym, które mają grupy
+    skale = rbind(attributes(daneNaWyjsciu)$skale,
+                  attributes(daneNaWejsciu)$skale)
+    normy = c(attributes(daneNaWyjsciu)$normy,
+              attributes(daneNaWejsciu)$normy)
+    if (any(grepl("R_irt$", names(dane)))) {
+      skaleNormy = filter_(skale, ~grepl("^ewd;[^;]+R;", opis_skali)) %>%
+        select_(~id_skali, ~skalowanie, ~rok, ~zmienna)
+      normy = suppressMessages(
+        inner_join(pobierz_normy(polacz()), skaleNormy, copy = TRUE) %>%
+          select_(~-id_skali, ~-skalowanie) %>%
+          collect()
+      )
+      for (j in unique(normy$zmienna)) {
+        skrotEgz = substr(j, 1, 1)
+        temp = filter_(normy, ~zmienna == j) %>% select_(~-zmienna)
+        names(temp) = sub("^wartosc$", paste0(sub("_irt$", "", j), "_suma"), names(temp))
+        names(temp) = sub("^wartosc_zr$", j, names(temp))
+        names(temp) = sub("^rok$", paste0("rok_", skrotEgz), names(temp))
+        names(temp) = sub("^grupa$", paste0("grupa_", skrotEgz), names(temp))
+        dane = suppressMessages(left_join(dane, temp))
+      }
+
+    }
+
     class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
     if (any(grepl("_suma$", names(dane)))) {
       class(dane) = c(class(dane), "daneSurowe")
@@ -140,10 +166,8 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
     attributes(dane)$egzaminNaWejsciu = egzaminNaWejsciu
     attributes(dane)$lata = i:(i - liczbaRocznikow + 1)
     attributes(dane)$wydluzenie = wydluzenie
-    attributes(dane)$normy = c(attributes(daneNaWyjsciu)$normy,
-                               attributes(daneNaWejsciu)$normy)
-    attributes(dane)$skale = rbind(attributes(daneNaWyjsciu)$skale,
-                                   attributes(daneNaWejsciu)$skale)
+    attributes(dane)$normy = normy
+    attributes(dane)$skale = skale
     setwd(katalogRoboczy)
     save(dane, file = plikZapis)
     plikiZapis = c(plikiZapis, plikZapis)
