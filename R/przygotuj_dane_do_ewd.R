@@ -155,7 +155,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
       normyTemp = vector(mode = "list", length = nrow(normyU))
       names(normyTemp) = paste0(normyU$konstrukt, "_", normyU$rok)
       for (j in 1:nrow(normyU)) {
-        normyTemp[[j]] = semi_join(normy, normyU[j, ])
+        normyTemp[[j]] = suppressMessages(semi_join(normy, normyU[j, ]))
       }
       normy = normyTemp
     }
