@@ -8,7 +8,7 @@
 #' wcześniej przy pomocy funkcji \code{\link{pobierz_wyniki_surowe}} lub
 #' \code{\link{pobierz_wyniki_wyskalowane}}.
 #'
-#' Normy #' ekwikwantylowe pobierane są z bazy, z użyciem funkcji
+#' Normy ekwikwantylowe pobierane są z bazy, z użyciem funkcji
 #' \code{\link[ZPD]{normalizuj}}.
 #'
 #' Reguły wyboru, które wyniki zostaną zwrócone w sytuacji, gdy wykorzystywane
@@ -30,8 +30,8 @@
 #' @return wektor z nazwami zapisanych plików (niewidocznie)
 #' @export
 przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
-                                        lataDo, liczbaRocznikow = 1,
-                                        wydluzenie = 1) {
+                                 lataDo, liczbaRocznikow = 1,
+                                 wydluzenie = 1) {
   stopifnot(is.character(katalogZDanymi), length(katalogZDanymi) == 1,
             is.character(typSzkoly), length(typSzkoly) == 1,
             is.numeric(lataDo), length(lataDo) > 0,

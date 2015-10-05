@@ -39,7 +39,7 @@ Funkcja działa w oparciu o dane dostępne lokalnie, ściągnięte
 wcześniej przy pomocy funkcji \code{\link{pobierz_wyniki_surowe}} lub
 \code{\link{pobierz_wyniki_wyskalowane}}.
 
-Normy #' ekwikwantylowe pobierane są z bazy, z użyciem funkcji
+Normy ekwikwantylowe pobierane są z bazy, z użyciem funkcji
 \code{\link[ZPD]{normalizuj}}.
 
 Reguły wyboru, które wyniki zostaną zwrócone w sytuacji, gdy wykorzystywane
