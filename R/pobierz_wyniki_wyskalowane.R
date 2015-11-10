@@ -242,7 +242,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
     attributes(temp)$dataPobrania = Sys.time()
     assign(paste0(skrotEgzaminu, "Kontekstowe"), temp)
     rm(temp)
-    nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "-kontekstowe.RData")
+    nazwaPliku = paste0("dane wyskalowane/", rodzajEgzaminu, "-kontekstowe.RData")
     save(list = paste0(skrotEgzaminu, "Kontekstowe"), file = nazwaPliku)
     message(" zapisano do pliku: ", nazwaPliku,
             format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
