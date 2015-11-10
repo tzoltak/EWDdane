@@ -1,4 +1,12 @@
 --------------------
+Zmiany w EWDdane 0.7.1 (2015-11-10)
+
+Naprawione błędy:
+  - pobierz_wyniki_wyskalowane() zapisuje plik z danymi kontekstowymi w katalogu
+    'wyniki wyskalowane', a nie w 'wyniki surowe'.
+
+
+--------------------
 Zmiany w EWDdane 0.7 (2015-09-28)
 
 Przystosowano pakiet do współpracy z pakietem ZPD w wersji 1.5.0.
