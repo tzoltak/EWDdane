@@ -70,6 +70,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
       unlist %>%
       sort
   }
+  skrotEgzaminu = sub("e", "g", substr(rodzajEgzaminu, 1, 1))
 
   # sprawdzanie, co jest na dysku
   if (!dir.exists("dane surowe")) {
@@ -134,12 +135,10 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   if (daneKontekstowe) {
     message("\nDane o uczniach i szkołach:")
     temp = pobierz_dane_kontekstowe(src, rodzajEgzaminu)
-    class(temp) = append(class(temp), "daneKontekstowe")
-    attributes(temp)$dataPobrania = Sys.time()
-    assign(paste0(substr(czesciEgzaminu$prefiks[1], 1, 1), "Kontekstowe"), temp)
+    assign(paste0(skrotEgzaminu, "Kontekstowe"), temp)
     rm(temp)
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "-kontekstowe.RData")
-    save(list = paste0(substr(rodzajEgzaminu, 1, 1), "Kontekstowe"), file = nazwaPliku)
+    save(list = paste0(skrotEgzaminu, "Kontekstowe"), file = nazwaPliku)
     message(" zapisano do pliku: ", nazwaPliku,
             format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
     pliki = append(pliki, nazwaPliku)

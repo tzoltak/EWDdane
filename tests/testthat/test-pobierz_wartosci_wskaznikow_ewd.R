@@ -6,5 +6,5 @@ test_that('pobierz_wartosci_wskaznikow_ewd działa', {
 	dane = pobierz_wartosci_wskaznikow_ewd('T', 2013)
 	expect_is(dane, 'data.frame')
 	expect_equal(all(dane$typ_szkoly %in% 'T'), TRUE)
-	#expect_equal(all(!is.na(dane$nazwa)), TRUE)
+	expect_equal(all(!is.na(dane$nazwa)), TRUE)
 })

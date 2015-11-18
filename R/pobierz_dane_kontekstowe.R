@@ -125,6 +125,8 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   }
 
   # pobranie danych na poziomie {uczeń, rodzajEgzaminu, czescEgzaminu, rok} i agregacja do {uczeń, rok}
+  message(" Pobieranie danych o przystępowaniu do egzaminów.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   testy = suppressMessages(
     pobierz_testy(src) %>%
       filter_(~dane_ewd == TRUE, ~rodzaj_egzaminu == rodzajEgzaminu, ~czy_egzamin == TRUE) %>%
@@ -136,6 +138,8 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
       select_('-pop_podejscie', '-oke', '-zrodlo', '-id_testu') %>%
       collect()
   )
+  message(" Konwersja danych na format krótszy.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   dane = suppressWarnings(
     uczniowieTesty %>%
       group_by_('id_obserwacji', 'rok') %>%
@@ -146,6 +150,8 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   )
 
   # konwersja informacji o byciu laureatem do postaci szerokiej
+  message(" Obrabianie informacji o byciu laureatem.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   uczniowieTesty = uczniowieTesty %>%
     mutate_(prefiks = ~paste0('laur_', prefiks)) %>%
     reshape2::dcast(id_obserwacji + rok ~ prefiks, value.var = 'laureat')
@@ -155,6 +161,8 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   rm(uczniowieTesty)
 
   # dołączenie informacji o szkołach
+  message(" Dołączanie informacji o szkołach.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   szkoly = pobierz_szkoly(src) %>%
     select_('id_szkoly', 'rok', 'typ_szkoly', 'publiczna', 'specjalna',
             'dla_doroslych', 'przyszpitalna', 'artystyczna') %>%
@@ -163,13 +171,18 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   rm(szkoly)
 
   # dołączanie informacji o obserwacjach
+  message(" Dołączanie informacji o uczniach.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
     select_('-id_cke') %>%
+    distinct() %>%
     collect()
   dane = suppressMessages(inner_join(dane, obserwacje))
   rm(obserwacje)
 
   # oznaczamy pierwsze przystąpienia
+  message(" Oznaczanie pierwszych i ostatnich przystąpień do egzaminu.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   pierwsze = filtruj_przystapienia(src, pierwsze = TRUE,
                                    rodzajEgzaminu = rodzajEgzaminu,
                                    czescEgzaminu = NULL, czyEwd = TRUE) %>%
@@ -191,6 +204,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
 
   # ew. wyliczenie wieku w miesiącach
   if (daneOsobowe) {
+    message(" Wyliczanie wieku.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
     dane = dane %>%
       mutate(wiek = as.numeric(substr(dane$data, 1, 4)) * 12 +
                as.numeric(substr(dane$data, 6, 7)) -
@@ -201,6 +215,8 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     select_('-data')
 
   # wygenerowanie zmiennej określającej populację
+  message(" Generowanie zmiennnych określających populacje wzorcowe.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   dane = dane %>%
     mutate_(
       populacja_we = ~ostatnie %in% TRUE & id_szkoly > 0,
@@ -221,13 +237,13 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   if (daneOsobowe) {
     if (rodzajEgzaminu == "sprawdzian") {
       wiekWzor = 153.5
-      rokSprawdzWiek = 2008
+      rokSprawdzWiek = 2005
     } else if (rodzajEgzaminu == "egzamin gimnazjalny") {
       wiekWzor = 189.5
-      rokSprawdzWiek = 2005
+      rokSprawdzWiek = 2008
     } else {
       wiekWzor = 225.5
-      rokSprawdzWiek = 2008
+      rokSprawdzWiek = 2010
     }
     dane = dane %>%
       mutate_(
@@ -259,6 +275,11 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
                                              laur_gm_m & laur_gm_p))
     }
   }
+  message(" Zakończono pobieranie danych kontekstowych.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
 
+  # koniec
+  class(dane) = append(class(dane), "daneKontekstowe")
+  attributes(dane)$dataPobrania = Sys.time()
   return(dane)
 }

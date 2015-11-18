@@ -1,8 +1,60 @@
 --------------------
+Zmiany w EWDdane 0.7.2 (2015-11-18)
+
+Naprawione błędy:
+  - pobierz_parametry_skalowania() uwzględnia wartość argumentu 'doPrezentacji'
+    przy wyborze skalowań, dla których zwrócone zostaną parametry.
+
+--------------------
+Zmiany w EWDdane 0.7.1 (2015-11-10)
+
+Naprawione błędy:
+  - pobierz_wyniki_wyskalowane() zapisuje plik z danymi kontekstowymi w katalogu
+    'wyniki wyskalowane', a nie w 'wyniki surowe'.
+
+--------------------
+Zmiany w EWDdane 0.7 (2015-09-28)
+
+Przystosowano pakiet do współpracy z pakietem ZPD w wersji 1.5.0.
+
+Naprawione błędy:
+  - pobierz_dane_kontekstowe() nie zwraca duplikatów dla osób, które mają
+    w bazie to samo id_obserwacji, ale różnią się id_cke.
+
+--------------------
+Zmiany w EWDdane 0.6.3 (2015-09-15)
+
+Nowe funkcje:
+  - wczytaj_wyniki_skalowania() (nieeksportowana) - wczytuje oszacowania
+    umiejętności z plików z wynikami skalowania, zapisywanych przez funkcje
+    skaluj_egamin() z pakietu EWDskale;
+  - wczytaj_wyniki_surowe() i wczytaj_wyniki_wyskalowane() (nieeksportowane) -
+    pozwalają uelastycznić wczytaj_wyniki_egzaminu() tak, aby radziła sobie
+    i z wynikami surowymi i z wyskalowanymi.
+
+Zmiany_nazw_funkcji:
+  - przygotuj_dane_do_ewd() zamiast przygotuj_dane_surowe_do_ewd(), bo teraz
+    potrafi wczytywać również dane wyskalowane (jeśli to je napotka w podanym
+    katalogu z danymi).
+
+Nowe funkcjonalności:
+  - pobierz_parametry_skalowania() przepisana i dopasowana do nowej struktury
+    bazy (tak samo nieeksportowana zmien_na_mplus());
+  - pobierz_dane_kontekstowe() wyświetla komunikaty o postępach swoich prac;
+  - pobierz_wyniki_skalowania() potrafi skorzystać również z wyników skalowań
+    zapisanych na dysku, zamiast z bazy.
+
+Naprawione błędy:
+  - pobierz_dane_kontekstowe() przy generowaniu zmiennej 'populacja_wy' sprawdza
+    wiek dla sprawdzianu od 2005 r., a dla egzaminu gimnazjalnego od 2008 r.,
+    a nie na odwrót.
+  - przygotuj_dane_do_ewd() poprawnie wylicza wartość zmiennej 'lu_wszyscy'.
+
+--------------------
 Zmiany w EWDdane 0.6.2 (2015-08-25)
 
 Nowe funkcjonalności:
-  - pobierz_baze_szkol() umożliwa wybranie "SP" jako typu szkoły;
+  - pobierz_baze_szkol() umożliwa wybranie "SP" jako typu szkoły.
 
 --------------------
 Zmiany w EWDdane 0.6.1 (2015-08-11)
@@ -15,7 +67,7 @@ Nowe funkcjonalności:
       przyłączeniem wyników "na wejściu";
   - formaty_zmiennych_baza_na_ewd() zamienia w nazwach zmiennych "laur_" na
     "laureat_", co jest zgodne z konwencją zapisu z 2014 r. i bardziej logiczne
-    wobec faktu, że "dysleksja" jest opisywana pełnym wyrazem, a nie skrótem;
+    wobec faktu, że "dysleksja" jest opisywana pełnym wyrazem, a nie skrótem.
 
 --------------------
 Zmiany w EWDdane 0.6.0 (2015-08-07)
@@ -27,17 +79,17 @@ Nowe funkcje:
     surowymi i znormalizowanymi ekwikwantylowo, używane do wyliczania modeli EWD;
     - wczytaj_dane_kontekstowe(), wczytaj_wyniki_egzaminu() - nieeksportowane
       funkcje służące do wczytywania odpowiednich danych z dysku i łączenia
-      ich w postać szeroką;
+      ich w postać szeroką.
 
 Usunięte funkcje:
   - pobierz_dane_wyskalowane();
-  - pobierz_wyniki_surowe_ewd_gimn() - zastąpiona przez
+  - pobierz_wyniki_surowe_ewd_gimn();
   - zapisz_normy_do_bazy() - przeniesiona do pakietu ZPDzapis;
-  - sklej_normy() - przeniesiona do pakietu EWDwskaźniki;
+  - sklej_normy() - przeniesiona do pakietu EWDwskaźniki.
 
 Dodano zamykanie połączeń z bazą w funkcjach:
-- pobierz_wyniki_surowe() (gdy wywoływana z argumentem src = NULL),
-- pobierz_dane_szkol(),
+- pobierz_wyniki_surowe() (gdy wywoływana z argumentem src = NULL);
+- pobierz_dane_szkol().
 
 --------------------
 Zmiany w EWDdane 0.5.3 (2015-05-27)
@@ -47,19 +99,19 @@ Funkcja pobierz_dane_kontekstowe():
     i ostatnich)
   - generuje zmienne: ostatnie, pierwsze, populacja_we, populacja_wy;
   - generuje zmienną "wiek" jako liczbę miesięcy pomiędzy urodzeniem ucznia
-    a najwcześniejszym egzaminem w danym roku;
+    a najwcześniejszym egzaminem w danym roku.
 
 Usunięte funkcje:
   - pobierz_dane_uczniow() zasąpiona przez pobierz_dane_kontekstowe();
   - wielokrotnie_przystepujacy() - jej rolę przejęła pobierz_dane_kontekstowe();
-  - usun_kryteria_ze_skali_es() - przeniesiona do gałęzi rozwojowej pakietu ZPDzapis;
+  - usun_kryteria_ze_skali_es() - przeniesiona do gałęzi rozwojowej pakietu ZPDzapis.
 
 --------------------
 Zmiany w EWDdane 0.5.2 (2015-05-20)
 
 Nowe funkcje:
   - pobierz_dane_kontekstowe() - pobiera wszelkie dane kontekstowe o uczniach
-    (i szkołach) potrzebne przy wyliczaniu EWD
+    (i szkołach) potrzebne przy wyliczaniu EWD.
 
 --------------------
 Zmiany w EWDdane 0.5.2 (2015-04-30)
