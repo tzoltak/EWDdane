@@ -74,6 +74,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
                                "brak_skalowan")) %>%
       ungroup()
   )
+
   if (is.character(skalowanie)) {
     skale = mutate_(skale, .dots = setNames(list(~grepl(skalowanie, opis_skalowania)),
                                             "wybrane_skalowanie"))
@@ -84,6 +85,12 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   } else {
     skale = mutate_(skale, .dots = setNames(list(~!brak_skalowan),
                                             "wybrane_skalowanie"))
+    if (!is.na(doPrezentacji)) {
+      skale =
+        mutate_(skale,
+                .dots = setNames(list(~skalowanie_do_prezentacji == doPrezentacji),
+                                 "wybrane_skalowanie"))
+    }
   }
 
   # pobieranie parametrów
