@@ -230,6 +230,10 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
   obiekty = load(nazwaPliku)
   for (i in obiekty) {
     oszacowania = get(i)
+    # konwersja grup na liczby, żeby mogły być przetwarzana melt/dcast z oszacowaniami
+    oszacowania$grupa = factor(oszacowania$grupa)
+    grupy = levels(oszacowania$grupa)
+    oszacowania$grupa = as.numeric(oszacowania$grupa)
     rm(i)
     if ("wynikiWyskalowane" %in% class(oszacowania)) {
       skale = bind_rows(
@@ -255,6 +259,11 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
                 value.var = "wartosc")
       )
       names(oszacowania) = sub("wynik_", "", names(oszacowania))
+      # grupy znów na ciągi znaków
+      maskaZmGrupy = grep("^grupa_", names(oszacowania))
+      oszacowania[, maskaZmGrupy] = lapply(oszacowania[, maskaZmGrupy],
+                                           function(x, grupy) {return(grupy[x])},
+                                           grupy = grupy)
       if (exists("dane", inherits = FALSE)) {
         dane = suppressMessages(full_join(dane, oszacowania))
       } else {
