@@ -28,6 +28,7 @@
 #' @param wydluzenie liczba całkowita - w przygotowanym zbiorze znajdą się
 #' uczniowie o toku kształcenia wydłużonym maksymalnie o tyle lat
 #' @return wektor z nazwami zapisanych plików (niewidocznie)
+#' @import dplyr
 #' @export
 przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                  lataDo, liczbaRocznikow = 1,
@@ -63,8 +64,8 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                    paste0(egzaminNaWyjsciu, "-kontekstowe.RData"))
   if (any(!file.exists(plikiZDanymi))) {
     stop("Nie znaleziono plików z danymi kontestowymi:\n  '",
-            paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
-            "'.")
+         paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
+         "'.")
   }
   lataWejscie = max(lataDo - tok):(min(lataDo) - liczbaRocznikow + 1 - tok - wydluzenie)
   kontekstoweNaWejsciu = wczytaj_dane_kontekstowe(plikiZDanymi[1], FALSE, lataWejscie)
@@ -87,10 +88,10 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
 
     setwd(katalogZDanymi)
     plikiNaWejsciu = paste0(egzaminNaWejsciu, " ",
-                           (i - tok):(i - tok - liczbaRocznikow + 1 - wydluzenie),
-                           ".RData")
+                            (i - tok):(i - tok - liczbaRocznikow + 1 - wydluzenie),
+                            ".RData")
     plikiNaWyjsciu = paste0(egzaminNaWyjsciu, " ",
-                           i:(i - liczbaRocznikow + 1), ".RData")
+                            i:(i - liczbaRocznikow + 1), ".RData")
     plikiZDanymi = c(plikiNaWejsciu, plikiNaWyjsciu)
     if (any(!file.exists(plikiZDanymi))) {
       warning("Nie udało się utworzyć pliku obejmującego roczniki absolwentów z lat ",
@@ -158,6 +159,33 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
         normyTemp[[j]] = suppressMessages(semi_join(normy, normyU[j, ]))
       }
       normy = normyTemp
+    }
+
+    # tworzenie zmiennych opisujących przedmioty zdawane na maturze
+    if (typSzkoly %in% c("LO", "T")) {
+      message("Dołączanie informacji o zdawanych przedmiotach.")
+      zmianaKatalogu = try(setwd("../dane surowe"))
+      if ("try-error" %in% class(zmianaKatalogu)) {
+        warning("Nie udało się znaleźć katalogu z wynikami surowymi ",
+                "('../dane surowe' w stosunku do katalogu podanego argumentem ",
+                "'katalogZDanymi'), co uniemożliwia utworzenie zmiennych ",
+                "opisujących przystępowanie przez zdających do poszczególnych ",
+                "części egzaminu.", immediate. = TRUE)
+      } else if (any(!file.exists(plikiNaWyjsciu))) {
+        warning("W katalogu z wynikami surowymi ('../dane surowe' w stosunku do ",
+                "katalogu podanego argumentem 'katalogZDanymi') nie znaleziono ",
+                "pliku/ów:\n",
+                paste0(paste0("'", plikiNaWyjsciu[!file.exists(plikiNaWyjsciu)],
+                              "'"), collapse = ", "),
+                "\nUniemożliwia to utworzenie zmiennych opisujących ",
+                "przystępowanie przez zdających do poszczególnych części ",
+                "egzaminu.", immediate. = TRUE)
+      } else {
+        przystepowanie = wczytaj_liczbe_przystepujacych(plikiNaWyjsciu)
+        names(przystepowanie) = sub("^rok$", paste0("rok_", skrotEgzaminu),
+                                    names(przystepowanie))
+        dane = suppressMessages(left_join(dane, przystepowanie))
+      }
     }
 
     class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
