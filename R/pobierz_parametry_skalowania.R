@@ -197,6 +197,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 #' @return
 #' Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych
 #' przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
+#' @import dplyr
 zmien_na_mplus = function(x) {
   stopifnot(is.data.frame(x))
 
@@ -316,10 +317,20 @@ zmien_na_mplus = function(x) {
   wynik = bind_rows(binarne, grm) %>%
     arrange_(~typ, ~zmienna1, ~zmienna2) %>%
     bind_rows(grupowe)
-  # r EAP
+  # r EAP i param. standaryzacji
   rEAP = filter_(x, ~parametr == "r EAP")
   if (nrow(rEAP) > 0) {
     attributes(wynik)$"r EAP" = rEAP[ c("grupa", "wartosc")]
+  }
+  std = filter_(x, ~parametr %in% c("std_mean", "std_sd"))
+  if (nrow(std) > 0) {
+    stdSr = filter_(std, ~parametr == "std_mean") %>%
+      select_(~grupa, ~wartosc) %>%
+      setNames(c("grupa", "sr"))
+    stdOs = filter_(std, ~parametr == "std_sd") %>%
+      select_(~grupa, ~wartosc) %>%
+      setNames(c("grupa", "os"))
+    attributes(wynik)$"paramStd" = full_join(stdSr, stdOs)
   }
 
   return(wynik)
