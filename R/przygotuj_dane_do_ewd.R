@@ -186,6 +186,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                     names(przystepowanie))
         dane = suppressMessages(left_join(dane, przystepowanie))
       }
+      setwd(katalogZDanymi)
     }
 
     class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
