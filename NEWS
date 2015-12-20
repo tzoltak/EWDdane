@@ -1,5 +1,5 @@
 --------------------
-Zmiany w EWDdane 0.8 (2015-12-19)
+Zmiany w EWDdane 0.8 (2015-12-20)
 
 Nowe funkcjonalności:
   - przygotuj_dane_do_ewd() w przypadku matury zwraca również zmienne opisujące,
@@ -14,7 +14,9 @@ Nowe funkcje:
 
 Naprawione błędy:
   - wczytaj_wyniki_wyskalowane() traktuje grupę jako cechę wskaźnika osiągnięć
-    (modelu skalowania), a nie osoby zdającej dany egzamin w danym roku.
+    (modelu skalowania), a nie osoby zdającej dany egzamin w danym roku;
+  - wczytaj_wyniki_wyskalowane() radzi sobie w sytuacji, gdy skala ma kilka
+    skalowań;
 
 --------------------
 Zmiany w EWDdane 0.7.2 (2015-11-18)

@@ -251,7 +251,7 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
                                    "zmienna"))
       )
       oszacowania = suppressMessages(
-        inner_join(oszacowania, select_(skale, ~id_skali, ~zmienna)) %>%
+        inner_join(oszacowania, select_(skale, ~id_skali, ~skalowanie, ~zmienna)) %>%
           select_(~-id_skali, ~-skalowanie) %>%
           melt(measure.vars = c("wynik", "bs", "grupa"), variable.name = "co",
                value.name = "wartosc") %>%

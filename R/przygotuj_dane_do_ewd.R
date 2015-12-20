@@ -60,15 +60,16 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
   message("Wczytywanie danych kontekstowych.")
   setwd(katalogZDanymi)
   katalogZDanymi = getwd()
-  plikiZDanymi = c(paste0(egzaminNaWejsciu, "-kontekstowe.RData"),
-                   paste0(egzaminNaWyjsciu, "-kontekstowe.RData"))
-  if (any(!file.exists(plikiZDanymi))) {
+  plikiZDanymiKontekstowymi = c(paste0(egzaminNaWejsciu, "-kontekstowe.RData"),
+                                paste0(egzaminNaWyjsciu, "-kontekstowe.RData"))
+  if (any(!file.exists(plikiZDanymiKontekstowymi))) {
     stop("Nie znaleziono plików z danymi kontestowymi:\n  '",
          paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
          "'.")
   }
   lataWejscie = max(lataDo - tok):(min(lataDo) - liczbaRocznikow + 1 - tok - wydluzenie)
-  kontekstoweNaWejsciu = wczytaj_dane_kontekstowe(plikiZDanymi[1], FALSE, lataWejscie)
+  kontekstoweNaWejsciu =
+    wczytaj_dane_kontekstowe(plikiZDanymiKontekstowymi[1], FALSE, lataWejscie)
   skrotEgzaminu = sub("e", "g", substr(egzaminNaWyjsciu, 1, 1))
 
   # tworzenie wynikowych plików
@@ -76,7 +77,9 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
     # lataWyjście w pętli, bo od tego, co podamy wczytaj_dane_kontekstowe() zależy,
     # na jakiej grupie wylicza się wartość zmiennej 'lu_wszyscy'
     lataWyjscie = i:(i - liczbaRocznikow + 1)
-    kontekstoweNaWyjsciu = wczytaj_dane_kontekstowe(plikiZDanymi[2], TRUE, lataWyjscie)
+    setwd(katalogZDanymi)
+    kontekstoweNaWyjsciu =
+      wczytaj_dane_kontekstowe(plikiZDanymiKontekstowymi[2], TRUE, lataWyjscie)
     if (liczbaRocznikow > 1) {
       rok = paste0(substring(as.character(i), 3, 4), "-",
                    substring(as.character(i - liczbaRocznikow + 1), 3, 4))
@@ -86,7 +89,6 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
     plikZapis = paste0("dane_ewd_", sub("[.]", "", typSzkoly), rok, ".RData")
     message("Przygotowywanie pliku '", plikZapis, "'.")
 
-    setwd(katalogZDanymi)
     plikiNaWejsciu = paste0(egzaminNaWejsciu, " ",
                             (i - tok):(i - tok - liczbaRocznikow + 1 - wydluzenie),
                             ".RData")
@@ -163,7 +165,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
 
     # tworzenie zmiennych opisujących przedmioty zdawane na maturze
     if (typSzkoly %in% c("LO", "T")) {
-      message("Dołączanie informacji o zdawanych przedmiotach.")
+      message("  Dołączanie informacji o zdawanych przedmiotach.")
       zmianaKatalogu = try(setwd("../dane surowe"))
       if ("try-error" %in% class(zmianaKatalogu)) {
         warning("Nie udało się znaleźć katalogu z wynikami surowymi ",
@@ -186,7 +188,6 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                     names(przystepowanie))
         dane = suppressMessages(left_join(dane, przystepowanie))
       }
-      setwd(katalogZDanymi)
     }
 
     class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
