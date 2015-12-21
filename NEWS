@@ -1,9 +1,10 @@
 --------------------
-Zmiany w EWDdane 0.8 (2015-12-20)
+Zmiany w EWDdane 0.8 (2015-12-21)
 
 Nowe funkcjonalności:
   - przygotuj_dane_do_ewd() w przypadku matury zwraca również zmienne opisujące,
-    do jakich części egzaminu przystąpili poszczególni zdający;
+    do jakich części egzaminu przystąpili poszczególni zdający oraz informację,
+    czy w szkole jest zdawana matura międzynarodowa;
   - pobierz_parametry_skalowania() zwraca (jako atrybut) również parametry
     standaryzacji w ramach grup (o ile są jakieś zapisane w bazie).
 

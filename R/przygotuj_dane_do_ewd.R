@@ -29,6 +29,7 @@
 #' uczniowie o toku kształcenia wydłużonym maksymalnie o tyle lat
 #' @return wektor z nazwami zapisanych plików (niewidocznie)
 #' @import dplyr
+#' @import ZPD
 #' @export
 przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                  lataDo, liczbaRocznikow = 1,
@@ -188,6 +189,14 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                     names(przystepowanie))
         dane = suppressMessages(left_join(dane, przystepowanie))
       }
+      # dołączanie informacji o maturze międzynarodowej
+      ib = pobierz_szkoly(polacz()) %>%
+        filter_(~typ_szkoly == typSzkoly, ~rok %in% c(lataWyjscie, lataWyjscie)) %>%
+        select_(~id_szkoly, ~rok, ~matura_miedzynarodowa) %>%
+        collect()
+      names(ib) = paste0(names(ib), "_", skrotEgzaminu)
+      names(ib) = sub("^(matura_miedzynarodowa).*$", "\\1", names(ib))
+      dane = suppressMessages(left_join(dane, ib))
     }
 
     class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
