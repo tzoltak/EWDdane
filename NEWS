@@ -1,4 +1,25 @@
 --------------------
+Zmiany w EWDdane 0.8 (2015-12-21)
+
+Nowe funkcjonalności:
+  - przygotuj_dane_do_ewd() w przypadku matury zwraca również zmienne opisujące,
+    do jakich części egzaminu przystąpili poszczególni zdający oraz informację,
+    czy w szkole jest zdawana matura międzynarodowa;
+  - pobierz_parametry_skalowania() zwraca (jako atrybut) również parametry
+    standaryzacji w ramach grup (o ile są jakieś zapisane w bazie).
+
+Nowe funkcje:
+  - wczytaj_liczbe_przystepujacych() (nieeksportowana) - na podstawie surowych
+    wynikow egzaminu zwraca zestawienie z informacjami, którzy zdający zdawali
+    poszczególne części ezgaminu.
+
+Naprawione błędy:
+  - wczytaj_wyniki_wyskalowane() traktuje grupę jako cechę wskaźnika osiągnięć
+    (modelu skalowania), a nie osoby zdającej dany egzamin w danym roku;
+  - wczytaj_wyniki_wyskalowane() radzi sobie w sytuacji, gdy skala ma kilka
+    skalowań;
+
+--------------------
 Zmiany w EWDdane 0.7.2 (2015-11-18)
 
 Naprawione błędy:

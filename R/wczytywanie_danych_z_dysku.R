@@ -211,7 +211,6 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
   attributes(dane)$normy = normy
   return(dane)
 }
-
 #' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
 #' @description Funkcja wczytuje wyniki surowe egzaminu z pojedynczego pliku.
 #' @param nazwaPliku ciąg znaków - nazwa pliku z surowymi wynikami egzaminu
@@ -231,6 +230,10 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
   obiekty = load(nazwaPliku)
   for (i in obiekty) {
     oszacowania = get(i)
+    # konwersja grup na liczby, żeby mogły być przetwarzana melt/dcast z oszacowaniami
+    oszacowania$grupa = factor(oszacowania$grupa)
+    grupy = levels(oszacowania$grupa)
+    oszacowania$grupa = as.numeric(oszacowania$grupa)
     rm(i)
     if ("wynikiWyskalowane" %in% class(oszacowania)) {
       skale = bind_rows(
@@ -248,14 +251,19 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
                                    "zmienna"))
       )
       oszacowania = suppressMessages(
-        inner_join(oszacowania, select_(skale, ~id_skali, ~zmienna)) %>%
+        inner_join(oszacowania, select_(skale, ~id_skali, ~skalowanie, ~zmienna)) %>%
           select_(~-id_skali, ~-skalowanie) %>%
-          melt(measure.vars = c("wynik", "bs"), variable.name = "co",
+          melt(measure.vars = c("wynik", "bs", "grupa"), variable.name = "co",
                value.name = "wartosc") %>%
-          dcast(id_obserwacji + rok + nr_pv + grupa ~ co + zmienna,
+          dcast(id_obserwacji + rok + nr_pv ~ co + zmienna,
                 value.var = "wartosc")
       )
       names(oszacowania) = sub("wynik_", "", names(oszacowania))
+      # grupy znów na ciągi znaków
+      maskaZmGrupy = grep("^grupa_", names(oszacowania))
+      oszacowania[, maskaZmGrupy] = lapply(oszacowania[, maskaZmGrupy],
+                                           function(x, grupy) {return(grupy[x])},
+                                           grupy = grupy)
       if (exists("dane", inherits = FALSE)) {
         dane = suppressMessages(full_join(dane, oszacowania))
       } else {
@@ -283,7 +291,7 @@ wczytaj_wyniki_skalowania = function(nazwyPlikow) {
   skale = data.frame()
   for (i in nazwyPlikow) {
     obiekty = load(i)
-    for (j in (obiekty)) {
+    for (j in obiekty) {
       if ("listaWynikowSkalowania" %in% class(get(j))) {
         rok = suppressMessages(
           as.numeric(sub("^.([[:digit:]]{4})Skalowanie", "\\1", j)))
@@ -302,4 +310,39 @@ wczytaj_wyniki_skalowania = function(nazwyPlikow) {
   }
   attributes(oszacowania)$skale = skale
   return(oszacowania)
+}
+#' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
+#' @description Funkcja wczytuje dane z plików .RData z wynikami surowymi
+#' egzaminu, i przygotowuje zestawienie opisujące, którzy zdający przystępowali
+#' do których części egzaminu.
+#' @param nazwyPlikow wektor ciągów znaków - nazwy plików z surowymi wynikami
+#' egzaminu
+#' @import dplyr
+#' @return data table
+wczytaj_liczbe_przystepujacych = function(nazwyPlikow) {
+  stopifnot(is.character(nazwyPlikow), length(nazwyPlikow) > 0)
+
+  przystepowanie = setNames(vector(mode = "list", length = length(nazwyPlikow)),
+                            nazwyPlikow)
+  for (i in nazwyPlikow) {
+    obiekty = load(i)
+    przystepowanie[[i]] =
+      data.frame(id_obserwacji = vector(mode = "integer", length = 0))
+    for (j in obiekty) {
+      if (all(c("wynikiSurowe", "czescEgzaminu") %in% class(get(j)))) {
+        temp = get(j) %>%
+          select_(~id_obserwacji, ~rok) %>%
+          mutate_(.dots = setNames(list(~TRUE),
+                                   paste0("zdawal_", j)))
+        przystepowanie[[i]] = suppressMessages(
+          full_join(przystepowanie[[i]], temp))
+      }
+      rm(list = j)
+    }
+  }
+  przystepowanie = rbind_all(przystepowanie)
+  maska = is.na(przystepowanie[, grep("^zdawal_", names(przystepowanie))])
+  przystepowanie[, grep("^zdawal_", names(przystepowanie))][maska] = FALSE
+
+  return(przystepowanie)
 }
