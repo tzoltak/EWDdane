@@ -261,7 +261,7 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
       names(oszacowania) = sub("wynik_", "", names(oszacowania))
       # grupy znów na ciągi znaków
       maskaZmGrupy = grep("^grupa_", names(oszacowania))
-      oszacowania[, maskaZmGrupy] = lapply(oszacowania[, maskaZmGrupy],
+      oszacowania[, maskaZmGrupy] = lapply(oszacowania[, maskaZmGrupy, drop = FALSE],
                                            function(x, grupy) {return(grupy[x])},
                                            grupy = grupy)
       if (exists("dane", inherits = FALSE)) {

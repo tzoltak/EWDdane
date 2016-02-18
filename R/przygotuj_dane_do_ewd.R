@@ -131,8 +131,8 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
     dane$wydl = factor(as.numeric(levels(dane$wydl))[dane$wydl])
 
     # przypisywanie sum punktów skalom raschowym, które mają grupy
-    skale = rbind(attributes(daneNaWyjsciu)$skale,
-                  attributes(daneNaWejsciu)$skale)
+    skale = bind_rows(attributes(daneNaWyjsciu)$skale,
+                      attributes(daneNaWejsciu)$skale)
     normy = c(attributes(daneNaWyjsciu)$normy,
               attributes(daneNaWejsciu)$normy)
     if (any(grepl("R_irt$", names(dane)))) {
