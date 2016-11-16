@@ -5,7 +5,7 @@
 \title{Przygotowywanie danych do wyliczania modeli EWD}
 \usage{
 przygotuj_dane_do_ewd(katalogZDanymi, typSzkoly, lataDo, liczbaRocznikow = 1,
-  wydluzenie = 1)
+  wydluzenie = 1, usunPusteKolumny = TRUE)
 }
 \arguments{
 \item{katalogZDanymi}{ciąg znaków - ścieżka do katalogu, w którym znajdują
@@ -24,6 +24,10 @@ obejmować pojedynczy plik (domyślnie 1 - zbiory "jednoroczne")}
 
 \item{wydluzenie}{liczba całkowita - w przygotowanym zbiorze znajdą się
 uczniowie o toku kształcenia wydłużonym maksymalnie o tyle lat}
+
+\item{usunPusteKolumny}{opcjonalnie wartość logiczna - czy usunąć puste
+kolumny opisujące grupę w skalowaniu, błędy standardowe oraz kolumnę 'nr_pv',
+jeśli skalowanie nie generowało PV?}
 }
 \value{
 wektor z nazwami zapisanych plików (niewidocznie)

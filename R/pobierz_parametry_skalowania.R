@@ -24,6 +24,7 @@
 #' W zależności od wartości argumentu \code{parametryzacja} albo w formacie
 #' zwracanym przez funkcję \code{\link[ZPD]{pobierz_parametry}}, albo w formacie
 #' wykorzystywanym przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
+#' @importFrom stats setNames
 #' @import ZPD
 #' @export
 pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
@@ -41,7 +42,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   # szukamy skal
   skale = pobierz_skale(polacz(), doPrezentacji = NA, czyKtt = FALSE) %>%
     select_(~-id_testu, ~-grupa) %>%
-    collect(skale) %>%
+    collect(skale, n = Inf) %>%
     distinct()
   if (!is.na(doPrezentacji)) {
     skale = filter_(skale, ~skala_do_prezentacji == doPrezentacji)
@@ -101,7 +102,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   parametry = suppressMessages(
     pobierz_parametry(polacz()) %>%
       inner_join(select_(skaleZeSkalowaniem, ~-max_skalowanie), copy = TRUE) %>%
-      collect()
+      collect(n = Inf)
   )
   if (ncol(parametry) == 0) {
     # jeśli w wyniku semi_joina wypadają wszystkie wiersze, to wyparowują też kolumny
@@ -197,6 +198,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 #' @return
 #' Funkcja zwraca ramkę danych, która jest zgodna z postacią ramek zwracanych
 #' przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
+#' @importFrom stats setNames
 #' @import dplyr
 zmien_na_mplus = function(x) {
   stopifnot(is.data.frame(x))

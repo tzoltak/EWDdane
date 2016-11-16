@@ -1,7 +1,7 @@
 #' @title Pobieranie surowych wynikow egzaminu
 #' @description
-#' Funkcja pobiera surowe wyniki egzaminu (ze wszystkich lat i wszystkich skal,
-#' powiązanych z danym egzaminem, które są w bazie) i zapisuje je na dysku
+#' Funkcja pobiera wyskalowane wyniki egzaminu (ze wszystkich lat i wszystkich
+#' skal, powiązanych z danym egzaminem, które są w bazie) i zapisuje je na dysku
 #' w postaci plików RData.
 #' \itemize{
 #'   \item{Funkcja sprawdzi, czy w aktywnym katalogu istnieje katalog
@@ -10,7 +10,7 @@
 #'   \item{Dane dotyczące wyników z poszczególnych lat zapisane zostaną
 #'         w oddzielnych plikach, o nazwach postaci \code{nazwa egzaminu rok.RData}.}
 #'   \item{W każdym takim pliku znajduje się data frame klasy
-#'         \code{wyniki Wyskalowane}, o nazwie postaci \code{prefiksKontekstowe}
+#'         \code{wynikiWyskalowane}, o nazwie postaci \code{prefiksWyskalowane}
 #'         (gdzie \code{prefiks} opisuje rodzaj egzaminu: \code{s} - sprawdzian,
 #'         \code{g} - egz. gimn., \code{m} - matura). Przechowuje on wyskalowane
 #'         wyniki w postaci długiej, analogicznie jak wynik wywołania funkcji
@@ -45,6 +45,7 @@
 #' \code{\link[EWDskale]{skaluj_matura}}. Jeśli podany, wyniki wyskalowane
 #' zostaną wczytane z tych plików, a nie z bazy.
 #' @return lista z nazwami zapisanych plików (niewidocznie)
+#' @importFrom stats setNames
 #' @import ZPD
 #' @export
 pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
@@ -72,12 +73,12 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
     lata = pobierz_testy(src) %>%
       filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
       select_(.dots = ~rok) %>%
-      distinct %>%
-      collect %>%
-      as.list %>%
-      unlist %>%
-      sort %>%
-      unname
+      distinct() %>%
+      collect(n = Inf) %>%
+      as.list() %>%
+      unlist() %>%
+      sort() %>%
+      unname()
   }
   skrotEgzaminu = sub("e", "g", substr(rodzajEgzaminu, 1, 1))
 
@@ -114,7 +115,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
               ~rok %in% c(lata, lata)) %>%
       left_join(pobierz_testy(src) %>% select_(~id_testu, ~czy_egzamin)) %>%
       select_(~-id_testu, ~-grupa, ~-posiada_normy) %>%
-      collect() %>%
+      collect(n = Inf) %>%
       distinct() %>%
       group_by_(~id_skali, ~skalowanie) %>%
       mutate_(.dots = setNames(list(~!czy_egzamin | all(czy_egzamin)),
@@ -150,7 +151,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
       oszacowania = suppressMessages(
         pobierz_oszacowania_uczniow(src) %>%
           semi_join(select_(skaleRok, ~id_skali, ~rok), copy = TRUE) %>%
-          collect()
+          collect(n = Inf)
       )
       skalowaniaZDysku = NULL
     } else {
