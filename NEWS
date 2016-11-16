@@ -27,6 +27,13 @@ Naprawione błędy:
     wynik surowy nie jest funkcją wyniku znormalizowanego.
 
 --------------------
+Zmiany w EWDdane 0.8.1 (18.02.2016)
+
+Naprawione błędy:
+  - wczytaj_wyniki_wyskalowane(): usunięto regresję względem wyników sprawdzianu
+    (regresja wystąpiła w wersji 0.8), spodowowaną brakiem "drop = FALSE".
+
+--------------------
 Zmiany w EWDdane 0.8 (21.12.2015)
 
 Nowe funkcjonalności:
