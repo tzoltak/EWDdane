@@ -1,7 +1,7 @@
 #' @title Pobieranie danych kontekstowych o uczniach
 #' @description
 #' Pobiera z bazy danych zmaterializowany zbiór danych zawierający wszelkie
-#' infromacje kontekstowe potrzebne przy wyliczaniu EWD.
+#' infromacje kontekstowe potrzebne przy obliczaniu EWD.
 #'
 #' Jeden wiersz zwracanej ramki danych opisuje pierwsze/ostatnie (patrz niżej)
 #' przystąpienie ucznia do wskazanego rodzaju egzaminu, a informacje dotyczące
@@ -110,7 +110,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     dysleksja = ~ifelse(dysleksja == dysleksja2, dysleksja, NA)
   )
   dotsSelect = c('-id_szkoly2', '-dysleksja2')
-  if(daneOsobowe){
+  if (daneOsobowe) {
     dotsSummarize = append(dotsSummarize, list(
       klasa      = ~min(klasa,     na.rm = T),
       kod_u      = ~min(kod_u,     na.rm = T),
@@ -136,7 +136,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     pobierz_dane_uczniowie_testy(src, daneOsobowe = daneOsobowe) %>%
       inner_join(testy) %>%
       select_('-pop_podejscie', '-oke', '-zrodlo', '-id_testu') %>%
-      collect()
+      collect(n = Inf)
   )
   message(" Konwersja danych na format krótszy.",
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
@@ -166,7 +166,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   szkoly = pobierz_szkoly(src) %>%
     select_('id_szkoly', 'rok', 'typ_szkoly', 'publiczna', 'specjalna',
             'dla_doroslych', 'przyszpitalna', 'artystyczna') %>%
-    collect()
+    collect(n = Inf)
   dane = suppressMessages(inner_join(dane, szkoly))
   rm(szkoly)
 
@@ -176,7 +176,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
     select_('-id_cke') %>%
     distinct() %>%
-    collect()
+    collect(n = Inf)
   dane = suppressMessages(inner_join(dane, obserwacje))
   rm(obserwacje)
 
@@ -186,7 +186,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   pierwsze = filtruj_przystapienia(src, pierwsze = TRUE,
                                    rodzajEgzaminu = rodzajEgzaminu,
                                    czescEgzaminu = NULL, czyEwd = TRUE) %>%
-    collect() %>%
+    collect(n = Inf) %>%
     select_('-rodzaj_egzaminu', '-dane_ewd') %>%
     mutate_(pierwsze = TRUE)
   dane = suppressMessages(left_join(dane, pierwsze))
@@ -196,15 +196,15 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   ostatnie = filtruj_przystapienia(src, pierwsze = FALSE,
                                    rodzajEgzaminu = rodzajEgzaminu,
                                    czescEgzaminu = NULL, czyEwd = TRUE) %>%
-    collect() %>%
+    collect(n = Inf) %>%
     select_('-rodzaj_egzaminu', '-dane_ewd') %>%
     mutate_(ostatnie = TRUE)
   dane = suppressMessages(left_join(dane, ostatnie))
   rm(ostatnie)
 
-  # ew. wyliczenie wieku w miesiącach
+  # ew. obliczenie wieku w miesiącach
   if (daneOsobowe) {
-    message(" Wyliczanie wieku.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
+    message(" Obliczanie wieku.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
     dane = dane %>%
       mutate(wiek = as.numeric(substr(dane$data, 1, 4)) * 12 +
                as.numeric(substr(dane$data, 6, 7)) -

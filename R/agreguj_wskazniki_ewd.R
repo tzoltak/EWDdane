@@ -40,6 +40,7 @@
 #' dane = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) %>%
 #'   agreguj_wskazniki_ewd("powiat")
 #' }
+#' @importFrom stats as.formula
 #' @import dplyr
 #' @import ZPD
 #' @export

@@ -36,8 +36,8 @@ zostaną wczytane z tych plików, a nie z bazy.}
 lista z nazwami zapisanych plików (niewidocznie)
 }
 \description{
-Funkcja pobiera surowe wyniki egzaminu (ze wszystkich lat i wszystkich skal,
-powiązanych z danym egzaminem, które są w bazie) i zapisuje je na dysku
+Funkcja pobiera wyskalowane wyniki egzaminu (ze wszystkich lat i wszystkich
+skal, powiązanych z danym egzaminem, które są w bazie) i zapisuje je na dysku
 w postaci plików RData.
 \itemize{
   \item{Funkcja sprawdzi, czy w aktywnym katalogu istnieje katalog
@@ -46,7 +46,7 @@ w postaci plików RData.
   \item{Dane dotyczące wyników z poszczególnych lat zapisane zostaną
         w oddzielnych plikach, o nazwach postaci \code{nazwa egzaminu rok.RData}.}
   \item{W każdym takim pliku znajduje się data frame klasy
-        \code{wyniki Wyskalowane}, o nazwie postaci \code{prefiksKontekstowe}
+        \code{wynikiWyskalowane}, o nazwie postaci \code{prefiksWyskalowane}
         (gdzie \code{prefiks} opisuje rodzaj egzaminu: \code{s} - sprawdzian,
         \code{g} - egz. gimn., \code{m} - matura). Przechowuje on wyskalowane
         wyniki w postaci długiej, analogicznie jak wynik wywołania funkcji

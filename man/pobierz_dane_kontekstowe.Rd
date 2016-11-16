@@ -17,7 +17,7 @@ data.frame
 }
 \description{
 Pobiera z bazy danych zmaterializowany zbiór danych zawierający wszelkie
-infromacje kontekstowe potrzebne przy wyliczaniu EWD.
+infromacje kontekstowe potrzebne przy obliczaniu EWD.
 
 Jeden wiersz zwracanej ramki danych opisuje pierwsze/ostatnie (patrz niżej)
 przystąpienie ucznia do wskazanego rodzaju egzaminu, a informacje dotyczące

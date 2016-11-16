@@ -65,10 +65,10 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
       filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
       select_(.dots = ~rok) %>%
       distinct %>%
-      collect %>%
-      as.list %>%
-      unlist %>%
-      sort
+      collect(n = Inf) %>%
+      as.list() %>%
+      unlist() %>%
+      sort()
   }
   skrotEgzaminu = sub("e", "g", substr(rodzajEgzaminu, 1, 1))
 
@@ -100,7 +100,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   # pobieranie i zapis wyników
   for (i in lata) {
     message("\nRok ", i, ":")
-    if ((rodzajEgzaminu == "sprawdzian" & i < 2003) |
+    if ((rodzajEgzaminu == "sprawdzian" & (i < 2003 | i == 2013)) |
         (rodzajEgzaminu == "egzamin gimnazjalny" & i < 2006) |
         (rodzajEgzaminu == "matura" & i < 2010)) {
       czyEwd = FALSE
@@ -110,8 +110,8 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     czesciEgzaminu = pobierz_testy(src) %>%
       filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rok == i, ~czy_egzamin) %>%
       select_(.dots = list(~czesc_egzaminu, ~prefiks)) %>%
-      collect %>%
-      unique
+      collect(n = Inf) %>%
+      unique()
     for (j in 1:nrow(czesciEgzaminu)) {
       if (czesciEgzaminu$czesc_egzaminu[j] != "") {
         message("  ", czesciEgzaminu$czesc_egzaminu[j])
@@ -119,7 +119,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
       temp = pobierz_wyniki_egzaminu(src, rodzajEgzaminu,
                                      czesciEgzaminu$czesc_egzaminu[j],
                                      i, czyEwd) %>%
-        collect
+        collect(n = Inf)
       class(temp) = append(class(temp), c("wynikiSurowe", "czescEgzaminu"))
       attributes(temp)$dataPobrania = Sys.time()
       assign(czesciEgzaminu$prefiks[j], temp)

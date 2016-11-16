@@ -7,6 +7,7 @@
 #' @param zapis opcjonalnie nazwa pliku, do którego zostaną zapisane pobrane dane
 #' (w formacie csv)
 #' @return data frame (niewidocznie)
+#' @importFrom utils write.csv2
 #' @import dplyr
 #' @import ZPD
 #' @export
@@ -26,11 +27,12 @@ pobierz_baze_szkol = function(typySzkol, zapis = NULL) {
     }
   }
 
+  lata = 2006:as.numeric(format(Sys.time(), "%Y"))
   for (typ in typySzkol) {
-    daneSzkol = pobierz_dane_szkol(2006:as.numeric(format(Sys.time(), "%Y")),
-                                   typ, idOke = FALSE, daneAdresowe = TRUE) %>%
+    daneSzkol = pobierz_dane_szkol(lata, typ, idOke = FALSE,
+                                   daneAdresowe = TRUE) %>%
       filter_(~id_szkoly > 0)
-    lata = sort(unique(daneSzkol$rok), decreasing = TRUE)
+    lata = max(daneSzkol$rok):min(daneSzkol$rok)
     daneSzkol = select_(daneSzkol, ~-rok, ~-wielkosc_miejscowosci,
                         ~-rodzaj_gminy, ~-matura_miedzynarodowa)
     daneSzkol = within(daneSzkol, {
