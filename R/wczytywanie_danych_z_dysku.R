@@ -95,7 +95,7 @@ wczytaj_wyniki_egzaminu = function(nazwyPlikow, daneKontekstowe = NULL) {
       normy = c(normy, attributes(daneRok)$normy)
     } else if ("wynikiWyskalowane" %in% klasy) {
       daneRok = wczytaj_wyniki_wyskalowane(i)
-      skale = rbind(skale, attributes(daneRok)$skale)
+      skale = bind_rows(skale, attributes(daneRok)$skale)
     } else {
       warning("W pliku '", i, "', nie ma ani wyników surowych, ani wyskalowanych",
               immediate. = TRUE)
@@ -137,7 +137,7 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
   # obsługa części egzaminu gimnazjalnego
   testy = pobierz_testy(polacz()) %>%
     filter_(~prefiks %in% c("gh", "gm"), ~is.na(arkusz), ~dane_ewd == TRUE) %>%
-    collect()
+    collect(n = Inf)
   if (exists("gh_h") & exists("gh_p")) {
     gh = suppressMessages(inner_join(get("gh_h"),
                                      get("gh_p")[, names(get("gh_p")) != "id_testu"]))
@@ -153,7 +153,7 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
 
   skale = pobierz_skale(polacz(), doPrezentacji = NA) %>%
     filter_(~opis_skalowania == "normalizacja ekwikwantylowa EWD") %>%
-    collect()
+    collect(n = Inf)
   skaleTesty = list()
   normy = list()
   # idziemy po obiektach
@@ -175,14 +175,16 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
       grupa = last(filter_(idSkali, ~posiada_normy == TRUE)$grupa, default = NULL)
       skalowanie = last(filter_(idSkali, ~posiada_normy == TRUE)$skalowanie, default = NULL)
       idSkali = last(filter_(idSkali, ~posiada_normy == TRUE)$id_skali, default = NULL)
-      if (!is.null(idSkali) & !is.null(skalowanie) & grupa == '') {
-        temp = normalizuj(temp, src = polacz(), idSkali = idSkali,
-                          skalowanie = skalowanie, grupa = grupa)
-        normy[[length(normy) + 1]] = pobierz_normy(polacz()) %>%
-          filter_(~id_skali == idSkali, ~skalowanie == skalowanie, ~grupa == grupa) %>%
-          as.data.frame() %>%
-          mutate_(rok = ~temp$rok[1], konstrukt = ~konstrukt)
-        names(normy)[length(normy)] = paste0(konstrukt, "_", temp$rok[1])
+      if (!is.null(idSkali) & !is.null(skalowanie) & !is.null(grupa)) {
+        if (grupa == '') {
+          temp = normalizuj(temp, src = polacz(), idSkali = idSkali,
+                            skalowanie = skalowanie, grupa = grupa)
+          normy[[length(normy) + 1]] = pobierz_normy(polacz()) %>%
+            filter_(~id_skali == idSkali, ~skalowanie == skalowanie, ~grupa == grupa) %>%
+            as.data.frame() %>%
+            mutate_(rok = ~temp$rok[1], konstrukt = ~konstrukt)
+          names(normy)[length(normy)] = paste0(konstrukt, "_", temp$rok[1])
+        }
       } else if (is.null(idSkali)) {
         warning("Nie przypisano normalizacji ekwikwantylowej wynikom konstruktu '",
                 konstrukt, "' z ", temp$rok[1], " roku. ",
@@ -219,6 +221,7 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
 #' to zwrócone zostaną wyniki tylko jednego z nich, przy czym piwerwszeństwo
 #' będą mieć skalowania oznaczone jako do prezentacji, a w dalszej kolejności
 #' te, których data skalowania jest najpóżniejsza.
+#' @importFrom stats setNames
 #' @import ZPD
 #' @import reshape2
 #' @return data table
@@ -317,6 +320,7 @@ wczytaj_wyniki_skalowania = function(nazwyPlikow) {
 #' do których części egzaminu.
 #' @param nazwyPlikow wektor ciągów znaków - nazwy plików z surowymi wynikami
 #' egzaminu
+#' @importFrom stats setNames
 #' @import dplyr
 #' @return data table
 wczytaj_liczbe_przystepujacych = function(nazwyPlikow) {
@@ -340,7 +344,7 @@ wczytaj_liczbe_przystepujacych = function(nazwyPlikow) {
       rm(list = j)
     }
   }
-  przystepowanie = rbind_all(przystepowanie)
+  przystepowanie = bind_rows(przystepowanie)
   maska = is.na(przystepowanie[, grep("^zdawal_", names(przystepowanie))])
   przystepowanie[, grep("^zdawal_", names(przystepowanie))][maska] = FALSE
 

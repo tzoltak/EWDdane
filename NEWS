@@ -1,5 +1,33 @@
 --------------------
-Zmiany w EWDdane 0.8 (2015-12-21)
+Zmiany w EWDdane 0.9 (16.11.2016)
+
+Nowe funkcjonalności:
+  - formaty_zmiennych_baza_na_ewd(), a w związku z tym również,
+    przygotuj_dane_do_ewd(), domyślnie usuwa puste kolmny opisujące grupy (dot.
+    skalowań wykonywanych modelami jednogrupowymi), błędy standardowe (dot.
+    skalowań, w których wynikom nie są przypisywane bł. std.) oraz nr PV (dot.
+    skalowań, w którzych PV nie są generowane); poprzednie zachowanie można
+    uzyskać korzystając z argumentu 'usunPusteKolumny';
+  - formaty_zmiennych_baza_na_ewd(), a w związku z tym również,
+    przygotuj_dane_do_ewd(), porządkuje kolejność zmiennych w zwracanej ramce
+    danych.
+
+Naprawione błędy:
+  - pobierz_baze_szkol() pobiera id OKE szkół ze wszystkich lat z zadanego
+    zakresu, a nie tylko tych, w których coś się zmieniło w danych adresowych;
+  - wczytaj_wyniki_egzaminu() uodpornione na nieco różny zestaw charakterystyk
+    skal w zależności od pliku z wynikami (takie różnice występują ze względu
+    na zmiany, jakie zachodziły w zestawie kolumn zwracanym przez
+    pobierz_skale());
+  - wszystkie funkcje uodpornione na kaprys Hadleya Wickhama, aby colect()
+    pobierała domyśłnie tylko 100 tys. wierszy;
+  - pobierz_wyniki_wyskalowane() - poprawiona dokumentacja;
+  - przygotuj_dane_do_ewd() nie duplikuje obserwacji przy dołączaniu wyników
+    surowych skal raschowych na podstawie wyników obserwowanych, jeśli w normach
+    wynik surowy nie jest funkcją wyniku znormalizowanego.
+
+--------------------
+Zmiany w EWDdane 0.8 (21.12.2015)
 
 Nowe funkcjonalności:
   - przygotuj_dane_do_ewd() w przypadku matury zwraca również zmienne opisujące,
@@ -20,21 +48,21 @@ Naprawione błędy:
     skalowań;
 
 --------------------
-Zmiany w EWDdane 0.7.2 (2015-11-18)
+Zmiany w EWDdane 0.7.2 (18.11.2015)
 
 Naprawione błędy:
   - pobierz_parametry_skalowania() uwzględnia wartość argumentu 'doPrezentacji'
     przy wyborze skalowań, dla których zwrócone zostaną parametry.
 
 --------------------
-Zmiany w EWDdane 0.7.1 (2015-11-10)
+Zmiany w EWDdane 0.7.1 (10.11.2015)
 
 Naprawione błędy:
   - pobierz_wyniki_wyskalowane() zapisuje plik z danymi kontekstowymi w katalogu
     'wyniki wyskalowane', a nie w 'wyniki surowe'.
 
 --------------------
-Zmiany w EWDdane 0.7 (2015-09-28)
+Zmiany w EWDdane 0.7 (28.09.2015)
 
 Przystosowano pakiet do współpracy z pakietem ZPD w wersji 1.5.0.
 
@@ -43,7 +71,7 @@ Naprawione błędy:
     w bazie to samo id_obserwacji, ale różnią się id_cke.
 
 --------------------
-Zmiany w EWDdane 0.6.3 (2015-09-15)
+Zmiany w EWDdane 0.6.3 (15.09.2015)
 
 Nowe funkcje:
   - wczytaj_wyniki_skalowania() (nieeksportowana) - wczytuje oszacowania
@@ -72,13 +100,13 @@ Naprawione błędy:
   - przygotuj_dane_do_ewd() poprawnie wylicza wartość zmiennej 'lu_wszyscy'.
 
 --------------------
-Zmiany w EWDdane 0.6.2 (2015-08-25)
+Zmiany w EWDdane 0.6.2 (25.08.2015)
 
 Nowe funkcjonalności:
   - pobierz_baze_szkol() umożliwa wybranie "SP" jako typu szkoły.
 
 --------------------
-Zmiany w EWDdane 0.6.1 (2015-08-11)
+Zmiany w EWDdane 0.6.1 (11.08.2015)
 
 Nowe funkcjonalności:
   - przygotuj_dane_surowe_do_ewd():
@@ -91,7 +119,7 @@ Nowe funkcjonalności:
     wobec faktu, że "dysleksja" jest opisywana pełnym wyrazem, a nie skrótem.
 
 --------------------
-Zmiany w EWDdane 0.6.0 (2015-08-07)
+Zmiany w EWDdane 0.6.0 (07.08.2015)
 
 Nowe funkcje:
   - pobierz_baze_szkol() - zamknięcie do pakietu procesu aktualizacji bazy szkół;
@@ -113,7 +141,7 @@ Dodano zamykanie połączeń z bazą w funkcjach:
 - pobierz_dane_szkol().
 
 --------------------
-Zmiany w EWDdane 0.5.3 (2015-05-27)
+Zmiany w EWDdane 0.5.3 (27.05.2015)
 
 Funkcja pobierz_dane_kontekstowe():
   - pobiera informacje o wszystkich przystąpieniach (zarówno pierwszych, jak
@@ -128,14 +156,14 @@ Usunięte funkcje:
   - usun_kryteria_ze_skali_es() - przeniesiona do gałęzi rozwojowej pakietu ZPDzapis.
 
 --------------------
-Zmiany w EWDdane 0.5.2 (2015-05-20)
+Zmiany w EWDdane 0.5.2 (20.05.2015)
 
 Nowe funkcje:
   - pobierz_dane_kontekstowe() - pobiera wszelkie dane kontekstowe o uczniach
     (i szkołach) potrzebne przy wyliczaniu EWD.
 
 --------------------
-Zmiany w EWDdane 0.5.2 (2015-04-30)
+Zmiany w EWDdane 0.5.2 (30.04.2015)
 
 Nowe funkcje:
   - agreguj_wskazniki_ewd() - pozwala łatwo agregować wartości wskaźników EWD
@@ -150,13 +178,13 @@ Pomniejsze zmiany:
     kolumny opisujace, czy elipsy poszczególnych szkół są wyświetlane.
 
 --------------------
-Zmiany w EWDdane 0.5.1 (2015-03-03)
+Zmiany w EWDdane 0.5.1 (03.03.2015)
 
 Zmiany w kodzie funkcji pobierz_dane_szkol() i pobierz_wartosci_wskaznikow_ewd(),
 dostosowujące obsługę kodowania polskich znaków do zmian w pakiecie ZPD.
 
 --------------------
-Zmiany w EWDdane 0.5 (2015-02-18)
+Zmiany w EWDdane 0.5 (18.02.2015)
 
 Zmiana licencji na MIT.
 
@@ -192,13 +220,13 @@ Funkcje przeniesione do innych pakietów:
   - zapisz_oszacowania_umiejetnosci() - do pakietu ZPDzapis.
 
 --------------------
-Zmiany w EWDdane 0.4 (2014-10-23)
+Zmiany w EWDdane 0.4 (23.10.2014)
 
 Nowe funkcje:
   - pobierz_wartosci_wskaznikow() - pobiera zestawienia wartości wskaźników EWD.
 
 --------------------
-Zmiany w EWDdane 0.3 (2014-10-14)
+Zmiany w EWDdane 0.3 (14.10.2014)
 
 Nowe funkcje:
   - stworz_test_z_wielu_czesci() - pozwala łatwo tworzyć testy opisujące EWDowe
@@ -210,14 +238,14 @@ Inne zmiany:
   - Dostosowanie funkcji pobierz_dane_uczniow() do zmian w strukturze bazy.
 
 --------------------
-Zmiany w EWDdane 0.2 (2014-08-25)
+Zmiany w EWDdane 0.2 (25.08.2014)
 
 Poprawione błędy:
   - pobierz_dane_szkol() teraz na prawdę pobiera dane najaktualniejsze w ramach
     podanego okresu (wcześniej próbowała pobrać najaktualniejsze w ogóle);
 
 --------------------
-Publikacja EWDdane 0.1 (2014-08-09)
+Publikacja EWDdane 0.1 (09.08.2014)
 
 Nowe funkcje:
   - pobierz_dane_uczniow();

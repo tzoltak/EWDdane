@@ -36,6 +36,8 @@
 #' @param fileEncoding ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
 #' plik csv
 #' @return data frame
+#' @importFrom stats qchisq
+#' @importFrom utils write.csv2
 #' @import ZPD
 #' @import reshape2
 #' @import lazyeval
@@ -93,7 +95,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     lUczniow = suppressMessages(left_join(wskazniki, pobierz_wartosci_wskaznikow_lu(src)))
     lUczniow = filter_(lUczniow, "!is.na(czesc_egzaminu)")
     lUczniow = select_(lUczniow, ~ matches("^(id_ww|czesc_egzaminu|przedm_lu)$"))
-    lUczniow = as.data.frame(collect(lUczniow))
+    lUczniow = as.data.frame(collect(lUczniow, n = Inf))
     for (i in names(lUczniow)[unlist(lapply(lUczniow, is.character))]) {
       Encoding(lUczniow[, i]) = "UTF-8"
       lUczniow[, i] = enc2native(lUczniow[, i])
@@ -106,7 +108,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(lUczniow) = gsub(" ", "_", names(lUczniow), fixed = TRUE)
   }
   message("Pobieranie informacji o wartościach wskaźników.")
-  wskazniki = collect(wskazniki)
+  wskazniki = collect(wskazniki, n = Inf)
   # dalsze przekształcanie
   message("Wyliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))
@@ -188,6 +190,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   if (opisoweNazwy) {
     maska = grep("ewd[ _]|srednia[ _]|bs[ _]", names(wskazniki))
     wskazniki[maska] = lapply(wskazniki[maska], round, digits = 2)
+    names(wskazniki) = sub("id_szkoly_oke", "kod egzaminacyjny szkoły", names(wskazniki))
     names(wskazniki) = sub("id_szkoly" , "id szkoły w bazie EWD", names(wskazniki))
     names(wskazniki) = sub("typ_szkoly", "typ szkoły", names(wskazniki))
     names(wskazniki) = sub("dla_doroslych", "szkoła dla dorosłych", names(wskazniki))
@@ -195,7 +198,6 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(wskazniki) = sub("przyszpitalna", "szkoła przyszpitalna", names(wskazniki))
     wskazniki$artystyczna[is.na(wskazniki$artystyczna)] = "ndt."
     names(wskazniki) = sub("artystyczna"  , "typ szkoły artystycznej", names(wskazniki))
-    names(wskazniki) = sub("id_szkoly_oke", "kod egzaminacyjny szkoły", names(wskazniki))
     names(wskazniki) = sub("nazwa_szkoly" , "nazwa", names(wskazniki))
     names(wskazniki) = sub("miejscowosc"  , "miejscowość", names(wskazniki))
     names(wskazniki) = sub("pna"          , "kod pocztowy", names(wskazniki))

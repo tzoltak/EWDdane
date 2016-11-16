@@ -28,17 +28,22 @@
 #' @param wydluzenie liczba całkowita - w przygotowanym zbiorze znajdą się
 #' uczniowie o toku kształcenia wydłużonym maksymalnie o tyle lat
 #' @return wektor z nazwami zapisanych plików (niewidocznie)
+#' @param usunPusteKolumny opcjonalnie wartość logiczna - czy usunąć puste
+#' kolumny opisujące grupę w skalowaniu, błędy standardowe oraz kolumnę 'nr_pv',
+#' jeśli skalowanie nie generowało PV?
 #' @import dplyr
 #' @import ZPD
 #' @export
 przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                  lataDo, liczbaRocznikow = 1,
-                                 wydluzenie = 1) {
+                                 wydluzenie = 1, usunPusteKolumny = TRUE) {
   stopifnot(is.character(katalogZDanymi), length(katalogZDanymi) == 1,
             is.character(typSzkoly), length(typSzkoly) == 1,
             is.numeric(lataDo), length(lataDo) > 0,
             is.numeric(liczbaRocznikow), length(liczbaRocznikow) == 1,
-            is.numeric(wydluzenie), length(wydluzenie) == 1)
+            is.numeric(wydluzenie), length(wydluzenie) == 1,
+            all(usunPusteKolumny %in% c(TRUE, FALSE)),
+            length(usunPusteKolumny) == 1)
   stopifnot(typSzkoly %in% c("gimn.", "LO", "T"),
             dir.exists(katalogZDanymi))
   stopifnot(lataDo >= 2006, all(as.integer(lataDo) == lataDo),
@@ -65,7 +70,8 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                 paste0(egzaminNaWyjsciu, "-kontekstowe.RData"))
   if (any(!file.exists(plikiZDanymiKontekstowymi))) {
     stop("Nie znaleziono plików z danymi kontestowymi:\n  '",
-         paste0(plikiZDanymi[!file.exists(plikiZDanymi)], collapse = "',\n  '"),
+         paste0(plikiZDanymiKontekstowymi[!file.exists(plikiZDanymiKontekstowymi)],
+                collapse = "',\n  '"),
          "'.")
   }
   lataWejscie = max(lataDo - tok):(min(lataDo) - liczbaRocznikow + 1 - tok - wydluzenie)
@@ -126,7 +132,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
 
     dane = suppressMessages(left_join(daneNaWyjsciu, daneNaWejsciu))
     dane = subset(dane, get(paste0("typ_szkoly_", skrotEgzaminu)) == typSzkoly)
-    dane = formaty_zmiennych_baza_na_ewd(dane)
+    dane = formaty_zmiennych_baza_na_ewd(dane, usunPusteKolumny)
     dane = subset(dane, as.numeric(levels(get("wydl")))[get("wydl")] %in% (0:wydluzenie))
     dane$wydl = factor(as.numeric(levels(dane$wydl))[dane$wydl])
 
@@ -140,17 +146,34 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
         select_(~id_skali, ~skalowanie, ~rok, ~zmienna)
       normy = suppressMessages(
         inner_join(pobierz_normy(polacz()), skaleNormy, copy = TRUE) %>%
-          collect()
+          collect(n = Inf)
       )
       for (j in unique(normy$zmienna)) {
         skrotEgz = substr(j, 1, 1)
         temp = filter_(normy, ~zmienna == j) %>%
-          select_(~-id_skali, ~-skalowanie, ~-zmienna)
+          select_(~-id_skali, ~-skalowanie, ~-zmienna) %>%
+          group_by_(~grupa) %>%
+          mutate_(.dots = setNames(list(~wartosc_zr == min(wartosc_zr)),
+                                   "usun")) %>%
+          mutate_(.dots = setNames(list(~usun & wartosc != suppressWarnings(max(wartosc[usun]))),
+                                   "usun")) %>%
+          filter_(~!usun) %>%
+          mutate_(.dots = setNames(list(~wartosc_zr == max(wartosc_zr)),
+                                   "usun")) %>%
+          mutate_(.dots = setNames(list(~usun & wartosc != suppressWarnings(min(wartosc[usun]))),
+                                   "usun")) %>%
+          filter_(~!usun) %>%
+          ungroup() %>%
+          select_(~-usun)
         names(temp) = sub("^wartosc$", paste0(sub("_irt$", "", j), "_suma"),
                           names(temp))
         names(temp) = sub("^wartosc_zr$", j, names(temp))
         names(temp) = sub("^rok$", paste0("rok_", skrotEgz), names(temp))
-        names(temp) = sub("^grupa$", paste0("grupa_", skrotEgz), names(temp))
+        if (all(temp$grupa == "" | is.na(temp$grupa))) {
+          temp = select_(temp, ~-grupa)
+        } else {
+          names(temp) = sub("^grupa$", paste0("grupa_", j), names(temp))
+        }
         dane = suppressMessages(left_join(dane, temp))
       }
       names(normy) = sub("zmienna", "konstrukt", names(normy))
@@ -193,7 +216,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
       ib = pobierz_szkoly(polacz()) %>%
         filter_(~typ_szkoly == typSzkoly, ~rok %in% c(lataWyjscie, lataWyjscie)) %>%
         select_(~id_szkoly, ~rok, ~matura_miedzynarodowa) %>%
-        collect()
+        collect(n = Inf)
       names(ib) = paste0(names(ib), "_", skrotEgzaminu)
       names(ib) = sub("^(matura_miedzynarodowa).*$", "\\1", names(ib))
       dane = suppressMessages(left_join(dane, ib))

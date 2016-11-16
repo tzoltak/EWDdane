@@ -12,6 +12,7 @@
 #' zostaną wykryte błędy polegające na duplikacji identyfikatorów OKE, funkcja
 #' zbada również zakres zmian w stosunku do zrzutu bazy.
 #' @return lista data frame'ów
+#' @importFrom utils read.csv2
 #' @export
 weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   stopifnot(is.data.frame(bazaZakt) | is.character(bazaZakt))
