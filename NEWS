@@ -1,4 +1,16 @@
 --------------------
+Zmiany w EWDdane 0.9.1 (19.01.2017)
+
+Naprawione błędy:
+  - pobierz_dane_kontekstowe(), konstruując zmienną "populacja_we" bierze teraz
+    pod uwagę wyłącznie to, które jest to podejście do egzaminu; przestała za to
+    sprawdzać, czy szkoła, do której egzamin jest przypisany istnieje w bazie
+    (w przypadku SP zdarzały się przypadki nieistnienia, co powodowoało
+    wykleczeniem uczniów takich SP przy obliczaniu EWD gimnazjuów);
+  - pobierz_dane_kontekstowe() sprawdza, czy podano występujący w bazie rodzaj
+    egzaminu, a jeśli nie, rzuca informatywnym błędem.
+
+--------------------
 Zmiany w EWDdane 0.9 (16.11.2016)
 
 Nowe funkcjonalności:
@@ -104,7 +116,7 @@ Naprawione błędy:
   - pobierz_dane_kontekstowe() przy generowaniu zmiennej 'populacja_wy' sprawdza
     wiek dla sprawdzianu od 2005 r., a dla egzaminu gimnazjalnego od 2008 r.,
     a nie na odwrót.
-  - przygotuj_dane_do_ewd() poprawnie wylicza wartość zmiennej 'lu_wszyscy'.
+  - przygotuj_dane_do_ewd() poprawnie oblicza wartość zmiennej 'lu_wszyscy'.
 
 --------------------
 Zmiany w EWDdane 0.6.2 (25.08.2015)
@@ -132,7 +144,7 @@ Nowe funkcje:
   - pobierz_baze_szkol() - zamknięcie do pakietu procesu aktualizacji bazy szkół;
   - weryfikuj_baze_szkol() - j.w.;
   - przygotuj_dane_surowe_do_ewd() - pozwala przygotowywać pliki z wynikami
-    surowymi i znormalizowanymi ekwikwantylowo, używane do wyliczania modeli EWD;
+    surowymi i znormalizowanymi ekwikwantylowo, używane do obliczania modeli EWD;
     - wczytaj_dane_kontekstowe(), wczytaj_wyniki_egzaminu() - nieeksportowane
       funkcje służące do wczytywania odpowiednich danych z dysku i łączenia
       ich w postać szeroką.
@@ -167,7 +179,7 @@ Zmiany w EWDdane 0.5.2 (20.05.2015)
 
 Nowe funkcje:
   - pobierz_dane_kontekstowe() - pobiera wszelkie dane kontekstowe o uczniach
-    (i szkołach) potrzebne przy wyliczaniu EWD.
+    (i szkołach) potrzebne przy obliczaniu EWD.
 
 --------------------
 Zmiany w EWDdane 0.5.2 (30.04.2015)

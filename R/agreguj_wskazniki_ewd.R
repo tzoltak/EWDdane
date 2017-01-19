@@ -6,24 +6,24 @@
 #' "województwo", albo \code{NULL}, jeśli podany został parametr 'funkcjaGrupujaca'
 #' @param grupujPoLatach wartość logiczna (\code{TRUE} lub \code{FALSE})
 #' wskazująca, czy przy wyróżnianiu grup oprócz TERYTu ma być uwzględniona
-#' również zmienna opisująca okres, dla którego wyliczony został wskaźnik
+#' również zmienna opisująca okres, dla którego obliczony został wskaźnik
 #' @param funkcjaGrupujaca NULL lub fukcja przyjmująca jako pierwszy parametr
 #' TERYT szkoły (w postaci wektora liczb całkowitych) i zwracająca jednoelementowy
 #' data frame (lub listę), który opisuje przydział szkół do grup
 #' @param tylkoWyswietlane wartość logiczna (\code{TRUE/FALSE/NA}) opisująca,
-#' czy przy wyliczaniu agregatów mają zostać uwzględnione tylko te szkoły,
+#' czy przy obliczaniu agregatów mają zostać uwzględnione tylko te szkoły,
 #' których elipsy są pokazywane na stronie - p. sekcja Details
 #' @param paramGrupujaca opcjonalnie lista dodatkowych parametrów, które zostaną
 #' przekazane funkcji grupującej
 #' @details
 #' Zachowanie funkcji w zależności od wartości parametru \code{tylkoWyswietlane}:
 #' \itemize{
-#'   \item{Jeśli \code{tylkoWyswietlane=TRUE} przy wyliczaniu agregatów
+#'   \item{Jeśli \code{tylkoWyswietlane=TRUE} przy obliczaniu agregatów
 #'         uwzględniane zostaną tylko te szkoły, których elipsy są wyświetlane
 #'         na stronie.}
-#'   \item{Jeśli \code{tylkoWyswietlane=FALSE} przy wyliczaniu agregatów
+#'   \item{Jeśli \code{tylkoWyswietlane=FALSE} przy obliczaniu agregatów
 #'         uwzględniane zostaną wszystkie szkoły}
-#'   \item{Domyślnie, tj. gdy \code{tylkoWyswietlane=NA}, przy wyliczaniu
+#'   \item{Domyślnie, tj. gdy \code{tylkoWyswietlane=NA}, przy obliczaniu
 #'         agregatów uwzględniane zostaną wszystkie szkoły, (jak wtedy, gdy
 #'         \code{tylkoWyswietlane=TRUE}) z tym, że jeśli w jakiejś grupie nie ma
 #'         żadnej szkoły, której elipsa byłaby prezentowana, to wartość
