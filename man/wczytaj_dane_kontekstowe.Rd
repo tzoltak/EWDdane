@@ -2,7 +2,7 @@
 % Please edit documentation in R/wczytywanie_danych_z_dysku.R
 \name{wczytaj_dane_kontekstowe}
 \alias{wczytaj_dane_kontekstowe}
-\title{Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD}
+\title{Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD}
 \usage{
 wczytaj_dane_kontekstowe(nazwaPliku, czyWyjscie = TRUE, lata = NULL)
 }

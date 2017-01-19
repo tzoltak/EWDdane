@@ -132,6 +132,9 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
       filter_(~dane_ewd == TRUE, ~rodzaj_egzaminu == rodzajEgzaminu, ~czy_egzamin == TRUE) %>%
       select_('id_testu', 'prefiks', 'data_testu')
   )
+  if (select_(testy, ~id_testu) %>% collect() %>% nrow() == 0) {
+    stop("Podano rodzaj egzaminu, który nie występuje w bazie.")
+  }
   uczniowieTesty = suppressMessages(
     pobierz_dane_uczniowie_testy(src, daneOsobowe = daneOsobowe) %>%
       inner_join(testy) %>%
@@ -219,7 +222,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   dane = dane %>%
     mutate_(
-      populacja_we = ~ostatnie %in% TRUE & id_szkoly > 0,
+      populacja_we = ~ostatnie %in% TRUE,
       populacja_wy = ~pierwsze %in% TRUE & id_szkoly > 0
     )
   if (rodzajEgzaminu == "sprawdzian") {

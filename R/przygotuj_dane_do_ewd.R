@@ -1,5 +1,5 @@
-#' @title Przygotowywanie danych do wyliczania modeli EWD
-#' @description Funkcja przygotowuje pliki z danymi do wyliczania modeli EWD,
+#' @title Przygotowywanie danych do obliczania modeli EWD
+#' @description Funkcja przygotowuje pliki z danymi do obliczania modeli EWD,
 #' wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo lub
 #' wyskalowane - w zależności od tego, jakie znajdzie w katalogu podanym
 #' argumentem \code{katalogZDanymi} - i zapisuje go w aktywnym katalogu.
@@ -82,7 +82,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
   # tworzenie wynikowych plików
   for (i in lataDo) {
     # lataWyjście w pętli, bo od tego, co podamy wczytaj_dane_kontekstowe() zależy,
-    # na jakiej grupie wylicza się wartość zmiennej 'lu_wszyscy'
+    # na jakiej grupie oblicza się wartość zmiennej 'lu_wszyscy'
     lataWyjscie = i:(i - liczbaRocznikow + 1)
     setwd(katalogZDanymi)
     kontekstoweNaWyjsciu =

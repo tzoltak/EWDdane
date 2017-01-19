@@ -2,7 +2,7 @@
 % Please edit documentation in R/wczytywanie_danych_z_dysku.R
 \name{wczytaj_liczbe_przystepujacych}
 \alias{wczytaj_liczbe_przystepujacych}
-\title{Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD}
+\title{Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD}
 \usage{
 wczytaj_liczbe_przystepujacych(nazwyPlikow)
 }
