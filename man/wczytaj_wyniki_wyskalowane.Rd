@@ -2,7 +2,7 @@
 % Please edit documentation in R/wczytywanie_danych_z_dysku.R
 \name{wczytaj_wyniki_wyskalowane}
 \alias{wczytaj_wyniki_wyskalowane}
-\title{Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD}
+\title{Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD}
 \usage{
 wczytaj_wyniki_wyskalowane(nazwaPliku)
 }

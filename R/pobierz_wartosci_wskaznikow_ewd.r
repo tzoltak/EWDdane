@@ -110,7 +110,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   message("Pobieranie informacji o wartościach wskaźników.")
   wskazniki = collect(wskazniki, n = Inf)
   # dalsze przekształcanie
-  message("Wyliczanie przedziałów ufności.")
+  message("Obliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))
   dots = list(dg_pu_srednia = interp("srednia - lambda * bs", lambda = lambda),
               gg_pu_srednia = interp("srednia + lambda * bs", lambda = lambda),

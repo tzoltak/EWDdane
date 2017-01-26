@@ -1,4 +1,4 @@
-#' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
+#' @title Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD
 #' @description Funkcja wczytuje podany plik z danymi kontekstowymi i wybiera
 #' z niego informacje w sposób odpowiedni do łączenia go potem z wynikami
 #' egzaminu traktowanymi jako wyniki "na wejściu" lub wyniki "na wyjściu".
@@ -44,7 +44,7 @@ wczytaj_dane_kontekstowe = function(nazwaPliku, czyWyjscie = TRUE, lata = NULL) 
                                          skrotEgzaminu)
   return(daneKontekstowe)
 }
-#' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
+#' @title Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD
 #' @description Funkcja wczytuje wyniki egzaminu (surowe lub wyskalowane)
 #' z podanych plików, łączy je w jeden zbiór i ewentualnie łączy z podanymi
 #' danymi kontekstowymi.
@@ -124,7 +124,7 @@ wczytaj_wyniki_egzaminu = function(nazwyPlikow, daneKontekstowe = NULL) {
   attributes(dane)$skale = skale
   return(dane)
 }
-#' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
+#' @title Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD
 #' @description Funkcja wczytuje wyniki surowe egzaminu z pojedynczego pliku.
 #' @param nazwaPliku ciąg znaków - nazwa pliku z surowymi wynikami egzaminu
 #' @import ZPD
@@ -213,7 +213,7 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
   attributes(dane)$normy = normy
   return(dane)
 }
-#' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
+#' @title Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD
 #' @description Funkcja wczytuje wyniki surowe egzaminu z pojedynczego pliku.
 #' @param nazwaPliku ciąg znaków - nazwa pliku z surowymi wynikami egzaminu
 #' @details
@@ -277,7 +277,7 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
   attributes(dane)$skale = skale
   return(dane)
 }
-#' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
+#' @title Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD
 #' @description Funkcja wczytuje wyskalowane wyniki egzaminu z pliku .RData
 #' z wynikami skalowania, zapisanego przez funkcje
 #' \code{\link[EWDskale]{skaluj_spr}},
@@ -314,7 +314,7 @@ wczytaj_wyniki_skalowania = function(nazwyPlikow) {
   attributes(oszacowania)$skale = skale
   return(oszacowania)
 }
-#' @title Funkcje pomocnicze przy przygotowywaniu danych do wyliczania modeli EWD
+#' @title Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD
 #' @description Funkcja wczytuje dane z plików .RData z wynikami surowymi
 #' egzaminu, i przygotowuje zestawienie opisujące, którzy zdający przystępowali
 #' do których części egzaminu.

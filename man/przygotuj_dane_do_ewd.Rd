@@ -2,7 +2,7 @@
 % Please edit documentation in R/przygotuj_dane_do_ewd.R
 \name{przygotuj_dane_do_ewd}
 \alias{przygotuj_dane_do_ewd}
-\title{Przygotowywanie danych do wyliczania modeli EWD}
+\title{Przygotowywanie danych do obliczania modeli EWD}
 \usage{
 przygotuj_dane_do_ewd(katalogZDanymi, typSzkoly, lataDo, liczbaRocznikow = 1,
   wydluzenie = 1, usunPusteKolumny = TRUE)
@@ -33,7 +33,7 @@ jeśli skalowanie nie generowało PV?}
 wektor z nazwami zapisanych plików (niewidocznie)
 }
 \description{
-Funkcja przygotowuje pliki z danymi do wyliczania modeli EWD,
+Funkcja przygotowuje pliki z danymi do obliczania modeli EWD,
 wykorzystujących wyniki surowe lub znormalizowane ekwikwantylowo lub
 wyskalowane - w zależności od tego, jakie znajdzie w katalogu podanym
 argumentem \code{katalogZDanymi} - i zapisuje go w aktywnym katalogu.
