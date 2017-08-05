@@ -21,4 +21,3 @@ to zwrócone zostaną wyniki tylko jednego z nich, przy czym piwerwszeństwo
 będą mieć skalowania oznaczone jako do prezentacji, a w dalszej kolejności
 te, których data skalowania jest najpóżniejsza.
 }
-

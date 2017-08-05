@@ -40,4 +40,3 @@ wykorzystywanym przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
 Funkcja pobiera parametry skalowań o podanej nazwie skali i numerze testu
 oraz których opis skalowań spełnia podane wyrażenie regularne.
 }
-

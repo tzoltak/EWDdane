@@ -3,18 +3,23 @@
 #' Funkcja agreguje wskaźniki EWD.
 #' @param dane ramka danych zwracana przez funkcję \link{pobierz_wartosci_wskaznikow_ewd}.
 #' @param poziom ciąg znaków definiujący poziom agregacji: "gmina", "powiat" lub
-#' "województwo", albo \code{NULL}, jeśli podany został parametr 'funkcjaGrupujaca'
+#' "województwo", albo \code{NULL}, jeśli podany został parametr
+#' \code{zmiennaGrupujaca}
 #' @param grupujPoLatach wartość logiczna (\code{TRUE} lub \code{FALSE})
 #' wskazująca, czy przy wyróżnianiu grup oprócz TERYTu ma być uwzględniona
 #' również zmienna opisująca okres, dla którego obliczony został wskaźnik
-#' @param funkcjaGrupujaca NULL lub fukcja przyjmująca jako pierwszy parametr
-#' TERYT szkoły (w postaci wektora liczb całkowitych) i zwracająca jednoelementowy
-#' data frame (lub listę), który opisuje przydział szkół do grup
+#' @param zmiennaGrupujaca ciąg znaków - nazwa zmiennej grupującej
 #' @param tylkoWyswietlane wartość logiczna (\code{TRUE/FALSE/NA}) opisująca,
 #' czy przy obliczaniu agregatów mają zostać uwzględnione tylko te szkoły,
 #' których elipsy są pokazywane na stronie - p. sekcja Details
-#' @param paramGrupujaca opcjonalnie lista dodatkowych parametrów, które zostaną
-#' przekazane funkcji grupującej
+#' @param pu wartość logiczna (\code{TRUE} lub \code{FALSE}) wskazująca, czy
+#' funkcja ma zwrócić oszacowania granic przedziałów ufności dla obliczonych
+#' średnich?
+#' @param gammaDane poziom ufności dla jakiego zostały obliczone granice
+#' przedziałów ufności podane w kolumnach argumentu \code{dane} - liczba
+#' z przedziału (0;1) (ma zastosowanie tylko gdy \code{pu=TRUE})
+#' @param gamma poziom ufności - liczba z przedziału (0;1) (ma zastosowanie
+#' tylko gdy \code{pu=TRUE})
 #' @details
 #' Zachowanie funkcji w zależności od wartości parametru \code{tylkoWyswietlane}:
 #' \itemize{
@@ -29,79 +34,101 @@
 #'         żadnej szkoły, której elipsa byłaby prezentowana, to wartość
 #'         wskaźnika zostanie w niej zmieniona na brak danych.}
 #' }
-#' Oznacza to, że dla poprawnego działania domyślnego wywołwania funkcji
+#' Oznacza to, że dla poprawnego działania domyślnego wywołania funkcji
 #' \code{agreguj_wskazniki_ewd} potrzebne jest pobranie wcześniej danych
 #' o wartościach wskaźników wywołaniem funkcji
 #' \code{\link{pobierz_wartosci_wskaznikow_ewd}} z inną niż domyślna wartością
 #' parametru \code{tylkoWyswietlane} - p. przykład użycia.
+#'
+#' Uwaga, jeśli chce się uzyskać przedziały ufności dla obliczanych agregatów,
+#' a funkcja  \code{\link{pobierz_wartosci_wskaznikow_ewd}} była wywoływana
+#' z inną niż domyślna wartością parametru \code{gamma}, wartość tą należy przy
+#' wywołaniu \code{agreguj_wskazniki_ewd} podać jako argument \code{gammaDane}.
 #' @return data frame
 #' @examples
 #' \dontrun{
-#' dane = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) %>%
+#' # agregacja wartości wskaźników dla techników z lat 2013-2014 do poziomu powiatu
+#' agr = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) %>%
 #'   agreguj_wskazniki_ewd("powiat")
+#'
+#' # j.w. ale agregacja po miejscowości podanej jako siedziba poczty
+#' # ze zwróceniem granic przedziałów ufności dla agregatów
+#' agr = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) %>%
+#'   agreguj_wskazniki_ewd(zmiennaGrupujaca = "poczta", pu = TRUE)
+#'
+#' # przedziały ufności dla agregatów, jeśli pobierz_wartosci_wskaznikow_ewd()
+#' # była wywołana z inną niż domyślna wartością parametru 'gamma'
+#' # wywołując agreguj_wskazniki_ewd() trzeba użyć argumentu 'gammaDane'
+#' gamma = 0.9
+#' dane = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE, gamma = gamma)
+#' agr = agreguj_wskazniki_ewd(dane, zmiennaGrupujaca = "poczta", pu = TRUE, gammaDane = gamma)
 #' }
 #' @importFrom stats as.formula
 #' @import dplyr
 #' @import ZPD
 #' @export
 agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
-                                  funkcjaGrupujaca = NULL, tylkoWyswietlane = NA,
-                                  paramGrupujaca = list()) {
+                                  zmiennaGrupujaca = "teryt_szkoly",
+                                  tylkoWyswietlane = NA, pu = FALSE,
+                                  gammaDane = 0.95, gamma = 0.95) {
   stopifnot(is.data.frame(dane),
-            !is.null(poziom) | !is.null(funkcjaGrupujaca),
             is.character(poziom) | is.null(poziom),
             is.logical(grupujPoLatach), length(grupujPoLatach) == 1,
-            is.function(funkcjaGrupujaca) | is.null(funkcjaGrupujaca),
+            is.character(zmiennaGrupujaca), length(zmiennaGrupujaca) == 1,
             is.logical(tylkoWyswietlane), length(tylkoWyswietlane) == 1,
-            is.list(paramGrupujaca))
-  if (!is.null(poziom)) stopifnot(poziom %in% c("gmina", "powiat", "województwo"))
-  stopifnot(grupujPoLatach %in% c(TRUE, FALSE))
-
-  if ( "teryt_szkoly" %in% names(dane) ) {
-    czyOpisowe = FALSE
-  } else if ("TERYT gminy" %in% names(dane) ) {
-    czyOpisowe = TRUE
+            is.logical(pu), length(pu) == 1,
+            is.numeric(gamma), length(gamma) == 1)
+  if (!is.null(poziom)) {
+    stopifnot(poziom %in% c("gmina", "powiat", "województwo"),
+              zmiennaGrupujaca == "teryt_szkoly")
+  }
+  stopifnot(grupujPoLatach %in% c(TRUE, FALSE),
+            pu %in% c(TRUE, FALSE),
+            gamma > 0, gamma < 1)
+  opisoweNazwy = "TERYT gminy" %in% names(dane)
+  if (opisoweNazwy) {
     names(dane) = konwertuj_nazwy_na_opisowe(names(dane), TRUE)
-  } else {
-    stop("Funkcja nie zawiera zmiennej opisującej teryt")
+  }
+  stopifnot("rok_do" %in% names(dane),
+            "teryt_szkoly" %in% names(dane),
+            "id_szkoly" %in% names(dane))
+  if (!(zmiennaGrupujaca %in% names(dane))) {
+    stop("Funkcja nie zawiera ",
+         ifelse(zmiennaGrupujaca == "teryt_szkoly",
+                "zmiennej opisującej TERYT.", "podanej zmiennej grupującej."))
   }
   if (!is.null(poziom)) {
-    funkcjaGrupujaca = przygotuj_funkcje_grupujaca_teryt(poziom)
+    grupowanie = do.call(przygotuj_funkcje_grupujaca_teryt(poziom),
+                         list(dane$teryt_szkoly))
+    zmiennaGrupujaca = names(grupowanie)
+    dane = bind_cols(dane, grupowanie)
   }
   if (grupujPoLatach) {
-    rok_do = "rok_do"
+    rokDo = "rok_do"
   } else {
-    rok_do = NULL
+    rokDo = NULL
   }
+  maskaPU = ifelse(pu, "|dg_pu_(srednia|ewd)", "")
 
-  grupowanie = do.call(funkcjaGrupujaca, append(list(dane$teryt_szkoly),
-                                                paramGrupujaca))
-  if ( !is.data.frame(grupowanie) | ncol(grupowanie) != 1 |
-        nrow(grupowanie) != nrow(dane) ) {
-    stop("Niepoprawny format danych zwracany przez funkcję grupującą.")
-  }
-  nazwaGrupowania = names(grupowanie)
   names(dane) = enc2native(names(dane))  # jako że select() nie radzi sobie z UTFem
-  dane = cbind(dane %>% select_(~-teryt_szkoly), grupowanie)
+  dane = dane[, c(zmiennaGrupujaca,
+                  grep(paste0("^(id_szkoly|rok_do)$|^(ewd|lu_ewd|wyswietlaj|srednia",
+                              maskaPU, ")[_ ]"),
+                       tolower(names(dane)), value = TRUE))]
 
-  dane = dane[, grepl("^(id_szkoly|rok_do)$|^teryt|^(ewd|lu_ewd|wyswietlaj|srednia)[_ ]",
-                      tolower(names(dane)))]
-
-  zmienne = c("id_szkoly", "rok_do", nazwaGrupowania)
-  maskaZmienne = "^(ewd|lu_ewd|wyswietlaj|srednia)[_ ]"
+  zmienne = c("id_szkoly", "rok_do", zmiennaGrupujaca)
+  maskaZmienne = paste0("^(ewd|lu_ewd|wyswietlaj|srednia", maskaPU, ")[_ ]")
   dane = melt(dane[, c(zmienne,
-                       names(dane)[grepl(maskaZmienne, names(dane))])],
-              id = zmienne)
-  dane = cbind(dane,
-               wskaznik = gsub(maskaZmienne, "", dane$variable))
-  dane$variable = gsub(paste0(maskaZmienne, ".*$"), "\\1",
-                       dane$variable)
+                       grep(maskaZmienne, names(dane), value = TRUE))],
+              id = zmienne) %>%
+    mutate_(.dots = list(wskaznik = ~gsub(maskaZmienne, "", variable),
+                         variable = ~gsub(paste0(maskaZmienne, ".*$"), "\\1",
+                                          variable)))
 
   formulaTemp = as.formula(paste0(paste0(zmienne, collapse = "+"),
                                   " + wskaznik ~ variable"))
   dane = dcast(dane, formulaTemp, value.var = "value") %>%
-    group_by_(.dots = list(rok_do, nazwaGrupowania, "wskaznik"))
-
+    group_by_(.dots = as.list(c(rokDo, "wskaznik", zmiennaGrupujaca)))
   # Gdy tylkoWyswietlane to TRUE, odfiltruj niewyświetlane.
   if (tylkoWyswietlane %in% TRUE & "wyswietlaj" %in% names(dane)) {
     dane = dane %>% filter_(~wyswietlaj == 1)
@@ -126,21 +153,60 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
   }
   if (!("wyswietlaj" %in% names(dane))) dane = mutate(dane, wyswietlaj = NA)
 
-  dane = dane %>%
-    summarise_(.dots = list(ewd = ~weighted.mean(ewd, lu_ewd, na.rm = TRUE),
-                            srednia = ~weighted.mean(srednia, lu_ewd, na.rm = TRUE),
-                            lu_ewd = ~sum(lu_ewd, na.rm = TRUE),
-                            wyswietlaj = ~any(wyswietlaj == 1) ))
+  dots = list(ewd_agr = ~weighted.mean(ewd, lu_ewd, na.rm = TRUE),
+              srednia_agr = ~weighted.mean(srednia, lu_ewd, na.rm = TRUE),
+              lu_sum = ~sum(lu_ewd, na.rm = TRUE),
+              wyswietlaj = ~any(wyswietlaj == 1)
+  )
+  if (pu) {
+    lambda = sqrt(qchisq(gammaDane, 2))
+    dane = dane %>%
+      mutate_(.dots = list(
+        dg_pu_ewd = ~(ewd - dg_pu_ewd) / lambda,
+        dg_pu_srednia = ~(srednia - dg_pu_srednia) / lambda)) %>%
+      rename_(bs_ewd = ~dg_pu_ewd,
+              bs_srednia = ~dg_pu_srednia)
+    lambda = sqrt(qchisq(gamma, 2))
+    dots = append(dots,
+                  list(
+                    bs_ewd = ~sqrt(
+                      sum(lu_ewd * ewd^2, na.rm = TRUE) -
+                        sum(lu_ewd * ewd, na.rm = TRUE)^2 / lu_sum +
+                        sum(lu_ewd^2 * bs_ewd^2, na.rm = TRUE)
+                    ) / lu_sum,
+                    bs_srednia = ~sqrt(
+                      sum(lu_ewd * srednia^2, na.rm = TRUE) -
+                        sum(lu_ewd * srednia, na.rm = TRUE)^2 / lu_sum +
+                        sum(lu_ewd^2 * bs_srednia^2, na.rm = TRUE)
+                    ) / lu_sum,
+                    dg_pu_ewd = ~ewd_agr - lambda * bs_ewd,
+                    gg_pu_ewd = ~ewd_agr + lambda * bs_ewd,
+                    dg_pu_srednia = ~srednia_agr - lambda * bs_srednia,
+                    gg_pu_srednia = ~srednia_agr + lambda * bs_srednia
+                  ))
+  }
+  dane = dane %>% summarise_(.dots = dots) %>%
+    rename_(ewd = ~ewd_agr, srednia = ~srednia_agr)
+  if (pu) {
+    dane = dane %>%
+      select_(~-bs_ewd, ~-bs_srednia)
+  }
   if (is.na(tylkoWyswietlane) & "wyswietlaj" %in% names(dane)) {
     dane$ewd[!dane$wyswietlaj] = NA
     dane$srednia[!dane$wyswietlaj] = NA
+    if (pu) {
+      dane$dg_pu_ewd[!dane$wyswietlaj] = NA
+      dane$gg_pu_ewd[!dane$wyswietlaj] = NA
+      dane$dg_pu_srednia[!dane$wyswietlaj] = NA
+      dane$gg_pu_srednia[!dane$wyswietlaj] = NA
+    }
   }
   dane = select_(dane, ~-wyswietlaj) %>%
-    melt(c(rok_do, nazwaGrupowania, "wskaznik")) %>%
-    dcast(as.formula(paste0(paste0(c(rok_do, nazwaGrupowania), collapse = "+"),
+    melt(c(rokDo, zmiennaGrupujaca, "wskaznik")) %>%
+    dcast(as.formula(paste0(paste0(c(rokDo, zmiennaGrupujaca), collapse = "+"),
                             " ~ wskaznik + variable")))
 
-  if (czyOpisowe) {
+  if (opisoweNazwy) {
     names(dane) = konwertuj_nazwy_na_opisowe(names(dane))
     names(dane) = gsub("_", " ", names(dane))
   }
@@ -163,8 +229,8 @@ przygotuj_funkcje_grupujaca_teryt <- function(poziom){
                powiat = function(teryt){
                  return(data.frame(teryt_powiatu = round(teryt / 100) * 100))
                },
-               wojewodztwo = function(teryt){
-                 return(data.frame("teryt_województwa" = round(teryt / 10^4) * 10^4))
+               `województwo` = function(teryt){
+                 return(data.frame("teryt_wojewodztwa" = round(teryt / 10^4) * 10^4))
                }
   )
   return(fun)
@@ -192,13 +258,17 @@ konwertuj_nazwy_na_opisowe <- function(nazwyKolumn, revert = FALSE){
     c("pna"          , "kod pocztowy"),
     c("wielkosc_miejscowosci", "wielkość miejscowości"),
     c("teryt_szkoly" , "TERYT gminy"),
+    c("teryt_gminy" , "TERYT gminy"),
+    c("teryt_powiatu" , "TERYT powiatu"),
+    c("teryt_wojewodztwa" , "TERYT województwa"),
     c("rodzaj_gminy" , "rodzaj gminy"),
     c("rok_do"       , "ostatni rok okresu obejmowanego przez wskaźnik"),
     c("^pomin$"      , "czy szkoła pomijana na stronie"),
     c("wyswietlaj"   , "czy elipsa wyświetlana -"),
-    c("dg_pu_"       , "dolna granica przedz. ufności dla" ),
-    c("gg_pu_"       , "górna granica przedz. ufności dla" ),
+    c("dg_pu_"       , "dolna granica przedz. ufności dla "),
+    c("gg_pu_"       , "górna granica przedz. ufności dla "),
     c("srednia"      , "śr. wyników egzaminów"),
+    c("_lu_sum$"     , " łączna liczba uczniów"),
     c("_lu_"         , " liczba uczniów "),
     c("lu_"          , "liczba uczniów "),
     c("_trend_EWD"   , " trend EWD"),
@@ -206,7 +276,7 @@ konwertuj_nazwy_na_opisowe <- function(nazwyKolumn, revert = FALSE){
   klucz = data.frame(klucz)
   if (!revert) {
     colnames(klucz) = c("orginalne", "nowe")
-  } else{
+  } else {
     colnames(klucz) = c("nowe", "orginalne")
     klucz$nowe = sub("[:^:]|[:$:]", "", klucz$nowe)
   }
