@@ -1,4 +1,19 @@
 --------------------
+Zmiany w EWDdane 0.9.2 (05.08.2017)
+
+Nowe funkcjonalności:
+  - agreguj_wskazniki_ewd() potrafi zwracań przedziały ufności dla obliczanych
+    agregatów - w związku z tym pojawiły się w niej nowe argumenty: 'pu',
+    'gamma' i 'gammaDane';
+  - agreguj_wskazniki_ewd() - zmieniono sposób zadawania przez użytkownika
+    jego własnego grupowania: parametry 'funkcjaGrupujaca' i 'paramGrupujaca'
+    został usunięte, a zamiast tego można podać po prostu nazwę kolumny
+    zawierającej przydział do grup, przy pomocy argumentu 'zmiennaGrupujaca'.
+
+Naprawione błędy:
+  - agreguj_wskazniki_ewd() działa w różnych mniej typowych schematach użycia.
+
+--------------------
 Zmiany w EWDdane 0.9.1 (19.01.2017)
 
 Naprawione błędy:

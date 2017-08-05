@@ -24,4 +24,3 @@ Funkcja wczytuje podany plik z danymi kontekstowymi i wybiera
 z niego informacje w sposób odpowiedni do łączenia go potem z wynikami
 egzaminu traktowanymi jako wyniki "na wejściu" lub wyniki "na wyjściu".
 }
-

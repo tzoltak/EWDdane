@@ -94,4 +94,3 @@ Dodatkowe uwagi:
         zwróconych przez tę funkcję informacji o byciu laureatem).}
 }
 }
-

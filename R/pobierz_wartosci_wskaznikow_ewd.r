@@ -35,6 +35,8 @@
 #' @param gamma poziom ufności (liczba z przedziału [0;1] )
 #' @param fileEncoding ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
 #' plik csv
+#' @details
+#' Przykłady użycia - p. \href{http://zpd.ibe.edu.pl/doku.php?id=pobieranie_wartosci_ewd}{http://zpd.ibe.edu.pl/doku.php?id=pobieranie_wartosci_ewd}.
 #' @return data frame
 #' @importFrom stats qchisq
 #' @importFrom utils write.csv2

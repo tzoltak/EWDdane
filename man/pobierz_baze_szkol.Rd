@@ -20,4 +20,3 @@ data frame (niewidocznie)
 Funkcja pobiera dane o szkołach, potrzebne do dokonania aktualizacji bazy
 szkół (wykonuje zrzut bazy szkół).
 }
-

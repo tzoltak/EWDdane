@@ -27,4 +27,3 @@ są wyniki wyskalowane i dla jakiejś skali dostępne są wyniki z kilku różń
 skalowań, opisane są w pomocy do funkcji
 \code{\link{wczytaj_wyniki_wyskalowane}}.
 }
-

@@ -17,4 +17,3 @@ funkcja
 Funkcja przygotowuje funkcję grupującą. Więcej szczegółów
 w \link{agreguj_wskazniki_ewd}
 }
-

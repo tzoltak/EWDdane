@@ -20,4 +20,3 @@ z wynikami skalowania, zapisanego przez funkcje
 \code{\link[EWDskale]{skaluj_egz_gimn}} lub
 \code{\link[EWDskale]{skaluj_matura}}.
 }
-

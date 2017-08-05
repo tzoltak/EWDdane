@@ -1,6 +1,6 @@
 Encoding: UTF-8
 Package: EWDdane
-Version: 0.9.1
+Version: 0.9.2
 Title: Functions for Educational Value-Added data import/export
 Authors@R: c(
   person("Tomasz", "Zoltak", , "tomek@zozlak.org", role = c("aut", "cre")),
@@ -9,7 +9,7 @@ Authors@R: c(
 Description: Functions for Educational Value-Added data import/export.
 Depends:
     R (>= 3.0.0),
-    ZPD (>= 1.5.4)
+    ZPD (>= 1.5.5)
 Imports:
     reshape2,
     dplyr,
@@ -21,4 +21,4 @@ License: MIT + file LICENSE
 Language: pl
 VignetteBuilder: knitr
 NeedsCompilation: no
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

@@ -63,4 +63,3 @@ zawierający ramkę danych o nazwie \code{prefiksKontekstowe} (gdzie
 gimn., \code{m} - matura), będącą wynikiem wywołania funkcji
 \code{\link{pobierz_dane_kontekstowe}}.
 }
-

@@ -18,4 +18,3 @@ przez funkcję \code{\link[EWDskalowanie]{skaluj}}.
 Funkcja przekształca parametryzację z bazy (klasyczne, jednowymiarowe IRT)
 na parametryzację stosowaną przez Mplusa.
 }
-

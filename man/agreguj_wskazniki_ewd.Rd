@@ -5,28 +5,36 @@
 \title{Agregowanie wskaznikow EWD}
 \usage{
 agreguj_wskazniki_ewd(dane, poziom = NULL, grupujPoLatach = TRUE,
-  funkcjaGrupujaca = NULL, tylkoWyswietlane = NA, paramGrupujaca = list())
+  zmiennaGrupujaca = "teryt_szkoly", tylkoWyswietlane = NA, pu = FALSE,
+  gammaDane = 0.95, gamma = 0.95)
 }
 \arguments{
 \item{dane}{ramka danych zwracana przez funkcję \link{pobierz_wartosci_wskaznikow_ewd}.}
 
 \item{poziom}{ciąg znaków definiujący poziom agregacji: "gmina", "powiat" lub
-"województwo", albo \code{NULL}, jeśli podany został parametr 'funkcjaGrupujaca'}
+"województwo", albo \code{NULL}, jeśli podany został parametr
+\code{zmiennaGrupujaca}}
 
 \item{grupujPoLatach}{wartość logiczna (\code{TRUE} lub \code{FALSE})
 wskazująca, czy przy wyróżnianiu grup oprócz TERYTu ma być uwzględniona
 również zmienna opisująca okres, dla którego obliczony został wskaźnik}
 
-\item{funkcjaGrupujaca}{NULL lub fukcja przyjmująca jako pierwszy parametr
-TERYT szkoły (w postaci wektora liczb całkowitych) i zwracająca jednoelementowy
-data frame (lub listę), który opisuje przydział szkół do grup}
+\item{zmiennaGrupujaca}{ciąg znaków - nazwa zmiennej grupującej}
 
 \item{tylkoWyswietlane}{wartość logiczna (\code{TRUE/FALSE/NA}) opisująca,
 czy przy obliczaniu agregatów mają zostać uwzględnione tylko te szkoły,
 których elipsy są pokazywane na stronie - p. sekcja Details}
 
-\item{paramGrupujaca}{opcjonalnie lista dodatkowych parametrów, które zostaną
-przekazane funkcji grupującej}
+\item{pu}{wartość logiczna (\code{TRUE} lub \code{FALSE}) wskazująca, czy
+funkcja ma zwrócić oszacowania granic przedziałów ufności dla obliczonych
+średnich?}
+
+\item{gammaDane}{poziom ufności dla jakiego zostały obliczone granice
+przedziałów ufności podane w kolumnach argumentu \code{dane} - liczba
+z przedziału (0;1) (ma zastosowanie tylko gdy \code{pu=TRUE})}
+
+\item{gamma}{poziom ufności - liczba z przedziału (0;1) (ma zastosowanie
+tylko gdy \code{pu=TRUE})}
 }
 \value{
 data frame
@@ -48,16 +56,33 @@ Zachowanie funkcji w zależności od wartości parametru \code{tylkoWyswietlane}
         żadnej szkoły, której elipsa byłaby prezentowana, to wartość
         wskaźnika zostanie w niej zmieniona na brak danych.}
 }
-Oznacza to, że dla poprawnego działania domyślnego wywołwania funkcji
+Oznacza to, że dla poprawnego działania domyślnego wywołania funkcji
 \code{agreguj_wskazniki_ewd} potrzebne jest pobranie wcześniej danych
 o wartościach wskaźników wywołaniem funkcji
 \code{\link{pobierz_wartosci_wskaznikow_ewd}} z inną niż domyślna wartością
 parametru \code{tylkoWyswietlane} - p. przykład użycia.
+
+Uwaga, jeśli chce się uzyskać przedziały ufności dla obliczanych agregatów,
+a funkcja  \code{\link{pobierz_wartosci_wskaznikow_ewd}} była wywoływana
+z inną niż domyślna wartością parametru \code{gamma}, wartość tą należy przy
+wywołaniu \code{agreguj_wskazniki_ewd} podać jako argument \code{gammaDane}.
 }
 \examples{
 \dontrun{
-dane = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) \%>\%
+# agregacja wartoĹ›ci wskaĹşnikĂłw dla technikĂłw z lat 2013-2014 do poziomu powiatu
+agr = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) \%>\%
   agreguj_wskazniki_ewd("powiat")
-}
-}
 
+# j.w. ale agregacja po miejscowoĹ›ci podanej jako siedziba poczty
+# ze zwrĂłceniem granic przedziaĹ‚Ăłw ufnoĹ›ci dla agregatĂłw
+agr = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) \%>\%
+  agreguj_wskazniki_ewd(zmiennaGrupujaca = "poczta", pu = TRUE)
+
+# przedziaĹ‚y ufnoĹ›ci dla agregatĂłw, jeĹ›li pobierz_wartosci_wskaznikow_ewd()
+# byĹ‚a wywoĹ‚ana z innÄ… niĹĽ domyĹ›lna wartoĹ›ciÄ… parametru 'gamma'
+# wywoĹ‚ujÄ…c agreguj_wskazniki_ewd() trzeba uĹĽyÄ‡ argumentu 'gammaDane'
+gamma = 0.9
+dane = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE, gamma = gamma)
+agr = agreguj_wskazniki_ewd(dane, zmiennaGrupujaca = "poczta", pu = TRUE, gammaDane = gamma)
+}
+}

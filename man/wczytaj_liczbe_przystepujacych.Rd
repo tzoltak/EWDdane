@@ -18,4 +18,3 @@ Funkcja wczytuje dane z plików .RData z wynikami surowymi
 egzaminu, i przygotowuje zestawienie opisujące, którzy zdający przystępowali
 do których części egzaminu.
 }
-

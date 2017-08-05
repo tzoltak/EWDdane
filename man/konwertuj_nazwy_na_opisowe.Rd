@@ -20,4 +20,3 @@ wektor ciągów znaków
 Funkcja konwertuje nazwy kolumn ramki danych zwracanych przez funkcję
 \code{\link{pobierz_wartosci_wskaznikow_ewd}}.
 }
-

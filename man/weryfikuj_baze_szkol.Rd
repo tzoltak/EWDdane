@@ -27,4 +27,3 @@ zweryfikuje poprawność podanej bazy. Jeśli zostanie on podany, o ile nie
 zostaną wykryte błędy polegające na duplikacji identyfikatorów OKE, funkcja
 zbada również zakres zmian w stosunku do zrzutu bazy.
 }
-
