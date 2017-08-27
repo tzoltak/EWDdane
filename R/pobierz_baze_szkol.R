@@ -13,7 +13,7 @@
 #' @export
 pobierz_baze_szkol = function(typySzkol, zapis = NULL) {
   stopifnot(is.character(typySzkol),
-            all(typySzkol %in% c("SP", "gimn.", "LO", "LP", "T")),
+            all(typySzkol %in% c("SP", "gimn.", "LO", "LP", "T", "LOU", "TU")),
             is.character(zapis) | is.null(zapis)
   )
   if (any(typySzkol %in% "SP")) {
