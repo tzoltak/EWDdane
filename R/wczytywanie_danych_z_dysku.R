@@ -28,7 +28,8 @@ wczytaj_dane_kontekstowe = function(nazwaPliku, czyWyjscie = TRUE, lata = NULL) 
   if (czyWyjscie) {
     daneKontekstowe = subset(daneKontekstowe, get("populacja_wy") %in% TRUE)
     daneKontekstowe = group_by_(daneKontekstowe, ~id_szkoly) %>%
-      mutate_(lu_wszyscy = ~n())
+      mutate_(lu_wszyscy = ~n()) %>%
+      ungroup()
     maska = paste0("^(plec|id|rok|laur|dysleksja|klasa|publiczna|specjalna)|",
                    "^(typ_szkoly|przyszpitalna|dla_doroslych|artystyczna|wiek)|",
                    "^(pomin_szkole|lu_)")

@@ -15,7 +15,9 @@ Naprawione błędy:
     szkół, gdy niewystąpienie szkoły w danym roku opisane jest w danych brakiem
     danych zamiast pustym cięgiem znaków;
   - weryfikuj_baze_szkol() nie rzuca ostrzeżenie o duplikatach kodów OKE bez
-    powodu, gdy nie został podany argument 'bazaZrzut'.
+    powodu, gdy nie został podany argument 'bazaZrzut';
+  - wczytaj_dane_kontekstowe() zwraca ramkę danych (tibble), która nie jest
+    pogrupowana.
 
 --------------------
 Zmiany w EWDdane 0.9.3 (07.08.2017)
