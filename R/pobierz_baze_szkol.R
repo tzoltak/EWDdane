@@ -6,15 +6,19 @@
 #' zwrócone (lub NULL - zwraca informacje o wszystkich szkołach)
 #' @param zapis opcjonalnie nazwa pliku, do którego zostaną zapisane pobrane dane
 #' (w formacie csv)
+#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+#' połączenia
 #' @return data frame (niewidocznie)
 #' @importFrom utils write.csv2
 #' @import dplyr
 #' @import ZPD
 #' @export
-pobierz_baze_szkol = function(typySzkol, zapis = NULL) {
+pobierz_baze_szkol = function(typySzkol, zapis = NULL, src = NULL) {
   stopifnot(is.character(typySzkol),
             all(typySzkol %in% c("SP", "gimn.", "LO", "LP", "T", "LOU", "TU")),
-            is.character(zapis) | is.null(zapis)
+            is.character(zapis) | is.null(zapis),
+            is.src(src) | is.null(src)
   )
   if (any(typySzkol %in% "SP")) {
     warning("Informacje o SP dotyczące bycia szkołą publiczną, dla dorosłych, specjalną i przyszpitalną mogą być mało wiarygodne.",
@@ -30,7 +34,7 @@ pobierz_baze_szkol = function(typySzkol, zapis = NULL) {
   lata = 2006:as.numeric(format(Sys.time(), "%Y"))
   for (typ in typySzkol) {
     daneSzkol = pobierz_dane_szkol(lata, typ, idOke = FALSE,
-                                   daneAdresowe = TRUE) %>%
+                                   daneAdresowe = TRUE, src = src) %>%
       filter_(~id_szkoly > 0)
     lata = max(daneSzkol$rok):min(daneSzkol$rok)
     daneSzkol = select_(daneSzkol, ~-rok, ~-wielkosc_miejscowosci,
@@ -41,7 +45,8 @@ pobierz_baze_szkol = function(typySzkol, zapis = NULL) {
               "Łódź", "Łomża", "Poznań", "Poznań")[floor(get("teryt_szkoly") / 10^4) / 2]
     })
     for (i in lata) {
-      kody = pobierz_dane_szkol(i, typ, idOke = TRUE, daneAdresowe = FALSE)
+      kody = pobierz_dane_szkol(i, typ, idOke = TRUE, daneAdresowe = FALSE,
+                                src = src)
       kody = select_(kody, ~id_szkoly, ~id_szkoly_oke, ~matura_miedzynarodowa)
       if (!(typ %in% c("LO", "LP", "T"))) {
         kody = select_(kody, ~-matura_miedzynarodowa)

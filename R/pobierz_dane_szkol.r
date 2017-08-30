@@ -9,24 +9,32 @@
 #' @param idOke wartość logiczna (domyślnie FALSE) - czy dołączać kody OKE szkół?
 #' @param daneAdresowe wartość logiczna (domyślnie FALSE) - czy dołączać nazwę
 #' i dane adresowe?
+#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+#' połączenia
 #' @return data frame
 #' @import dplyr
 #' @import ZPD
 #' @export
 pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
-                              daneAdresowe = FALSE) {
+                              daneAdresowe = FALSE, src = NULL) {
   stopifnot(is.numeric(lata)        , length(lata) > 0,
             is.character(typySzkol) | is.null(typySzkol),
             is.logical(idOke)       , length(idOke) == 1,
-            is.logical(daneAdresowe), length(daneAdresowe) == 1
+            is.logical(daneAdresowe), length(daneAdresowe) == 1,
+            is.src(src) | is.null(src)
   )
   stopifnot(idOke %in% c(TRUE, FALSE),
             daneAdresowe %in% c(TRUE, FALSE))
+  czyZamykacSrc = FALSE
+  if (is.null(src)) {
+    src = polacz()
+    on.exit(rozlacz(src))
+    czyZamykacSrc = TRUE
+  }
 
   if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 3 wiersze dalej zadziała
   if (length(typySzkol) == 1) typySzkol = rep(typySzkol, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
-  src = polacz()
-  on.exit(rozlacz(src))
   szkoly = pobierz_szkoly(src)
   szkoly = filter_(szkoly, ~ rok %in% lata)
   szkoly = select_(szkoly, ~ -wojewodztwo_szkoly, ~ -powiat_szkoly, ~ -gmina_szkoly)
@@ -37,15 +45,18 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
                                       ~ -teryt_szkoly, ~ -rodzaj_gminy)
   szkoly = collect(szkoly, n = Inf)
   szkoly = group_by_(szkoly, ~ id_szkoly)
-  szkoly = mutate_(szkoly, .dots=list(max_rok = "max(rok)"))
+  szkoly = mutate_(szkoly, .dots = list(max_rok = "max(rok)"))
   szkoly = filter_(szkoly, ~ rok == max_rok)
   szkoly = select_(szkoly, ~ -max_rok)
   szkoly = as.data.frame(szkoly)
 
   typyWWynikach = typySzkol %in% szkoly$typ_szkoly
   if (any(!typyWWynikach)) warning("Nie znaleziono żadnych szkół typu/ów: ",
-                                   paste0(typySzkol[!typyWWynikach], collapse=", "), ".")
+                                   paste0(typySzkol[!typyWWynikach], collapse = ", "), ".")
 
+  if (czyZamykacSrc) {
+    rozlacz(src)
+  }
   attributes(szkoly)$lata = lata
   return(szkoly)
 }

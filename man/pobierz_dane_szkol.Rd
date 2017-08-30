@@ -5,7 +5,7 @@
 \title{Pobieranie danych o szkolach}
 \usage{
 pobierz_dane_szkol(lata, typySzkol = NULL, idOke = FALSE,
-  daneAdresowe = FALSE)
+  daneAdresowe = FALSE, src = NULL)
 }
 \arguments{
 \item{lata}{wektor liczb całkowitych - lata, których mają dotyczyć dane (dla
@@ -18,6 +18,10 @@ zwrócone (lub NULL - zwraca informacje o wszystkich szkołach)}
 
 \item{daneAdresowe}{wartość logiczna (domyślnie FALSE) - czy dołączać nazwę
 i dane adresowe?}
+
+\item{src}{NULL połączenie z bazą danych IBE zwracane przez funkcję
+\code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+połączenia}
 }
 \value{
 data frame
