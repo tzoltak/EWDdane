@@ -62,7 +62,6 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
       stop("Nie udało się znaleźć skali o id skali = ", skala, ".")
     }
   }
-  idSkal = sort(unique(skale$id_skali))
 
   # teraz trzeba wybrać skalowanie
   skale = suppressWarnings(
@@ -71,8 +70,9 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
     group_by_(~id_skali) %>%
       mutate_(.dots = setNames(list(~max(skalowanie, na.rm = TRUE)),
                                "max_skalowanie")) %>%
-      mutate_(.dots = setNames(list(~all(is.na(skalowanie))),
-                               "brak_skalowan")) %>%
+      mutate_(.dots = setNames(list(~all(is.na(skalowanie)),
+                                    ~ifelse(brak_skalowan, 0, max_skalowanie)),
+                               c("brak_skalowan", "max_skalowanie"))) %>%
       ungroup()
   )
 
@@ -80,7 +80,6 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
     skale = mutate_(skale, .dots = setNames(list(~grepl(skalowanie, opis_skalowania)),
                                             "wybrane_skalowanie"))
   } else if (is.numeric(skalowanie)) {
-    nrSkalowania = skalowanie
     skale = mutate_(skale, .dots = setNames(list(~skalowanie %in% nrSkalowania),
                                             "wybrane_skalowanie"))
   } else {
@@ -123,7 +122,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   if (ncol(skaleZeSkalowaniem) == 0) {
     # jeśli w wyniku semi_joina wypadają wszystkie wiersze, to wyparowują też kolumny
     skaleZeSkalowaniem = matrix(nrow = 0, ncol = 2,
-                       dimnames = list(NULL, c("id_skali", "ma_parametry"))) %>%
+                                dimnames = list(NULL, c("id_skali", "ma_parametry"))) %>%
       as.data.frame()
   }
 

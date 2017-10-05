@@ -1,4 +1,30 @@
 --------------------
+Zmiany w EWDdane 0.9.5 (05.10.2017)
+
+Nowe funkcjonalności:
+  - pobierz_baze_szkol() dopuszcza pobieranie informacji o LOU i TU;
+  - pobierz_wyniki_surowe() dostosowana do pobierania wyników sprawdzianu
+    z lat 2014-2016 (w tym danych kontekstowych);
+  - pobierz_baze_szkol() i pobierz_dane_szkol() zyskały argument 'src'
+    pozwalający łączyć się z bazą używająć nietypowych ustawień.
+
+Naprawione błędy:
+  - weryfikuj_baze_szkol() nie głupieje na etapie szukania nazw szkół
+    zawierających adresy, gdy nazwy szkół zawiera więcej niż jedna kolumna
+    (co jest użyteczne na etapie ręcznego rzeźbienia bazy); jest też teraz
+    inteligentniejsza w odróżniania PNA od lat (np. 1918-1919);
+  - weryfikuj_baze_szkol() nie głupieje przy sprawdzaniu duplikatów kodów OKE
+    szkół, gdy niewystąpienie szkoły w danym roku opisane jest w danych brakiem
+    danych zamiast pustym cięgiem znaków;
+  - weryfikuj_baze_szkol() nie rzuca ostrzeżenie o duplikatach kodów OKE bez
+    powodu, gdy nie został podany argument 'bazaZrzut';
+  - wczytaj_dane_kontekstowe() zwraca ramkę danych (tibble), która nie jest
+    pogrupowana;
+  - pobierz_parametry_skalowania() w sytuacji, gdy nie znajduje skalowań
+    przypisanych do skali, jako numer skalowania zwraca 1 (z brakiem parametrów),
+    zamiast -Inf.
+
+--------------------
 Zmiany w EWDdane 0.9.3 (07.08.2017)
 
 Podniesienie wersji pakietu ZPD w zależnościach w związku z reakcją na zmianę
@@ -7,6 +33,7 @@ pakietu dbplyr.)
 
 Naprawione błędy:
   - agreguj_wskazniki_ewd() działa w różnych mniej typowych schematach użycia.
+
 --------------------
 Zmiany w EWDdane 0.9.2 (05.08.2017)
 

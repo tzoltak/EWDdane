@@ -100,7 +100,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   # pobieranie i zapis wyników
   for (i in lata) {
     message("\nRok ", i, ":")
-    if ((rodzajEgzaminu == "sprawdzian" & (i < 2003 | i == 2013)) |
+    if ((rodzajEgzaminu == "sprawdzian" & i < 2003) |
         (rodzajEgzaminu == "egzamin gimnazjalny" & i < 2006) |
         (rodzajEgzaminu == "matura" & i < 2010)) {
       czyEwd = FALSE

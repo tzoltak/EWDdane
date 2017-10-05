@@ -43,6 +43,7 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   maskaKodyOke = grepl("^id_szkoly_oke_|^kod_(g|lo|t)_", names(bazaZakt))
   message("Liczba duplikatów id_szkoly_oke_rrrr dla lat:")
   for (i in names(bazaZakt)[maskaKodyOke]) {
+    bazaZakt[is.na(bazaZakt[, i]), i] = ""
     message("   ", gsub("[^[:digit:]]", "", i), ": ",
         sum(duplicated(bazaZakt[bazaZakt[, i] != "", i])),
         " z ", sum(bazaZakt[, i] != ""))
@@ -63,14 +64,17 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   # trochę sprawdzania nazw i adresów
   message("Szkoły z adresami w nazwie (szukam kodów pocztowych):")
   maskaNazwa = grepl("^nazwa", names(bazaZakt))
-  problemy$adresWNazwie = bazaZakt[grepl("[[:digit:]]{2}[-][[:digit:]]{3}",
-                                         bazaZakt[, maskaNazwa]),
-                                   grepl("^id_szkoly$|^id_(g|lo|t)|^nazwa",
+  problemy$adresWNazwie =
+    bazaZakt[apply(bazaZakt[, maskaNazwa], 1,
+                   function(x) {
+                     return(any(grepl("[^[:digit:]][[:digit:]]{2}[-][[:digit:]]{3}[^[:digit:]]", x)))
+                   }),
+             grepl("^id_szkoly$|^id_(g|lo|t)|^nazwa",
                                          names(bazaZakt))]
   if (nrow(problemy$adresWNazwie) > 0) {
     print(problemy$adresWNazwie, row.names = FALSE)
   } else {
-    cat("  Nie wystąpiły.")
+    cat("  Nie wystąpiły.\n")
   }
 
   message("Szkoły z nazwą miejscowości jako ulicą:")
@@ -87,7 +91,7 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   if (nrow(problemy$miejscowoscJakoUlica) > 0) {
     print(problemy$miejscowoscJakoUlica, row.names = FALSE)
   } else {
-    cat("  Nie wystąpiły.")
+    cat("  Nie wystąpiły.\n")
   }
 
   message("Szkoły z niepoprawnymi PNA (nie przystają do wzorca dd-ddd):")
@@ -98,7 +102,7 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   if (nrow(problemy$niepoprawnyPna) > 0) {
     print(problemy$niepoprawnyPna, row.names = FALSE)
   } else {
-    cat("  Nie wystąpiły.")
+    cat("  Nie wystąpiły.\n")
   }
 
   if (nrow(problemy$duplikaty) == 0 & !is.null(bazaZrzut)) {
@@ -163,8 +167,8 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
     print(zmiany$zmianyKodowOke, row.names = FALSE)
 
     return(zmiany)
-  } else {
+  } else if (nrow(problemy$duplikaty) > 0) {
     warning("Wykryto problemy z duplikatami kodów OKE szkół.", immediate. = TRUE)
-    invisible(problemy)
   }
+  invisible(problemy)
 }
