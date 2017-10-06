@@ -1,4 +1,12 @@
 --------------------
+Zmiany w EWDdane 0.9.6 (06.10.2017)
+
+Naprawione błędy:
+  - agreguj_wskazniki_ewd() radzi sobie z zestawieniami wskaźników pobranymi
+    funkcją pobierz_wartosci_wskaznikow_ewd() z argumentem 'opisoweNazwy'
+    ustawionym na TRUE.
+
+--------------------
 Zmiany w EWDdane 0.9.5 (05.10.2017)
 
 Nowe funkcjonalności:

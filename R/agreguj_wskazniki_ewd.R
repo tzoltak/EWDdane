@@ -114,7 +114,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
   dane = dane[, c(zmiennaGrupujaca,
                   grep(paste0("^(id_szkoly|rok_do)$|^(ewd|lu_ewd|wyswietlaj|srednia",
                               maskaPU, ")[_ ]"),
-                       tolower(names(dane)), value = TRUE))]
+                       names(dane), value = TRUE))]
 
   zmienne = c("id_szkoly", "rok_do", zmiennaGrupujaca)
   maskaZmienne = paste0("^(ewd|lu_ewd|wyswietlaj|srednia", maskaPU, ")[_ ]")
