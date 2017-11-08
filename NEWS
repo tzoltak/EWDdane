@@ -1,4 +1,12 @@
 --------------------
+Zmiany w EWDdane 0.9.7 (08.11.2017)
+
+Naprawione błędy:
+  - pobierz_wartosci_wskaznikow_ewd() rzuca (bardziej) informacyjnym błędem,
+    jeśli (na skutek podania dziwnych wartości argumentów) nie uda się znaleźć
+    żadnych wskaźników, których wartości miałyby być zwrócone.
+
+--------------------
 Zmiany w EWDdane 0.9.6 (06.10.2017)
 
 Naprawione błędy:

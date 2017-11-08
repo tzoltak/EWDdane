@@ -111,6 +111,9 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   }
   message("Pobieranie informacji o wartościach wskaźników.")
   wskazniki = collect(wskazniki, n = Inf)
+  if (nrow(wskazniki) == 0) {
+    stop("Nie znaleziono żadnych wskaźników spełniających podane ktryteria.")
+  }
   # dalsze przekształcanie
   message("Obliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))
