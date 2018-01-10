@@ -76,28 +76,38 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
             tylkoWyswietlane %in% c(TRUE, FALSE),
             czyPomin %in% c(TRUE, FALSE),
             gamma < 1, gamma > 0, !is.na(gamma))
+  if (tylkoWskDoPrezentacji == FALSE) {
+    tylkoWskDoPrezentacji = NA
+  }
   # pobieranie z bazy
-  if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
+  if (length(lata) == 1) {
+    lata = rep(lata, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
+  }
   src = polacz()
   on.exit(rozlacz(src))
-  wskazniki = pobierz_wskazniki(src)
-  wskazniki = filter_(wskazniki, ~ rodzaj_wsk == "ewd", ~ typ_szkoly == typSzkoly,
-                      ~ rok_do %in% lata)
-  wskazniki = select_(wskazniki, ~ -matches("^(opis_wsk|id_skali|skalowanie)$"))
-  if (tylkoWskDoPrezentacji) wskazniki = filter_(wskazniki, ~ wsk_do_prezentacji == TRUE)
-  wskazniki = select_(wskazniki, ~ -matches("^(rodzaj_egzaminu|czesc_egzaminu)$"))
-  wskazniki = distinct(wskazniki)
+  wskazniki = src %>%
+    pobierz_wskazniki(doPrezentacji = tylkoWskDoPrezentacji) %>%
+    filter_(~rodzaj_wsk == "ewd", ~typ_szkoly == typSzkoly, ~rok_do %in% lata) %>%
+    select_(~-matches("^(opis_wsk|id_skali|skalowanie)$"),
+            ~-matches("^(rodzaj_egzaminu|czesc_egzaminu)$")) %>%
+    distinct()
   wskazniki = suppressMessages(left_join(wskazniki, pobierz_wartosci_wskaznikow(src)))
-  if (tylkoWyswietlane) wskazniki = filter_(wskazniki, ~ wyswietlaj == TRUE)
-  wskazniki = select_(wskazniki, ~ matches("^(wskaznik|skrot|rok_do|id_ww|id_szkoly)$"),
-                      ~ matches("^(pomin|kategoria|wyswietlaj|srednia|bs|ewd|bs_ewd)$"),
-                      ~ matches("^(trend_ewd|bs_trend_ewd|korelacja|lu_ewd|lu_wszyscy)$"))
+  if (tylkoWyswietlane) {
+    wskazniki = filter_(wskazniki, ~wyswietlaj %in% TRUE)
+  }
+  if (czyPomin) {
+    wskazniki = filter_(wskazniki, ~pomin %in% FALSE)
+  }
+  wskazniki = select_(wskazniki, ~matches("^(wskaznik|skrot|rok_do|id_ww|id_szkoly)$"),
+                      ~matches("^(pomin|kategoria|wyswietlaj|srednia|bs|ewd|bs_ewd)$"),
+                      ~matches("^(trend_ewd|bs_trend_ewd|korelacja|lu_ewd|lu_wszyscy)$"))
   if (lUcznPrzedm) {
     message("Pobieranie informacji o liczbie zdających.")
-    lUczniow = suppressMessages(left_join(wskazniki, pobierz_wartosci_wskaznikow_lu(src)))
-    lUczniow = filter_(lUczniow, "!is.na(czesc_egzaminu)")
-    lUczniow = select_(lUczniow, ~ matches("^(id_ww|czesc_egzaminu|przedm_lu)$"))
-    lUczniow = as.data.frame(collect(lUczniow, n = Inf))
+    lUczniow = suppressMessages(left_join(wskazniki, pobierz_wartosci_wskaznikow_lu(src))) %>%
+      filter_("!is.na(czesc_egzaminu)") %>%
+      select_(~matches("^(id_ww|czesc_egzaminu|przedm_lu)$")) %>%
+      collect(n = Inf) %>%
+      as.data.frame()
     for (i in names(lUczniow)[unlist(lapply(lUczniow, is.character))]) {
       Encoding(lUczniow[, i]) = "UTF-8"
       lUczniow[, i] = enc2native(lUczniow[, i])
@@ -117,12 +127,12 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   # dalsze przekształcanie
   message("Obliczanie przedziałów ufności.")
   lambda = sqrt(qchisq(gamma, 2))
-  dots = list(dg_pu_srednia = interp("srednia - lambda * bs", lambda = lambda),
-              gg_pu_srednia = interp("srednia + lambda * bs", lambda = lambda),
-              dg_pu_ewd     = interp("ewd - lambda * bs_ewd", lambda = lambda),
-              gg_pu_ewd     = interp("ewd + lambda * bs_ewd", lambda = lambda))
-  wskazniki = mutate_(wskazniki, .dots = dots)
-  wskazniki = select_(wskazniki, ~ -matches("^bs(|_srednia|_ewd)$"))
+  dots = list(dg_pu_srednia = ~srednia - lambda * bs,
+              gg_pu_srednia = ~srednia + lambda * bs,
+              dg_pu_ewd     = ~ewd - lambda * bs_ewd,
+              gg_pu_ewd     = ~ewd + lambda * bs_ewd)
+  wskazniki = mutate_(wskazniki, .dots = dots) %>%
+    select_(~-matches("^bs(|_srednia|_ewd)$"))
   zmNaDlugi = c("kategoria", "wyswietlaj", "srednia", "ewd", "trend_ewd", "bs_trend_ewd",
                 "korelacja", "lu_ewd", "dg_pu_srednia", "gg_pu_srednia", "dg_pu_ewd",
                 "gg_pu_ewd")
@@ -138,18 +148,25 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   if (!dodatkoweInfo) {
     zmienneUsun = c("kategoria", "korelacja")
     if (tylkoWyswietlane) zmienneUsun = c(zmienneUsun, "wyswietlaj")
-    wskazniki = filter_(wskazniki, ~ !(variable %in% zmienneUsun))
+    wskazniki = filter_(wskazniki, ~!(variable %in% zmienneUsun))
   }
   # przekształcanie do postaci szerokiej
-  wskazniki = mutate_(wskazniki, .dots = list(variable = "levels(variable)[variable]"))
+  wskazniki = mutate_(wskazniki, .dots = list(variable = ~levels(variable)[variable]))
   if (opisoweNazwy) {
-    dots = list(variable = 'paste(variable, "wsk.", skrot)')
-    nazwyWskaznikow = paste0(" wsk. ", unique(wskazniki$skrot))
+    wskazniki = mutate_(wskazniki,
+                        .dots = list(variable = ~paste(variable, "wsk.", skrot))) %>%
+      group_by_(~rok_do, ~id_szkoly, ~variable) %>%
+      mutate_(.dots = list(n = ~n())) %>%
+      ungroup() %>%
+      mutate_(.dots = list(variable = ~ifelse(n == 1, variable,
+                                              paste0(variable, " (", wskaznik, ")"))))
+    nazwyWskaznikow = unique(sub("^ewd ", "",
+                                 grep("^ewd ", wskazniki$variable, value = TRUE)))
   } else {
-    dots = list(variable = 'paste(variable, wskaznik, sep="_")')
+    wskazniki = mutate_(wskazniki,
+                        .dots = list(variable = ~paste(variable, wskaznik, sep="_")))
     nazwyWskaznikow = paste0("_", unique(wskazniki$wskaznik))
   }
-  wskazniki = mutate_(wskazniki, .dots = dots)
   wskazniki = dcast(wskazniki, rok_do + id_szkoly + pomin + lu_wszyscy ~ variable,
                     identity, fill = NA_real_, value.var = "value")
   # łączenie z danymi szkół
@@ -157,8 +174,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   daneSzkol = pobierz_dane_szkol(c(lata, min(lata) - (1:2)), typSzkoly, idOke = idOke,
                                  daneAdresowe = daneAdresowe)
   if (!dodatkoweInfo) {
-    daneSzkol = select_(daneSzkol, ~ -matches("^(publiczna|dla_doroslych|specjalna)$"),
-                        ~ -matches("^(przyszpitalna|wielkosc_miejscowosci|rodzaj_gminy)$"))
+    daneSzkol = select_(daneSzkol, ~-matches("^(publiczna|dla_doroslych|specjalna)$"),
+                        ~-matches("^(przyszpitalna|wielkosc_miejscowosci|rodzaj_gminy)$"))
   }
   if (!any(c("LO", "T") %in% typSzkoly)) {
     daneSzkol = select_(daneSzkol, ~ -matches("^(matura_miedzynarodowa)$"))
@@ -166,7 +183,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   wskazniki = suppressMessages(inner_join(daneSzkol, wskazniki))
   # filtrowanie JST
   if (!is.null(jst)) {
-    wskazniki = filter_(wskazniki, ~ grepl(jst, teryt_szkoly))
+    wskazniki = filter_(wskazniki, ~grepl(jst, teryt_szkoly))
   }
   # układanie kolumn w odpowiedniej kolejności
   nazwy = colnames(wskazniki)
@@ -179,7 +196,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   sort2 = factor(sort2, levels = nazwyWskaznikow)
   sort2 = as.numeric(sort2)
   sort2[is.na(sort2)] = 0
-  sort3 = sub(maska, "", nazwy)
+  sort3 = sub(paste0("[ _]", maska), "", nazwy)
   sort3 = factor(sort3, levels = c("dg_pu_srednia", "gg_pu_srednia", "srednia",
                                    "dg_pu_ewd"    , "gg_pu_ewd"    , "ewd",
                                    "trend_ewd", "bs_trend_ewd", "korelacja",
@@ -189,7 +206,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   wskazniki = wskazniki[, order(sort1, sort2, sort3)]
   # ew. piękne nazwy kolumn
   if (czyPomin) {
-    wskazniki = select_(wskazniki, ~ -matches("^(pomin)$"))
+    wskazniki = select_(wskazniki, ~-matches("^(pomin)$"))
   }
   names(wskazniki) = enc2native(names(wskazniki))
   if (opisoweNazwy) {
@@ -204,9 +221,9 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     wskazniki$artystyczna[is.na(wskazniki$artystyczna)] = "ndt."
     names(wskazniki) = sub("artystyczna"  , "typ szkoły artystycznej", names(wskazniki))
     names(wskazniki) = sub("nazwa_szkoly" , "nazwa", names(wskazniki))
+    names(wskazniki) = sub("wielkosc_miejscowosci", "wielkość miejscowości", names(wskazniki))
     names(wskazniki) = sub("miejscowosc"  , "miejscowość", names(wskazniki))
     names(wskazniki) = sub("pna"          , "kod pocztowy", names(wskazniki))
-    names(wskazniki) = sub("wielkosc_miejscowosci", "wielkość miejscowości", names(wskazniki))
     names(wskazniki) = sub("teryt_szkoly" , "TERYT gminy", names(wskazniki))
     names(wskazniki) = sub("rodzaj_gminy" , "rodzaj gminy", names(wskazniki))
     names(wskazniki) = sub("rok_do"       , "ostatni rok okresu obejmowanego przez wskaźnik", names(wskazniki))
@@ -217,10 +234,11 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(wskazniki) = sub("srednia", "śr. wyników egzaminów", names(wskazniki))
     names(wskazniki) = sub("ewd"    , "EWD", names(wskazniki))
     names(wskazniki) = sub("^lu_|^l_uczn_"   , "liczba uczniów ", names(wskazniki))
-    names(wskazniki) = sub("_trend_EWD", " trend EWD", names(wskazniki))
+    names(wskazniki) = sub("bs_trend_EWD", "bs. trend EWD", names(wskazniki))
+    names(wskazniki) = sub("trend_EWD", "trend EWD", names(wskazniki))
   }
   # porządki
-  wskazniki = select_(wskazniki, ~ -matches("^(rok)$"))
+  wskazniki = select_(wskazniki, ~-matches("^(rok)$"))
   maska = unlist(lapply(wskazniki, function(x) {return(all(is.na(x)))}))
   wskazniki = wskazniki[, !maska]
  	# zapis
