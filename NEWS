@@ -1,4 +1,11 @@
 --------------------
+Zmiany w EWDdane 0.9.8 (10.01.2018)
+
+Naprawione błędy:
+  - pobierz_wartosci_wskaznikow_ewd() - działa wywołanie funkcji z argumentem
+    `czyPomin = FALSE`.
+
+--------------------
 Zmiany w EWDdane 0.9.7 (08.11.2017)
 
 Naprawione błędy:
