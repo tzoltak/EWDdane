@@ -1,9 +1,15 @@
 --------------------
 Zmiany w EWDdane 0.9.8 (10.01.2018)
 
+Zmiany:
+  - pobierz_wartosci_wskaznikow_ewd() - nazwa argumentu 'czyPomin' została
+    zmieniona na 'tylkoNiePomin', dzieki czemu jest bardziej kompatybilna
+    z nazwami innych argumentów zarządzających ew. zwracaniem wartości
+    wskaźników dla nietypowych szkół.
+
 Naprawione błędy:
-  - pobierz_wartosci_wskaznikow_ewd() - działa wywołanie funkcji z argumentem
-    `czyPomin = FALSE`.
+  - pobierz_wartosci_wskaznikow_ewd() - wreszcie potrafi poprawnie pobrać
+    wartości wskazników, które w bazie oznaczone są jako 'pomin'.
 
 --------------------
 Zmiany w EWDdane 0.9.7 (08.11.2017)

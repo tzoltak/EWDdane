@@ -28,7 +28,7 @@
 #' @param tylkoWyswietlane wartość logiczna (domyślnie TRUE) - czy mają zostać
 #' zwrócone wartości tylko dla tych szkół, dla których wyswietlane są elipsy? (ze
 #' względu na kategorię, jaka została im przypisana)
-#' @param czyPomin wartość logiczna (domyślnie TRUE) - czy pominąć wartości wskaźników
+#' @param tylkoNiePomin wartość logiczna (domyślnie TRUE) - czy pominąć wartości wskaźników
 #' dla szkół specjalnych itp. (tj. takich, które nie były uwzględniane w grupie szkół,
 #' na których estymowane były modele EWD i całkowicie pomijanych przy prezentacji
 #' wskaźników na stronie)?
@@ -49,7 +49,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
                                            opisoweNazwy = TRUE, lUcznPrzedm = FALSE,
                                            dodatkoweInfo = FALSE,
                                            tylkoWskDoPrezentacji = TRUE,
-                                           tylkoWyswietlane = TRUE, czyPomin = TRUE,
+                                           tylkoWyswietlane = TRUE,
+                                           tylkoNiePomin = TRUE,
                                            gamma = 0.95, fileEncoding = "windows-1250") {
   stopifnot(is.numeric(lata)        , length(lata) > 0,
             is.character(typSzkoly) , length(typSzkoly) == 1,
@@ -63,7 +64,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
             is.logical(dodatkoweInfo)        , length(dodatkoweInfo) == 1,
             is.logical(tylkoWskDoPrezentacji), length(tylkoWskDoPrezentacji) == 1,
             is.logical(tylkoWyswietlane)     , length(tylkoWyswietlane) == 1,
-            is.logical(czyPomin)             , length(czyPomin) == 1,
+            is.logical(tylkoNiePomin)        , length(tylkoNiePomin) == 1,
             is.numeric(gamma)                , length(gamma) == 1,
             is.character(fileEncoding)       , length(fileEncoding) == 1
   )
@@ -74,7 +75,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
             dodatkoweInfo %in% c(TRUE, FALSE),
             tylkoWskDoPrezentacji %in% c(TRUE, FALSE),
             tylkoWyswietlane %in% c(TRUE, FALSE),
-            czyPomin %in% c(TRUE, FALSE),
+            tylkoNiePomin %in% c(TRUE, FALSE),
             gamma < 1, gamma > 0, !is.na(gamma))
   if (tylkoWskDoPrezentacji == FALSE) {
     tylkoWskDoPrezentacji = NA
@@ -84,19 +85,17 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     lata = rep(lata, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
   }
   src = polacz()
-  on.exit(rozlacz(src))
   wskazniki = src %>%
     pobierz_wskazniki(doPrezentacji = tylkoWskDoPrezentacji) %>%
     filter_(~rodzaj_wsk == "ewd", ~typ_szkoly == typSzkoly, ~rok_do %in% lata) %>%
     select_(~-matches("^(opis_wsk|id_skali|skalowanie)$"),
             ~-matches("^(rodzaj_egzaminu|czesc_egzaminu)$")) %>%
     distinct()
-  wskazniki = suppressMessages(left_join(wskazniki, pobierz_wartosci_wskaznikow(src)))
+  wskazniki =
+    suppressMessages(left_join(wskazniki,
+                               pobierz_wartosci_wskaznikow(src, czyPomin = !tylkoNiePomin)))
   if (tylkoWyswietlane) {
     wskazniki = filter_(wskazniki, ~wyswietlaj %in% TRUE)
-  }
-  if (czyPomin) {
-    wskazniki = filter_(wskazniki, ~pomin %in% FALSE)
   }
   wskazniki = select_(wskazniki, ~matches("^(wskaznik|skrot|rok_do|id_ww|id_szkoly)$"),
                       ~matches("^(pomin|kategoria|wyswietlaj|srednia|bs|ewd|bs_ewd)$"),
@@ -108,10 +107,6 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
       select_(~matches("^(id_ww|czesc_egzaminu|przedm_lu)$")) %>%
       collect(n = Inf) %>%
       as.data.frame()
-    for (i in names(lUczniow)[unlist(lapply(lUczniow, is.character))]) {
-      Encoding(lUczniow[, i]) = "UTF-8"
-      lUczniow[, i] = enc2native(lUczniow[, i])
-    }
     lUczniow$czesc_egzaminu = paste0("l_uczn_", lUczniow$czesc_egzaminu)
     lUczniow = dcast(lUczniow, id_ww ~ czesc_egzaminu, identity, fill = NA_integer_,
                      value.var = "przedm_lu")
@@ -205,7 +200,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   sort3[is.na(sort3)] = 0
   wskazniki = wskazniki[, order(sort1, sort2, sort3)]
   # ew. piękne nazwy kolumn
-  if (czyPomin) {
+  if (tylkoNiePomin) {
     wskazniki = select_(wskazniki, ~-matches("^(pomin)$"))
   }
   names(wskazniki) = enc2native(names(wskazniki))
@@ -236,6 +231,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(wskazniki) = sub("^lu_|^l_uczn_"   , "liczba uczniów ", names(wskazniki))
     names(wskazniki) = sub("bs_trend_EWD", "bs. trend EWD", names(wskazniki))
     names(wskazniki) = sub("trend_EWD", "trend EWD", names(wskazniki))
+    names(wskazniki) = sub("matura_miedzynarodowa", "matura międzynarodowa", names(wskazniki))
   }
   # porządki
   wskazniki = select_(wskazniki, ~-matches("^(rok)$"))

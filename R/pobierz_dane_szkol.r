@@ -26,37 +26,32 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
   )
   stopifnot(idOke %in% c(TRUE, FALSE),
             daneAdresowe %in% c(TRUE, FALSE))
-  czyZamykacSrc = FALSE
   if (is.null(src)) {
     src = polacz()
-    on.exit(rozlacz(src))
-    czyZamykacSrc = TRUE
   }
 
   if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 3 wiersze dalej zadziała
   if (length(typySzkol) == 1) typySzkol = rep(typySzkol, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
-  szkoly = pobierz_szkoly(src)
-  szkoly = filter_(szkoly, ~ rok %in% lata)
-  szkoly = select_(szkoly, ~ -wojewodztwo_szkoly, ~ -powiat_szkoly, ~ -gmina_szkoly)
-  if (!is.null(typySzkol)) szkoly = filter_(szkoly, ~ typ_szkoly %in% typySzkol)
-  if (!idOke) szkoly = select_(szkoly, ~ -id_szkoly_oke)
-  if (!daneAdresowe) szkoly = select_(szkoly, ~ -nazwa_szkoly, ~ -adres, ~ -miejscowosc,
-                                      ~ -pna, ~ -poczta, ~ -wielkosc_miejscowosci,
-                                      ~ -teryt_szkoly, ~ -rodzaj_gminy)
-  szkoly = collect(szkoly, n = Inf)
-  szkoly = group_by_(szkoly, ~ id_szkoly)
-  szkoly = mutate_(szkoly, .dots = list(max_rok = "max(rok)"))
-  szkoly = filter_(szkoly, ~ rok == max_rok)
-  szkoly = select_(szkoly, ~ -max_rok)
-  szkoly = as.data.frame(szkoly)
+  szkoly = pobierz_szkoly(src) %>%
+    filter_(~rok %in% lata) %>%
+    select_(~-wojewodztwo_szkoly, ~-powiat_szkoly, ~-gmina_szkoly)
+  if (!is.null(typySzkol)) szkoly = filter_(szkoly, ~typ_szkoly %in% typySzkol)
+  if (!idOke) szkoly = select_(szkoly, ~-id_szkoly_oke)
+  if (!daneAdresowe) {
+    szkoly = select_(szkoly, ~-nazwa_szkoly, ~-adres, ~-miejscowosc,
+                     ~-pna, ~-poczta, ~-wielkosc_miejscowosci,
+                     ~-teryt_szkoly, ~-rodzaj_gminy)
+  }
+  szkoly = collect(szkoly, n = Inf) %>%
+    group_by_(~id_szkoly) %>%
+    mutate_(.dots = list(max_rok = ~max(rok))) %>%
+    filter_(~rok == max_rok) %>%
+    select_(~-max_rok) %>%
+    as.data.frame()
 
   typyWWynikach = typySzkol %in% szkoly$typ_szkoly
   if (any(!typyWWynikach)) warning("Nie znaleziono żadnych szkół typu/ów: ",
                                    paste0(typySzkol[!typyWWynikach], collapse = ", "), ".")
-
-  if (czyZamykacSrc) {
-    rozlacz(src)
-  }
   attributes(szkoly)$lata = lata
   return(szkoly)
 }
