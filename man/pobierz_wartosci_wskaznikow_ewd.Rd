@@ -7,8 +7,8 @@
 pobierz_wartosci_wskaznikow_ewd(typSzkoly, lata, zapis = NULL, jst = NULL,
   idOke = FALSE, daneAdresowe = TRUE, opisoweNazwy = TRUE,
   lUcznPrzedm = FALSE, dodatkoweInfo = FALSE,
-  tylkoWskDoPrezentacji = TRUE, tylkoWyswietlane = TRUE, czyPomin = TRUE,
-  gamma = 0.95, fileEncoding = "windows-1250")
+  tylkoWskDoPrezentacji = TRUE, tylkoWyswietlane = TRUE,
+  tylkoNiePomin = TRUE, gamma = 0.95, fileEncoding = "windows-1250")
 }
 \arguments{
 \item{typSzkoly}{ciąg znaków: 'gimn.', 'LO' lub 'T'}
@@ -48,7 +48,7 @@ stronie?}
 zwrócone wartości tylko dla tych szkół, dla których wyswietlane są elipsy? (ze
 względu na kategorię, jaka została im przypisana)}
 
-\item{czyPomin}{wartość logiczna (domyślnie TRUE) - czy pominąć wartości wskaźników
+\item{tylkoNiePomin}{wartość logiczna (domyślnie TRUE) - czy pominąć wartości wskaźników
 dla szkół specjalnych itp. (tj. takich, które nie były uwzględniane w grupie szkół,
 na których estymowane były modele EWD i całkowicie pomijanych przy prezentacji
 wskaźników na stronie)?}
