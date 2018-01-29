@@ -1,4 +1,15 @@
 --------------------
+Zmiany w EWDdane 0.9.9 (29.01.2018)
+
+Naprawione błędy:
+  - pobierz_dane_kontekstowe() już nie rzuca ostrzeżeń przy sprawdzaniu poziomu
+    uprawnień dostępu do bazy (a robiła to jakiś czas po przesiadce bazy na
+    PostgreSQL 10 i zmianie typu kolumny z płcią w bazie na nietypowy);
+  - podniesiono wersję pakietu ZPD w zależnościach, co pozwala uniknąć błędów
+    przy pobieraniu danych kontekstowych i ostrzeżeń przy pobieraniu wyników
+    surowych.
+
+--------------------
 Zmiany w EWDdane 0.9.8 (10.01.2018)
 
 Zmiany:
