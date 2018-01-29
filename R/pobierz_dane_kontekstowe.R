@@ -93,7 +93,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   # sprawdzanie poziomu uprawnień
   daneOsobowe = FALSE
   try({
-    tmp = tbl(src, sql("SELECT * FROM dane_osobowe.obserwacje LIMIT 1"))
+    tmp = tbl(src, sql("SELECT id_obserwacji FROM dane_osobowe.obserwacje LIMIT 1"))
     daneOsobowe = TRUE
   }, silent = TRUE)
 
