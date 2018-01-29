@@ -64,10 +64,8 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
     stopifnot(length(katalogWyskalowane) == 1)
     stopifnot(dir.exists(katalogWyskalowane))
   }
-  czyZamykacSrc = FALSE
   if (is.null(src)) {
     src = polacz()
-    czyZamykacSrc = TRUE
   }
   if (is.null(lata)) {
     lata = pobierz_testy(src) %>%
@@ -250,8 +248,5 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
     pliki = append(pliki, nazwaPliku)
   }
 
-  if (czyZamykacSrc) {
-    rozlacz(src)
-  }
   invisible(pliki)
 }
