@@ -6,6 +6,9 @@ sudo: required
 apt_packages:
   - unixodbc-dev
 
+r_packages:
+  - RPostgres
+
 r_github_packages:
   - jimhester/covr
   - zozlak/ZPD
@@ -15,7 +18,7 @@ warnings_are_errors: false
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
-  
+
 notifications:
   email:
     - zozlak@zozlak.org
