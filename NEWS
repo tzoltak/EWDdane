@@ -1,4 +1,16 @@
 --------------------
+Zmiany w EWDdane 0.9.10 (08.10.2018)
+
+Zmiany:
+  - weryfikuj_baze_szkol() po wczytywaniu bazy szkół z pliku sprawdza liczbę
+    kolumn, co pozwala szybko sypnąć błędem, jeśli plik CSV został zapisany nie
+    z tym separatorem pola, jakiego oczekiwała.
+
+Naprawione błędy:
+  - weryfikuj_baze_szkol() radzi sobie w sytuacji, gdy w bazie szkół nie ma
+    zmian identyfiaktorów OKE szkół względem poprzedniego roku.
+
+--------------------
 Zmiany w EWDdane 0.9.9 (29.01.2018)
 
 Naprawione błędy:

@@ -4,9 +4,9 @@
 \alias{pobierz_wartosci_wskaznikow_ewd}
 \title{Pobieranie wartosci wskaznikow EWD}
 \usage{
-pobierz_wartosci_wskaznikow_ewd(typSzkoly, lata, zapis = NULL, jst = NULL,
-  idOke = FALSE, daneAdresowe = TRUE, opisoweNazwy = TRUE,
-  lUcznPrzedm = FALSE, dodatkoweInfo = FALSE,
+pobierz_wartosci_wskaznikow_ewd(typSzkoly, lata, zapis = NULL,
+  jst = NULL, idOke = FALSE, daneAdresowe = TRUE,
+  opisoweNazwy = TRUE, lUcznPrzedm = FALSE, dodatkoweInfo = FALSE,
   tylkoWskDoPrezentacji = TRUE, tylkoWyswietlane = TRUE,
   tylkoNiePomin = TRUE, gamma = 0.95, fileEncoding = "windows-1250")
 }

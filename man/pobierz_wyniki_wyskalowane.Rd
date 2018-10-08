@@ -4,8 +4,9 @@
 \alias{pobierz_wyniki_wyskalowane}
 \title{Pobieranie surowych wynikow egzaminu}
 \usage{
-pobierz_wyniki_wyskalowane(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
-  daneKontekstowe = TRUE, src = NULL, katalogWyskalowane = NULL)
+pobierz_wyniki_wyskalowane(rodzajEgzaminu, lata = NULL,
+  nadpisz = FALSE, daneKontekstowe = TRUE, src = NULL,
+  katalogWyskalowane = NULL)
 }
 \arguments{
 \item{rodzajEgzaminu}{ciąg znaków - rodzaj egzaminu}

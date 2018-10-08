@@ -4,8 +4,8 @@
 \alias{pobierz_parametry_skalowania}
 \title{Pobieranie parametrow skalowan}
 \usage{
-pobierz_parametry_skalowania(skala, skalowanie = NULL, doPrezentacji = NA,
-  parametryzacja = "baza")
+pobierz_parametry_skalowania(skala, skalowanie = NULL,
+  doPrezentacji = NA, parametryzacja = "baza")
 }
 \arguments{
 \item{skala}{id_skali (liczba naturalna) lub ciąg znaków z wyrażeniem
