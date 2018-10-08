@@ -19,6 +19,7 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   if (is.character(bazaZakt)) {
     stopifnot(length(bazaZakt) == 1, file.exists(bazaZakt))
     bazaZakt = read.csv2(bazaZakt, fileEncoding = "UTF-8", stringsAsFactors = FALSE)
+    stopifnot(ncol(bazaZakt) > 1)
   } else {
     maska = unlist(lapply(bazaZakt, is.factor))
     bazaZakt[, maska] = lapply(bazaZakt[, maska],
@@ -30,6 +31,7 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   if (is.character(bazaZrzut)) {
     stopifnot(length(bazaZrzut) == 1, file.exists(bazaZrzut))
     bazaZrzut = read.csv2(bazaZrzut, fileEncoding = "UTF-8", stringsAsFactors = FALSE)
+    stopifnot(ncol(bazaZrzut) > 1)
   } else {
     maska = unlist(lapply(bazaZrzut, is.factor))
     bazaZrzut[, maska] = lapply(bazaZrzut[, maska],
@@ -59,13 +61,13 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
                        function(x, powtKody) {return(any(x %in% powtKody))},
                        powtKody = names(powtKody))
   maskaKolumny = maskaKodyOke | grepl("^id_|^nazwa", names(bazaZakt))
-  problemy$duplikaty = bazaZakt[maskaWiersze, maskaKolumny]
+  problemy$duplikaty = bazaZakt[maskaWiersze, maskaKolumny, drop = FALSE]
 
   # trochę sprawdzania nazw i adresów
   message("Szkoły z adresami w nazwie (szukam kodów pocztowych):")
   maskaNazwa = grepl("^nazwa", names(bazaZakt))
   problemy$adresWNazwie =
-    bazaZakt[apply(bazaZakt[, maskaNazwa], 1,
+    bazaZakt[apply(bazaZakt[, maskaNazwa, drop = FALSE], 1,
                    function(x) {
                      return(any(grepl("[^[:digit:]][[:digit:]]{2}[-][[:digit:]]{3}[^[:digit:]]", x)))
                    }),
@@ -152,20 +154,23 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
     temp = polaczone[, maskaZmienne] != polaczone[, paste0(maskaZmienne, "_zakt")]
     maska = apply(temp, 1, any)
     polaczone = polaczone[maska %in% TRUE, ]
-    maska = polaczone[, maskaZmienne] == polaczone[, paste0(maskaZmienne, "_zakt")]
-    polaczone[, maskaZmienne][maska] = ""
-    polaczone[, paste0(maskaZmienne, "_zakt")][maska] = ""
-    temp = polaczone[, maskaZmienne] != polaczone[, paste0(maskaZmienne, "_zakt")]
-    maska = apply(temp, 2, any)
-    maskaZmienne = c(
-      names(polaczone)[grep("^id_szkoly(|_strona)$", names(polaczone))],
-      maskaZmienne[maska], paste0(maskaZmienne, "_zakt")[maska]
-    )
-    zmiany$zmianyKodowOke = polaczone[, maskaZmienne]
-
-    message("Zmiany id OKE szkół w latach wcześniejszych:\n")
-    print(zmiany$zmianyKodowOke, row.names = FALSE)
-
+    if (any(maska)) {
+      maska = polaczone[, maskaZmienne] == polaczone[, paste0(maskaZmienne, "_zakt")]
+      polaczone[, maskaZmienne][maska] = ""
+      polaczone[, paste0(maskaZmienne, "_zakt")][maska] = ""
+      temp = polaczone[, maskaZmienne] != polaczone[, paste0(maskaZmienne, "_zakt")]
+      maska = apply(temp, 2, any)
+      maskaZmienne = c(
+        names(polaczone)[grep("^id_szkoly(|_strona)$", names(polaczone))],
+        maskaZmienne[maska], paste0(maskaZmienne, "_zakt")[maska]
+      )
+      zmiany$zmianyKodowOke = polaczone[, maskaZmienne]
+      message("Zmiany id OKE szkół w latach wcześniejszych:\n")
+      print(zmiany$zmianyKodowOke, row.names = FALSE)
+    } else {
+      zmiany$zmianyKodowOke = NULL
+      message("Nie znaleziono żadnych zmian id OKE szkół w latach wcześniejszych.\n")
+    }
     return(zmiany)
   } else if (nrow(problemy$duplikaty) > 0) {
     warning("Wykryto problemy z duplikatami kodów OKE szkół.", immediate. = TRUE)
