@@ -141,6 +141,42 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
       select_('-pop_podejscie', '-oke', '-zrodlo', '-id_testu') %>%
       collect(n = Inf)
   )
+
+  # pobieranie informacji o szkołach
+  message(" Pobieranie informacji o szkołach.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
+  szkoly = pobierz_szkoly(src) %>%
+    select_('id_szkoly', 'rok', 'typ_szkoly', 'publiczna', 'specjalna',
+            'dla_doroslych', 'przyszpitalna', 'artystyczna') %>%
+    collect(n = Inf)
+
+  # pobieranie informacji o obserwacjach
+  message(" Pobieranie informacji o uczniach.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
+  obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
+    select_('-id_cke') %>%
+    distinct() %>%
+    collect(n = Inf)
+
+  # pobieranie informacji o pierwszych przystąpieniach
+  message(" Pobieranie informacji o pierwszych i ostatnich przystąpieniach do egzaminu.",
+          format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
+  pierwsze = filtruj_przystapienia(src, pierwsze = TRUE,
+                                   rodzajEgzaminu = rodzajEgzaminu,
+                                   czescEgzaminu = NULL, czyEwd = TRUE) %>%
+    collect(n = Inf) %>%
+    select_('-rodzaj_egzaminu', '-dane_ewd') %>%
+    mutate_(pierwsze = TRUE)
+
+  # pobieranie informacji o ostatnich przystąpieniach
+  ostatnie = filtruj_przystapienia(src, pierwsze = FALSE,
+                                   rodzajEgzaminu = rodzajEgzaminu,
+                                   czescEgzaminu = NULL, czyEwd = TRUE) %>%
+    collect(n = Inf) %>%
+    select_('-rodzaj_egzaminu', '-dane_ewd') %>%
+    mutate_(ostatnie = TRUE)
+
+  # obróbka danych indywidualnych
   message(" Konwersja danych na format krótszy.",
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   dane = suppressWarnings(
@@ -166,42 +202,22 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   # dołączenie informacji o szkołach
   message(" Dołączanie informacji o szkołach.",
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  szkoly = pobierz_szkoly(src) %>%
-    select_('id_szkoly', 'rok', 'typ_szkoly', 'publiczna', 'specjalna',
-            'dla_doroslych', 'przyszpitalna', 'artystyczna') %>%
-    collect(n = Inf)
   dane = suppressMessages(inner_join(dane, szkoly))
   rm(szkoly)
 
   # dołączanie informacji o obserwacjach
   message(" Dołączanie informacji o uczniach.",
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
-    select_('-id_cke') %>%
-    distinct() %>%
-    collect(n = Inf)
   dane = suppressMessages(inner_join(dane, obserwacje))
   rm(obserwacje)
 
   # oznaczamy pierwsze przystąpienia
   message(" Oznaczanie pierwszych i ostatnich przystąpień do egzaminu.",
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  pierwsze = filtruj_przystapienia(src, pierwsze = TRUE,
-                                   rodzajEgzaminu = rodzajEgzaminu,
-                                   czescEgzaminu = NULL, czyEwd = TRUE) %>%
-    collect(n = Inf) %>%
-    select_('-rodzaj_egzaminu', '-dane_ewd') %>%
-    mutate_(pierwsze = TRUE)
   dane = suppressMessages(left_join(dane, pierwsze))
   rm(pierwsze)
 
   # oznaczamy ostatnie przystąpienia
-  ostatnie = filtruj_przystapienia(src, pierwsze = FALSE,
-                                   rodzajEgzaminu = rodzajEgzaminu,
-                                   czescEgzaminu = NULL, czyEwd = TRUE) %>%
-    collect(n = Inf) %>%
-    select_('-rodzaj_egzaminu', '-dane_ewd') %>%
-    mutate_(ostatnie = TRUE)
   dane = suppressMessages(left_join(dane, ostatnie))
   rm(ostatnie)
 
