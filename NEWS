@@ -1,4 +1,15 @@
 --------------------
+Zmiany w EWDdane 0.9.11 (10.10.2018)
+
+Naprawione błędy::
+  - pobierz_dane_kontekstowe() po zmianie backendu do bazy miało problem
+    z automatycznym zamykaniem połączenia z bazą w trakcie działania funkcji
+    (podczas wykonywania czasochłonnego etapu przetwarzania danych
+    niewykorzystywane poł☺ączenie było zamykane, choć potem funkcja chciała
+    znów z niego skorzystać); problem rozwiązano przenosząc pobieranie
+    wszystkich danych z bazy na początek działania funkcji.
+
+--------------------
 Zmiany w EWDdane 0.9.10 (08.10.2018)
 
 Zmiany:
@@ -8,7 +19,7 @@ Zmiany:
 
 Naprawione błędy:
   - weryfikuj_baze_szkol() radzi sobie w sytuacji, gdy w bazie szkół nie ma
-    zmian identyfiaktorów OKE szkół względem poprzedniego roku.
+    zmian identyfikatorów OKE szkół względem poprzedniego roku.
 
 --------------------
 Zmiany w EWDdane 0.9.9 (29.01.2018)
