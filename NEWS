@@ -1,7 +1,14 @@
 --------------------
+Zmiany w EWDdane 0.9.12 (09.10.2019)
+
+Uaktualnienia:
+  - podniesienie zależności od pakietu ZPD do wersji 1.7.4 zapewnia możliwość
+    współpracy z nowymi wydaniami pakietu dbplyr.
+
+--------------------
 Zmiany w EWDdane 0.9.11 (10.10.2018)
 
-Naprawione błędy::
+Naprawione błędy:
   - pobierz_dane_kontekstowe() po zmianie backendu do bazy miało problem
     z automatycznym zamykaniem połączenia z bazą w trakcie działania funkcji
     (podczas wykonywania czasochłonnego etapu przetwarzania danych
