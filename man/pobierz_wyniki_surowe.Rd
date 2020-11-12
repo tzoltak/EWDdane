@@ -4,8 +4,13 @@
 \alias{pobierz_wyniki_surowe}
 \title{Pobieranie surowych wynikow egzaminu}
 \usage{
-pobierz_wyniki_surowe(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
-  daneKontekstowe = TRUE, src = NULL)
+pobierz_wyniki_surowe(
+  rodzajEgzaminu,
+  lata = NULL,
+  nadpisz = FALSE,
+  daneKontekstowe = TRUE,
+  src = NULL
+)
 }
 \arguments{
 \item{rodzajEgzaminu}{ciąg znaków - rodzaj egzaminu}

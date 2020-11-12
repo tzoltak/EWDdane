@@ -4,8 +4,14 @@
 \alias{przygotuj_dane_do_ewd}
 \title{Przygotowywanie danych do obliczania modeli EWD}
 \usage{
-przygotuj_dane_do_ewd(katalogZDanymi, typSzkoly, lataDo,
-  liczbaRocznikow = 1, wydluzenie = 1, usunPusteKolumny = TRUE)
+przygotuj_dane_do_ewd(
+  katalogZDanymi,
+  typSzkoly,
+  lataDo,
+  liczbaRocznikow = 1,
+  wydluzenie = 1,
+  usunPusteKolumny = TRUE
+)
 }
 \arguments{
 \item{katalogZDanymi}{ciąg znaków - ścieżka do katalogu, w którym znajdują

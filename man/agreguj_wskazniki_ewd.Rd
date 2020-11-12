@@ -4,9 +4,16 @@
 \alias{agreguj_wskazniki_ewd}
 \title{Agregowanie wskaznikow EWD}
 \usage{
-agreguj_wskazniki_ewd(dane, poziom = NULL, grupujPoLatach = TRUE,
-  zmiennaGrupujaca = "teryt_szkoly", tylkoWyswietlane = NA,
-  pu = FALSE, gammaDane = 0.95, gamma = 0.95)
+agreguj_wskazniki_ewd(
+  dane,
+  poziom = NULL,
+  grupujPoLatach = TRUE,
+  zmiennaGrupujaca = "teryt_szkoly",
+  tylkoWyswietlane = NA,
+  pu = FALSE,
+  gammaDane = 0.95,
+  gamma = 0.95
+)
 }
 \arguments{
 \item{dane}{ramka danych zwracana przez funkcję \link{pobierz_wartosci_wskaznikow_ewd}.}
@@ -69,18 +76,18 @@ wywołaniu \code{agreguj_wskazniki_ewd} podać jako argument \code{gammaDane}.
 }
 \examples{
 \dontrun{
-# agregacja wartoĹ›ci wskaĹşnikĂłw dla technikĂłw z lat 2013-2014 do poziomu powiatu
+# agregacja wartości wskaźników dla techników z lat 2013-2014 do poziomu powiatu
 agr = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) \%>\%
   agreguj_wskazniki_ewd("powiat")
 
-# j.w. ale agregacja po miejscowoĹ›ci podanej jako siedziba poczty
-# ze zwrĂłceniem granic przedziaĹ‚Ăłw ufnoĹ›ci dla agregatĂłw
+# j.w. ale agregacja po miejscowości podanej jako siedziba poczty
+# ze zwróceniem granic przedziałów ufności dla agregatów
 agr = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE) \%>\%
   agreguj_wskazniki_ewd(zmiennaGrupujaca = "poczta", pu = TRUE)
 
-# przedziaĹ‚y ufnoĹ›ci dla agregatĂłw, jeĹ›li pobierz_wartosci_wskaznikow_ewd()
-# byĹ‚a wywoĹ‚ana z innÄ… niĹĽ domyĹ›lna wartoĹ›ciÄ… parametru 'gamma'
-# wywoĹ‚ujÄ…c agreguj_wskazniki_ewd() trzeba uĹĽyÄ‡ argumentu 'gammaDane'
+# przedziały ufności dla agregatów, jeśli pobierz_wartosci_wskaznikow_ewd()
+# była wywołana z inną niż domyślna wartością parametru 'gamma'
+# wywołując agreguj_wskazniki_ewd() trzeba użyć argumentu 'gammaDane'
 gamma = 0.9
 dane = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE, gamma = gamma)
 agr = agreguj_wskazniki_ewd(dane, zmiennaGrupujaca = "poczta", pu = TRUE, gammaDane = gamma)
