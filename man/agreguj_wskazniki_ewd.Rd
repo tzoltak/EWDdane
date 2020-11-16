@@ -4,9 +4,16 @@
 \alias{agreguj_wskazniki_ewd}
 \title{Agregowanie wskaznikow EWD}
 \usage{
-agreguj_wskazniki_ewd(dane, poziom = NULL, grupujPoLatach = TRUE,
-  zmiennaGrupujaca = "teryt_szkoly", tylkoWyswietlane = NA,
-  pu = FALSE, gammaDane = 0.95, gamma = 0.95)
+agreguj_wskazniki_ewd(
+  dane,
+  poziom = NULL,
+  grupujPoLatach = TRUE,
+  zmiennaGrupujaca = "teryt_szkoly",
+  tylkoWyswietlane = NA,
+  pu = FALSE,
+  gammaDane = 0.95,
+  gamma = 0.95
+)
 }
 \arguments{
 \item{dane}{ramka danych zwracana przez funkcję \link{pobierz_wartosci_wskaznikow_ewd}.}

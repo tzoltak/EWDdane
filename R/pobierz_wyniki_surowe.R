@@ -120,7 +120,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
                                      czesciEgzaminu$czesc_egzaminu[j],
                                      i, czyEwd) %>%
         collect(n = Inf)
-      class(temp) = append(class(temp), c("wynikiSurowe", "czescEgzaminu"))
+      class(temp) = c("wynikiSurowe", "czescEgzaminu", class(temp))
       attributes(temp)$dataPobrania = Sys.time()
       assign(czesciEgzaminu$prefiks[j], temp)
       rm(temp)
