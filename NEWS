@@ -1,5 +1,5 @@
 --------------------
-Zmiany w EWDdane 0.9.12 (12.11.2020)
+Zmiany w EWDdane 0.9.13 (16.11.2020)
 
 Uaktualnienia:
   - dostosowanie pobierz_wartosci_wskaznikow_ewd() oraz pobierz_dane_szkol()
@@ -7,6 +7,10 @@ Uaktualnienia:
   - dodanie parametru src do pobierz_wartosci_wskaznikow_ewd() tak by było
     możliwe pobieranie danych z ręcznie ustanowionego połączenia z bazą
     (niezbędne po migracji bazy do CIE)
+
+Naprawione błędy:
+  - funkcje pakietu przypisując dodatkowe klasy zwracanym obiektom dopisują je
+    na początku.
 
 --------------------
 Zmiany w EWDdane 0.9.12 (09.10.2019)

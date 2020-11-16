@@ -221,7 +221,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
       # końcowa estetyka
       attributes(oszacowania)$skale = skaleRok
       attributes(oszacowania)$dataPobrania = Sys.time()
-      class(oszacowania) = append(class(oszacowania), c("wynikiWyskalowane"))
+      class(oszacowania) = c("wynikiWyskalowane", class(oszacowania))
     }
     assign(paste0(skrotEgzaminu, "Wyskalowane"), oszacowania)
     rm(oszacowania)
@@ -237,7 +237,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
   if (daneKontekstowe & !is.null(get(paste0(skrotEgzaminu, "Wyskalowane")))) {
     message("\nDane o uczniach i szkołach:")
     temp = pobierz_dane_kontekstowe(src, rodzajEgzaminu)
-    class(temp) = append(class(temp), "daneKontekstowe")
+    class(temp) = c("daneKontekstowe", class(temp))
     attributes(temp)$dataPobrania = Sys.time()
     assign(paste0(skrotEgzaminu, "Kontekstowe"), temp)
     rm(temp)

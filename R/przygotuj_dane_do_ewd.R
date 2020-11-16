@@ -222,15 +222,15 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
       dane = suppressMessages(left_join(dane, ib))
     }
 
-    class(dane) = c(class(dane), "daneDoWyliczaniaEwd")
+    class(dane) = c("daneDoWyliczaniaEwd", class(dane))
     if (any(grepl("_suma$", names(dane)))) {
-      class(dane) = c(class(dane), "daneSurowe")
+      class(dane) = c("daneSurowe", class(dane))
     }
     if (any(grepl("_suma$", names(dane)))) {
-      class(dane) = c(class(dane), "daneZnormalizowane")
+      class(dane) = c("daneZnormalizowane", class(dane))
     }
     if (any(grepl("_irt$", names(dane)))) {
-      class(dane) = c(class(dane), "daneWyskalowane")
+      class(dane) = c("daneWyskalowane", class(dane))
     }
     attributes(dane)$dataUtworzenia = Sys.time()
     attributes(dane)$egzaminNaWyjsciu = egzaminNaWyjsciu

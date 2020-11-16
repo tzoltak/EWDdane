@@ -298,7 +298,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
 
   # koniec
-  class(dane) = append(class(dane), "daneKontekstowe")
+  class(dane) = c("daneKontekstowe", class(dane))
   attributes(dane)$dataPobrania = Sys.time()
   return(dane)
 }
