@@ -42,6 +42,7 @@
 #' domyślne prawach dostępu, co ma znaczenie dla zakresu pobieranych danych
 #' kontekstowych
 #' @return lista z nazwami zapisanych plików (niewidocznie)
+#' @import dplyr
 #' @import ZPD
 #' @export
 pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
@@ -62,9 +63,9 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   }
   if (is.null(lata)) {
     lata = pobierz_testy(src) %>%
-      filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
-      select_(.dots = ~rok) %>%
-      distinct %>%
+      filter(.data$rodzaj_egzaminu == rodzajEgzaminu) %>%
+      select(.data$rok) %>%
+      distinct() %>%
       collect(n = Inf) %>%
       as.list() %>%
       unlist() %>%
@@ -108,8 +109,8 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
       czyEwd = TRUE
     }
     czesciEgzaminu = pobierz_testy(src) %>%
-      filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rok == i, ~czy_egzamin) %>%
-      select_(.dots = list(~czesc_egzaminu, ~prefiks)) %>%
+      filter(.data$rodzaj_egzaminu == rodzajEgzaminu & .data$rok == i & .data$czy_egzamin) %>%
+      select(.data$czesc_egzaminu, .data$prefiks) %>%
       collect(n = Inf) %>%
       unique()
     for (j in 1:nrow(czesciEgzaminu)) {

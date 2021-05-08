@@ -1,4 +1,13 @@
 --------------------
+Zmiany w EWDdane 0.9.14 (08.05.2021)
+
+Uaktualnienia:
+2020:2020  - pobierz_wyniki_surowe() dostosowane do dplyr-a >= 1.0.0
+
+Naprawione błędy:
+  - `@import dplyr` dodane do dokumentacji pobierz_wyniki_surowe()
+
+--------------------
 Zmiany w EWDdane 0.9.13 (16.11.2020)
 
 Uaktualnienia:

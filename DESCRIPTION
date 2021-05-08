@@ -1,6 +1,6 @@
 Encoding: UTF-8
 Package: EWDdane
-Version: 0.9.13
+Version: 0.9.14
 Title: Functions for Educational Value-Added data import/export
 Authors@R: c(
   person("Tomasz", "Zoltak", , "tomek@zozlak.org", role = c("aut", "cre")),
