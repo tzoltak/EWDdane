@@ -1,8 +1,12 @@
 --------------------
-Zmiany w EWDdane 0.9.14 (08.05.2021)
+Zmiany w EWDdane 0.9.14 (09.05.2021)
 
 Uaktualnienia:
-2020:2020  - pobierz_wyniki_surowe() dostosowane do dplyr-a >= 1.0.0
+  - pobierz_wyniki_surowe() i pobierz_dane_kontekstowe() przepisane
+    z dplyr-owych verb_() na verb() (dbplyr odmawiał już z nimi współpracy)
+  - pobierz_wyniki_surowe() przepisane z ZPD::pobierz_czesc_egzaminu() na
+    ZPD::pobierz_odpowiedzi() plus tidyr::pivot_wider() z uwagi na problemy
+    z wydajnością po stronie serwera bazy danych
 
 Naprawione błędy:
   - `@import dplyr` dodane do dokumentacji pobierz_wyniki_surowe()

@@ -80,18 +80,17 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   }
   czyPobrane = file.exists(paste0("dane surowe/", rodzajEgzaminu, " ", lata, ".RData"))
   if (any(czyPobrane)) {
-    message("Istnieją już zapisane pliki z wynikami tego egzaminu z lat: ",
-            paste0(lata[czyPobrane], collapse = ", "), ".\n",
-            ifelse(nadpisz,
-                   "Zostaną one nadpisane nowo pobranymi danymi.\n",
-                   "Dane z tych lat nie zostaną pobrane.\n"))
+    message(
+      "Istnieją już zapisane pliki z wynikami tego egzaminu z lat: ",
+      paste0(lata[czyPobrane], collapse = ", "), ".\n",
+      ifelse(nadpisz, "Zostaną one nadpisane nowo pobranymi danymi.\n", "Dane z tych lat nie zostaną pobrane.\n")
+    )
     if (!nadpisz) {
       lata = lata[!czyPobrane]
     }
   }
   if (daneKontekstowe) {
-    if (file.exists(paste0("dane surowe/", rodzajEgzaminu,
-                           "- kontekstowe.RData"))) {
+    if (file.exists(paste0("dane surowe/", rodzajEgzaminu, "- kontekstowe.RData"))) {
       message("Istnieje już zapisany plik z danymi kontekstowymi. ",
               "Zostanie on nadpisany nowymi danymi.\n")
     }
@@ -101,26 +100,30 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   # pobieranie i zapis wyników
   for (i in lata) {
     message("\nRok ", i, ":")
-    if ((rodzajEgzaminu == "sprawdzian" & i < 2003) |
-        (rodzajEgzaminu == "egzamin gimnazjalny" & i < 2006) |
-        (rodzajEgzaminu == "matura" & i < 2010)) {
+    if (
+      (rodzajEgzaminu == "sprawdzian" & i < 2003) |
+      (rodzajEgzaminu == "egzamin gimnazjalny" & i < 2006) |
+      (rodzajEgzaminu == "matura" & i < 2010)
+    ) {
       czyEwd = FALSE
     } else {
       czyEwd = TRUE
     }
     czesciEgzaminu = pobierz_testy(src) %>%
-      filter(.data$rodzaj_egzaminu == rodzajEgzaminu & .data$rok == i & .data$czy_egzamin) %>%
-      select(.data$czesc_egzaminu, .data$prefiks) %>%
+      filter(.data$rodzaj_egzaminu == rodzajEgzaminu & .data$rok == i & .data$czy_egzamin == TRUE & .data$dane_ewd == czyEwd) %>%
+      select(.data$id_testu, .data$czesc_egzaminu, .data$prefiks) %>%
       collect(n = Inf) %>%
-      unique()
+      group_by(.data$czesc_egzaminu, .data$prefiks) %>% 
+      summarize(id_testu = list(.data$id_testu))
     for (j in 1:nrow(czesciEgzaminu)) {
       if (czesciEgzaminu$czesc_egzaminu[j] != "") {
         message("  ", czesciEgzaminu$czesc_egzaminu[j])
       }
-      temp = pobierz_wyniki_egzaminu(src, rodzajEgzaminu,
-                                     czesciEgzaminu$czesc_egzaminu[j],
-                                     i, czyEwd) %>%
-        collect(n = Inf)
+      temp = pobierz_odpowiedzi(src) %>%
+        filter(.data$id_testu %in% local(czesciEgzaminu$id_testu[[j]])) %>%
+        collect(n = Inf) %>%
+        select(-.data$odpowiedz) %>% 
+        tidyr::pivot_wider(names_from = 'kryterium', values_from = 'ocena')
       class(temp) = c("wynikiSurowe", "czescEgzaminu", class(temp))
       attributes(temp)$dataPobrania = Sys.time()
       assign(czesciEgzaminu$prefiks[j], temp)
@@ -128,8 +131,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     }
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, " ", i, ".RData")
     save(list = czesciEgzaminu$prefiks, file = nazwaPliku)
-    message(" zapisano do pliku: ", nazwaPliku,
-            format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
+    message(" zapisano do pliku: ", nazwaPliku, format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
   }
   pliki = paste0("dane surowe/", rodzajEgzaminu, " ", lata, ".RData")
   # pobieranie i zapis danych kontekstowych
@@ -140,8 +142,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     rm(temp)
     nazwaPliku = paste0("dane surowe/", rodzajEgzaminu, "-kontekstowe.RData")
     save(list = paste0(skrotEgzaminu, "Kontekstowe"), file = nazwaPliku)
-    message(" zapisano do pliku: ", nazwaPliku,
-            format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
+    message(" zapisano do pliku: ", nazwaPliku, format(Sys.time(), "\n (%Y.%m.%d, %H:%M:%S)"))
     pliki = append(pliki, nazwaPliku)
   }
 
