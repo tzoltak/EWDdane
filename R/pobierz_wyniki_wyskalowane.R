@@ -34,10 +34,9 @@
 #' zostaną wyniki tylko z lat, dla których pliki jeszcze nie istnieją
 #' @param daneKontekstowe wartość logiczna - czy pobrać również plik z danymi
 #' kontekstowymi (tj. o uczniach i szkołach)?
-#' @param src opcjonalnie połączenie z bazą danych IBE zwracane przez funkcję
-#' \code{\link[ZPD]{polacz}}; pozwala posłużyć się połączeniem o wyższych niż
-#' domyślne prawach dostępu, co ma znaczenie dla zakresu pobieranych danych
-#' kontekstowych
+#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+#' połączenia
 #' @param katalogWyskalowane opcjonalnie ciąg znaków - ścieżka do katalogu,
 #' w którym znajdują się pliki .RData z wynikami skalowania, zapisane przez
 #' funkcje \code{\link[EWDskale]{skaluj_spr}},
@@ -65,18 +64,16 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
     stopifnot(dir.exists(katalogWyskalowane))
   }
   if (is.null(src)) {
-    src = polacz()
+    src = ZPD::polacz()
   }
   if (is.null(lata)) {
     lata = pobierz_testy(src) %>%
-      filter_(~rodzaj_egzaminu == rodzajEgzaminu) %>%
-      select_(.dots = ~rok) %>%
+      filter(.data$rodzaj_egzaminu == rodzajEgzaminu) %>%
+      select(.data$rok) %>%
       distinct() %>%
-      collect(n = Inf) %>%
-      as.list() %>%
-      unlist() %>%
-      sort() %>%
-      unname()
+      arrange(.data$rok) %>%
+      collect(n = Inf)
+    lata = lata$rok
   }
   skrotEgzaminu = sub("e", "g", substr(rodzajEgzaminu, 1, 1))
 
@@ -109,18 +106,16 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
   # a przez wspólne kryteria oceny
   skale = suppressMessages(
     pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE) %>%
-      filter_(~rodzaj_egzaminu == rodzajEgzaminu, ~rodzaj_skali == "ewd",
-              ~rok %in% c(lata, lata)) %>%
-      left_join(pobierz_testy(src) %>% select_(~id_testu, ~czy_egzamin)) %>%
-      select_(~-id_testu, ~-grupa, ~-posiada_normy) %>%
+      filter(.data$rodzaj_egzaminu == rodzajEgzaminu & .data$rodzaj_skali == "ewd" & .data$rok %in% lata) %>%
+      left_join(pobierz_testy(src) %>% select(.data$id_testu, .data$czy_egzamin)) %>%
+      select(-.data$id_testu, -.data$grupa, -.data$posiada_normy) %>%
       collect(n = Inf) %>%
       distinct() %>%
-      group_by_(~id_skali, ~skalowanie) %>%
-      mutate_(.dots = setNames(list(~!czy_egzamin | all(czy_egzamin)),
-                               "czy_egzamin")) %>%
+      group_by(.data$id_skali, .data$skalowanie) %>%
+      mutate(czy_egzamin = !.data$czy_egzamin | all(.data$czy_egzamin)) %>%
       ungroup() %>%
-      filter_(~czy_egzamin) %>%
-      select_(~-czy_egzamin)
+      filter(.data$czy_egzamin) %>%
+      select(-.data$czy_egzamin)
   )
   names(skale) = sub("^estymacja$", "skala_estymacja", names(skale))
 
@@ -129,7 +124,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
   # pobieranie i zapis wyników
   for (i in 1:length(lata)) {
     message("Rok ", lata[i], ":")
-    skaleRok = filter_(skale, ~rok == lata[i])
+    skaleRok = filter(skale, .data$rok == lata[i])
 
     # ew. wczytywanie już zapisanych oszacowan
     if (czyPobrane[i]) {
@@ -148,7 +143,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
     if (is.null(katalogWyskalowane)) {
       oszacowania = suppressMessages(
         pobierz_oszacowania_uczniow(src) %>%
-          semi_join(select_(skaleRok, ~id_skali, ~rok), copy = TRUE) %>%
+          semi_join(select(skaleRok, .data$id_skali, .data$rok), copy = TRUE) %>%
           collect(n = Inf)
       )
       skalowaniaZDysku = NULL
@@ -167,12 +162,13 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
       oszacowania = NULL
     } else {
       # sprawdzanie, czy nie ma konfliktów z tym, co już na dysku i ew. dopisanie
-      oszacowania = select_(oszacowania, ~id_skali, ~skalowanie, ~id_obserwacji,
-                            ~rok, ~nr_pv, ~wynik, ~bs, ~grupa)
+      oszacowania = oszacowania %>%
+        select(.data$id_skali, .data$skalowanie, .data$id_obserwacji, .data$rok, .data$nr_pv, .data$wynik, .data$bs, .data$grupa)
       if (!is.null(stareOszacowania) & !nadpisz) {
         lNowych = nrow(oszacowania)
         oszacowania = bind_rows(stareOszacowania, oszacowania) %>% distinct()
-        lRoznych = select_(oszacowania, ~id_skali, ~skalowanie, ~id_obserwacji) %>%
+        lRoznych = oszacowania %>%
+          select(.data$id_skali, .data$skalowanie, .data$id_obserwacji) %>%
           distinct() %>%
           nrow()
         message(" Wśród ", format(nrow(stareOszacowania), big.mark = "'"),
@@ -212,7 +208,7 @@ pobierz_wyniki_wyskalowane = function(rodzajEgzaminu, lata = NULL,
         skalowaniaZDysku = suppressMessages(left_join(skalowaniaZDysku, skaleTemp))
         # i nadpisujemy/dołączamy do informacje/i o skalowaniach z bazy
         skaleRok = suppressMessages(
-          anti_join(skaleRok, select_(skalowaniaZDysku, ~id_skali, ~skalowanie)) %>%
+          anti_join(skaleRok, select(skalowaniaZDysku, .data$id_skali, .data$skalowanie)) %>%
             bind_rows(skalowaniaZDysku)
         )
       }

@@ -27,7 +27,7 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
   stopifnot(idOke %in% c(TRUE, FALSE),
             daneAdresowe %in% c(TRUE, FALSE))
   if (is.null(src)) {
-    src = polacz()
+    src = ZPD::polacz()
   }
 
   if (length(lata) == 1) lata = rep(lata, 2)  # brzydkie, ale za to 3 wiersze dalej zadziała

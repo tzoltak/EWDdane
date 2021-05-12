@@ -12,6 +12,9 @@
 #' \code{NA} - wszystkie, bez względu na to, czy są do prezentacji, czy nie)
 #' @param parametryzacja parametr określający format zwracanego wyniku. Domyślna
 #' wartość to 'baza'. Inna możliwa wartość to 'mplus'.
+#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' \code{\link[ZPD]{polacz}}. Jeśli nie podane, podjęta zostanie próba
+#' automatycznego nawiązania połączenia.
 #' @return data frame (data table) o kolumnach:
 #' \itemize{
 #'    \item{id_skali;}
@@ -29,26 +32,30 @@
 #' @export
 pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
                                         doPrezentacji = NA,
-                                        parametryzacja = "baza") {
+                                        parametryzacja = "baza", src = NULL) {
   stopifnot(is.character(skala) | is.numeric(skala), length(skala) == 1,
             is.null(skalowanie) | is.character(skalowanie) | is.numeric(skalowanie),
             is.logical(doPrezentacji), length(doPrezentacji) == 1,
-            is.character(parametryzacja), length(parametryzacja) == 1)
+            is.character(parametryzacja), length(parametryzacja) == 1,
+            is.src(src) | is.null(src))
   stopifnot(parametryzacja %in% c("baza", "mplus"))
   if (!is.null(skalowanie)) {
     stopifnot(length(skalowanie) == 1)
   }
+  if (is.null(src)) {
+    src = ZPD::polacz()
+  }
 
   # szukamy skal
-  skale = pobierz_skale(polacz(), doPrezentacji = NA, czyKtt = FALSE) %>%
-    select_(~-id_testu, ~-grupa) %>%
-    collect(skale, n = Inf) %>%
+  skale = pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE) %>%
+    select(-.data$id_testu, -.data$grupa) %>%
+    collect(n = Inf) %>%
     distinct()
   if (!is.na(doPrezentacji)) {
-    skale = filter_(skale, ~skala_do_prezentacji == doPrezentacji)
+    skale = filter(skale, .data$skala_do_prezentacji == doPrezentacji)
   }
   if (is.character(skala)) {
-    skale = filter_(skale, ~grepl(skala, opis_skali))
+    skale = filter(skale, grepl(skala, .data$opis_skali))
     lSkal = length(unique(skale$id_skali))
     if (lSkal == 0) {
       stop("Nie udało się znaleźć skali o opisie pasującym do wyrażenia '",
@@ -57,7 +64,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
     message("Znaleziono ", lSkal, " skal(e/ę), których/ej opis pasuje do wyrażenia '",
            skala, "':\n ", paste0(sort(unique(skale$id_skali)), collapse = ", "), ".")
   } else {
-    skale = filter_(skale, ~id_skali == skala)
+    skale = filter(skale, .data$id_skali == skala)
     if (nrow(skale) == 0) {
       stop("Nie udało się znaleźć skali o id skali = ", skala, ".")
     }
@@ -65,42 +72,34 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 
   # teraz trzeba wybrać skalowanie
   skale = suppressWarnings(
-    arrange_(skale, ~id_skali, ~desc(skalowanie_do_prezentacji),
-             ~desc(skalowanie)) %>%
-    group_by_(~id_skali) %>%
-      mutate_(.dots = setNames(list(~max(skalowanie, na.rm = TRUE)),
-                               "max_skalowanie")) %>%
-      mutate_(.dots = setNames(list(~all(is.na(skalowanie)),
-                                    ~ifelse(brak_skalowan, 0, max_skalowanie)),
-                               c("brak_skalowan", "max_skalowanie"))) %>%
+    arrange(skale, .data$id_skali, desc(.data$skalowanie_do_prezentacji), desc(.data$skalowanie)) %>%
+    group_by(.data$id_skali) %>%
+      mutate(max_skalowanie = max(.data$skalowanie, na.rm = TRUE)) %>%
+      mutate(brak_skalowan = all(is.na(.data$skalowanie))) %>%
+      mutate(max_skalowanie = ifelse(.data$brak_skalowan, 0, .data$max_skalowanie)) %>%
       ungroup()
   )
 
   if (is.character(skalowanie)) {
-    skale = mutate_(skale, .dots = setNames(list(~grepl(skalowanie, opis_skalowania)),
-                                            "wybrane_skalowanie"))
+    skale = mutate(skale, wybrane_skalowanie = grepl(local(skalowanie), .data$opis_skalowania))
   } else if (is.numeric(skalowanie)) {
-    skale = mutate_(skale, .dots = setNames(list(~skalowanie %in% nrSkalowania),
-                                            "wybrane_skalowanie"))
+    skale = mutate(skale, wybrane_skalowanie = local(skalowanie) %in% .data$skalowanie)
   } else {
-    skale = mutate_(skale, .dots = setNames(list(~!brak_skalowan),
-                                            "wybrane_skalowanie"))
+    skale = mutate(skale, wybrane_skalowanie = !.data$brak_skalowan)
     if (!is.na(doPrezentacji)) {
-      skale =
-        mutate_(skale,
-                .dots = setNames(list(~skalowanie_do_prezentacji == doPrezentacji),
-                                 "wybrane_skalowanie"))
+      skale = skale %>%
+        mutate(wybrane_skalowanie = .data$skalowanie_do_prezentacji == doPrezentacji)
     }
   }
 
   # pobieranie parametrów
-  skaleZeSkalowaniem = filter_(skale, ~wybrane_skalowanie) %>%
-    select_(~id_skali, ~rodzaj_egzaminu, ~skalowanie, ~opis_skali,
-            ~max_skalowanie) %>%
+  skaleZeSkalowaniem = skale %>%
+    filter(.data$wybrane_skalowanie) %>%
+    select(.data$id_skali, .data$rodzaj_egzaminu, .data$skalowanie, .data$opis_skali, .data$max_skalowanie) %>%
     distinct()
   parametry = suppressMessages(
-    pobierz_parametry(polacz()) %>%
-      inner_join(select_(skaleZeSkalowaniem, ~-max_skalowanie), copy = TRUE) %>%
+    pobierz_parametry(src) %>%
+      inner_join(select(skaleZeSkalowaniem, -.data$max_skalowanie), copy = TRUE) %>%
       collect(n = Inf)
   )
   if (ncol(parametry) == 0) {
@@ -115,78 +114,85 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 
   skaleZeSkalowaniem = suppressMessages(
     semi_join(skaleZeSkalowaniem, parametry) %>%
-      select_(~id_skali) %>%
+      select(.data$id_skali) %>%
       distinct() %>%
-      mutate_(.dots = setNames(list(~TRUE), "ma_parametry"))
+      mutate(ma_parametry = TRUE)
   )
   if (ncol(skaleZeSkalowaniem) == 0) {
     # jeśli w wyniku semi_joina wypadają wszystkie wiersze, to wyparowują też kolumny
-    skaleZeSkalowaniem = matrix(nrow = 0, ncol = 2,
-                                dimnames = list(NULL, c("id_skali", "ma_parametry"))) %>%
-      as.data.frame()
+    skaleZeSkalowaniem = matrix(nrow = 0, ncol = 2, dimnames = list(NULL, c("id_skali", "ma_parametry"))) %>%
+      as_tibble()
   }
 
   # przekształcanie parametrów
-  parametry = group_by_(parametry, ~id_skali, ~rodzaj_egzaminu, ~opis_skali,
-                        ~skalowanie) %>%  # dramatycznie zawikłana składnia pod dplyr-a
-    summarise_(.dots = setNames(list(~list(data.frame(grupa = grupa[1:n()],
-                                                      kryterium = kryterium[1:n()],
-                                                      uwagi = parametr_uwagi[1:n()],
-                                                      parametr = parametr[1:n()],
-                                                      model = model[1:n()],
-                                                      wartosc = wartosc[1:n()],
-                                                      bs = bs[1:n()],
-                                                      stringsAsFactors = FALSE))),
-                                "parametry")) %>%
+  parametry = parametry %>%
+    group_by(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie) %>%
+    summarise(
+      parametry = list(tibble(
+        grupa = grupa[1:n()],
+        kryterium = kryterium[1:n()],
+        uwagi = parametr_uwagi[1:n()],
+        parametr = parametr[1:n()],
+        model = model[1:n()],
+        wartosc = wartosc[1:n()],
+        bs = bs[1:n()]
+      ))
+    ) %>%
     ungroup()  # jeśli jest tylko jedno skalowanie, to zostało właśnie zgubione grupowanie po nim
   if (parametryzacja == "mplus") {
-    parametry = group_by_(parametry, ~id_skali, ~rodzaj_egzaminu, ~opis_skali,
-                          ~skalowanie) %>%
-      do_(.dots = setNames(list(~zmien_na_mplus(.)), "parametry")) %>%
+    parametry = parametry %>%
+      group_by(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie) %>%
+      do(parametry = zmien_na_mplus(.data)) %>%
       ungroup()
   }
-  #parametry = select_(parametry, ~-rodzaj_egzaminu, ~-opis_skali)
 
   # skale, dla których nic mądrego nie znaleźliśmy (i informowanie o nich użytkownika)
   skale = suppressMessages(
-    group_by_(skale, ~id_skali, ~rodzaj_egzaminu, ~opis_skali) %>%
-      summarise_(.dots = setNames(list(~brak_skalowan[1], ~any(wybrane_skalowanie),
-                                       ~max_skalowanie[1]),
-                                  c("brak_skalowan", "jest_wybrane_skalowanie",
-                                    "max_skalowanie"))) %>%
+    skale %>%
+      group_by(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali) %>%
+      summarise(
+        brak_skalowan = .data$brak_skalowan[1],
+        jest_wybrane_skalowanie = any(.data$wybrane_skalowanie),
+        max_skalowanie = .data$max_skalowanie[1],
+      ) %>%
       ungroup() %>%
-      mutate_(.dots = setNames(list(~ifelse(is.na(max_skalowanie),
-                                            0, max_skalowanie)),
-                               "max_skalowanie")) %>%
+      mutate(max_skalowanie = ifelse(is.na(.data$max_skalowanie), 0, .data$max_skalowanie)) %>%
       full_join(skaleZeSkalowaniem)
   )
   if (any(skale$brak_skalowan)) {
-    warning("Skala/e o id_skali: ",
-            paste0(skale$id_skali[skale$brak_skalowan], collapse = ", "),
-            " nie ma(ją) zarejestrowanych żadnych skalowań.")
+    warning(
+      "Skala/e o id_skali: ",
+      paste0(skale$id_skali[skale$brak_skalowan], collapse = ", "),
+      " nie ma(ją) zarejestrowanych żadnych skalowań."
+    )
   }
   if (with(skale, any(!jest_wybrane_skalowanie & !brak_skalowan))) {
-    warning("Skala/e o id_skali: ",
-            with(skale, paste0(id_skali[!jest_wybrane_skalowanie &
-                                          !brak_skalowan],
-                               collapse = ", ")),
-            " nie ma(ją) zarejestrowanych żadnych skalowań, które spełniają podane kryteria.")
+    warning(
+      "Skala/e o id_skali: ",
+      with(skale, paste0(id_skali[!jest_wybrane_skalowanie & !brak_skalowan], collapse = ", ")),
+      " nie ma(ją) zarejestrowanych żadnych skalowań, które spełniają podane kryteria."
+    )
   }
   if (with(skale, any(is.na(ma_parametry) & jest_wybrane_skalowanie & !brak_skalowan))) {
-    warning("Żadne ze skalowań, które spełniają podane kryteria, skal(i) o id_skali: ",
-            with(skale, paste0(id_skali[is.na(ma_parametry) &
-                                          jest_wybrane_skalowanie & !brak_skalowan],
-                               collapse = ", ")),
-            " nie ma(ją) zapisanych w bazie wartości parametrów modelu.")
+    warning(
+      "Żadne ze skalowań, które spełniają podane kryteria, skal(i) o id_skali: ",
+      with(skale, paste0(id_skali[is.na(ma_parametry) & jest_wybrane_skalowanie & !brak_skalowan], collapse = ", ")),
+      " nie ma(ją) zapisanych w bazie wartości parametrów modelu."
+    )
   }
-  skale = filter_(skale, ~!jest_wybrane_skalowanie | is.na(ma_parametry)) %>%
-    mutate_(.dots = setNames(list(~max_skalowanie + 1, ~NA),
-                             c("skalowanie", "parametry"))) %>%
-    select_(~id_skali, ~rodzaj_egzaminu, ~opis_skali, ~skalowanie, ~parametry)
+  skale = skale %>%
+    filter(!.data$jest_wybrane_skalowanie | is.na(.data$ma_parametry)) %>%
+    mutate(
+      skalowanie = .data$max_skalowanie + 1L, 
+      parametry = list()
+    ) %>%
+    select(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie, .data$parametry)
 
   # koniec
-  return(bind_rows(skale, parametry) %>%
-           arrange_(~id_skali, ~skalowanie))
+  return(
+    bind_rows(skale, parametry) %>%
+    arrange(.data$id_skali, .data$skalowanie)
+  )
 }
 #' @title Zmiana tablicy do formatu funkcji skaluj()
 #' @description
@@ -212,12 +218,12 @@ zmien_na_mplus = function(x) {
   x = x$parametry[[1]]
   maska = is.na(x$kryterium) & !is.na(x$uwagi)
   x$kryterium[maska] = x$uwagi[maska]
-  grm   = filter_(x, ~model %in% "GRM")
-  binarne = filter_(x, ~model %in% "2PL")
-  grupowe  = filter_(x, ~!is.na(grupa) & parametr != "r EAP")
+  grm   = filter(x, .data$model %in% "GRM")
+  binarne = filter(x, .data$model %in% "2PL")
+  grupowe  = filter(x, !is.na(.data$grupa) & parametr != "r EAP")
 
   if ((nrow(grm) + nrow(binarne) + nrow(grupowe)) !=
-      nrow(filter_(x, ~parametr != "r EAP"))) {
+      nrow(filter(x, .data$parametr != "r EAP"))) {
     stop("Przy konwersji parametrów na format 'mplus' obsługowane są wyłącznie ",
          "zadania 2PL lub SGR oraz ew. średnie i odchylenia standardowe ",
          "konstruktu w ramach grup.")
@@ -230,30 +236,44 @@ zmien_na_mplus = function(x) {
          paste(binarne$parametr[maska], collapse = "\n - "))
   }
   binarne = list(
-    a = with(filter_(binarne, ~parametr == "a"),
-             data.frame(typ = rep("by", length(wartosc)),
-                        zmienna1 = rep(nazwaKonstruktu, length(wartosc)),
-                        zmienna2 = kryterium,
-                        wartosc = wartosc,
-                        "S.E." = bs,
-                        stringsAsFactors = FALSE)),
-    b = with(filter_(binarne, ~parametr == "trudność"),
-             data.frame(typ = rep("threshold", length(wartosc)),
-                        zmienna1 = kryterium,
-                        zmienna2 = rep("1", length(wartosc)),
-                        wartosc = wartosc,
-                        "S.E." = bs,
-                        stringsAsFactors = FALSE))
+    a = with(
+      filter(binarne, .data$parametr == "a"),
+      tibble(
+        typ = rep("by", length(wartosc)),
+        zmienna1 = rep(nazwaKonstruktu, length(wartosc)),
+        zmienna2 = kryterium,
+        wartosc = wartosc,
+        "S.E." = bs
+      )
+    ),
+    b = with(
+      filter(binarne, .data$parametr == "trudność"),
+      tibble(
+        typ = rep("threshold", length(wartosc)),
+        zmienna1 = kryterium,
+        zmienna2 = rep("1", length(wartosc)),
+        wartosc = wartosc,
+        "S.E." = bs
+      )
+    )
   )
   binarne$b = suppressMessages(
-    full_join(binarne$b, with(binarne$a, data.frame(zmienna1 = zmienna2, a = wartosc,
-                                                stringsAsFactors = FALSE)))
+    full_join(
+      binarne$b, 
+      with(
+        binarne$a, 
+        tibble(zmienna1 = zmienna2, a = wartosc)
+      )
+    )
   )
-  binarne$b = within(binarne$b, {
-    wartosc = get("wartosc") * get("a")
-    S.E. = get("S.E.") * get("a")
-  })
-  binarne$b = select_(binarne$b, ~-a)
+  binarne$b = within(
+    binarne$b, 
+    {
+      wartosc = get("wartosc") * get("a")
+      S.E. = get("S.E.") * get("a")
+    }
+  )
+  binarne$b = select(binarne$b, -.data$a)
   binarne = bind_rows(binarne)
 
   #GRM
@@ -263,73 +283,93 @@ zmien_na_mplus = function(x) {
          paste(grm$parametr[maska], collapse = "\n - "))
   }
   grm = list(
-    a = with(filter_(grm, ~parametr == "a"),
-             data.frame(typ = rep("by", length(wartosc)),
-                        zmienna1 = rep(nazwaKonstruktu, length(wartosc)),
-                        zmienna2 = kryterium,
-                        wartosc = wartosc,
-                        "S.E." = bs,
-                        stringsAsFactors = FALSE)),
-    b = with(filter_(grm, ~substr(parametr, 1, 1) == "b"),
-             data.frame(typ = rep("threshold", length(wartosc)),
-                        zmienna1 = kryterium,
-                        zmienna2 = sub("^b([[:digit:]]+)$", "\\1", parametr),
-                        wartosc = wartosc,
-                        "S.E." = bs,
-                        stringsAsFactors = FALSE)),
-    g = with(filter_(grm, ~parametr == "trudność"),
-             data.frame(zmienna1 = kryterium,
-                        trudnosc = wartosc,
-                        stringsAsFactors = FALSE))
+    a = with(
+      filter(grm, .data$parametr == "a"),
+      tibble(
+        typ = rep("by", length(wartosc)),
+        zmienna1 = rep(nazwaKonstruktu, length(wartosc)),
+        zmienna2 = kryterium,
+        wartosc = wartosc,
+        "S.E." = bs
+      )
+    ),
+    b = with(
+      filter(grm, substr(.data$parametr, 1, 1) == "b"),
+      tibble(
+        typ = rep("threshold", length(wartosc)),
+        zmienna1 = kryterium,
+        zmienna2 = sub("^b([[:digit:]]+)$", "\\1", parametr),
+        wartosc = wartosc,
+        "S.E." = bs
+      )
+    ),
+    g = with(
+      filter(grm, .data$parametr == "trudność"),
+      tibble(
+        zmienna1 = kryterium,
+        trudnosc = wartosc
+      )
+    )
   )
   grm$b = suppressMessages(
-    full_join(grm$b, with(grm$a, data.frame(zmienna1 = zmienna2, a = wartosc,
-                                            stringsAsFactors = FALSE))) %>%
-      full_join(grm$g)
+    full_join(
+      grm$b, 
+      with(
+        grm$a, 
+        tibble(zmienna1 = zmienna2, a = wartosc)
+      )
+    ) %>%
+    full_join(grm$g)
   )
-  grm$b = within(grm$b, {
-    wartosc = get("wartosc") + get("trudnosc") * get("a")
-    S.E. = get("S.E.") * get("a")
-  })
-  grm$b = select_(grm$b, ~-a, ~-trudnosc)
+  grm$b = within(
+    grm$b, 
+    {
+      wartosc = get("wartosc") + get("trudnosc") * get("a")
+      S.E. = get("S.E.") * get("a")
+    }
+  )
+  grm$b = select(grm$b, -.data$a, -.data$trudnosc)
   grm = bind_rows(grm[c("a", "b")])
 
   # parametry grupowe
   grupowe = bind_rows(
-    sr = with(filter_(grupowe, ~parametr == "group_mean"),
-             data.frame(typ = paste0("mean", ifelse(grupa == "", "",
-                                                    paste0(".gr.", grupa))),
-                        zmienna1 = nazwaKonstruktu,
-                        zmienna2 = NA,
-                        wartosc = wartosc,
-                        "S.E." = bs,
-                        stringsAsFactors = FALSE)),
-    war = with(filter_(grupowe, ~parametr == "group_sd"),
-               data.frame(typ = paste0("variance", ifelse(grupa == "", "",
-                                                          paste0(".gr.", grupa))),
-                          zmienna1 = nazwaKonstruktu,
-                          zmienna2 = NA,
-                          wartosc = wartosc^2,
-                          "S.E." = bs,
-                          stringsAsFactors = FALSE))
+    sr = with(
+      filter(grupowe, .data$parametr == "group_mean"),
+      tibble(
+        typ = paste0("mean", ifelse(grupa == "", "", paste0(".gr.", grupa))),
+        zmienna1 = nazwaKonstruktu,
+        zmienna2 = NA,
+        wartosc = wartosc,
+        "S.E." = bs
+      )
+    ),
+    war = with(
+      filter(grupowe, .data$parametr == "group_sd"),
+      tibble(
+        typ = paste0("variance", ifelse(grupa == "", "", paste0(".gr.", grupa))),
+        zmienna1 = nazwaKonstruktu,
+        zmienna2 = NA,
+        wartosc = wartosc^2,
+        "S.E." = bs
+      )
+    )
   )
-  grupowe$typ
 
   wynik = bind_rows(binarne, grm) %>%
-    arrange_(~typ, ~zmienna1, ~zmienna2) %>%
+    arrange(.data$typ, .data$zmienna1, .data$zmienna2) %>%
     bind_rows(grupowe)
   # r EAP i param. standaryzacji
-  rEAP = filter_(x, ~parametr == "r EAP")
+  rEAP = filter(x, .data$parametr == "r EAP")
   if (nrow(rEAP) > 0) {
     attributes(wynik)$"r EAP" = rEAP[ c("grupa", "wartosc")]
   }
-  std = filter_(x, ~parametr %in% c("std_mean", "std_sd"))
+  std = filter(x, .data$parametr %in% c("std_mean", "std_sd"))
   if (nrow(std) > 0) {
-    stdSr = filter_(std, ~parametr == "std_mean") %>%
-      select_(~grupa, ~wartosc) %>%
+    stdSr = filter(std, .data$parametr == "std_mean") %>%
+      select(.data$grupa, .data$wartosc) %>%
       setNames(c("grupa", "sr"))
-    stdOs = filter_(std, ~parametr == "std_sd") %>%
-      select_(~grupa, ~wartosc) %>%
+    stdOs = filter(std, .data$parametr == "std_sd") %>%
+      select(.data$grupa, .data$wartosc) %>%
       setNames(c("grupa", "os"))
     attributes(wynik)$"paramStd" = full_join(stdSr, stdOs)
   }

@@ -1,9 +1,11 @@
 --------------------
-Zmiany w EWDdane 0.9.14 (09.05.2021)
+Zmiany w EWDdane 0.9.14 (12.05.2021)
 
 Uaktualnienia:
-  - pobierz_wyniki_surowe() i pobierz_dane_kontekstowe() przepisane
-    z dplyr-owych verb_() na verb() (dbplyr odmawiał już z nimi współpracy)
+  - przepisanie dplyr-owych verb_() na verb() (dbplyr odmawiał już z nimi 
+    współpracy)
+  - dodanie możliwości przekazania połączenia do bazy danych do wszystkich
+    funkcji, które wewnętrznie wołały ZPD::polacz()
   - pobierz_wyniki_surowe() przepisane z ZPD::pobierz_czesc_egzaminu() na
     ZPD::pobierz_odpowiedzi() plus tidyr::pivot_wider() z uwagi na problemy
     z wydajnością po stronie serwera bazy danych

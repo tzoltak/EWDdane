@@ -27,8 +27,8 @@ wczytaj_dane_kontekstowe = function(nazwaPliku, czyWyjscie = TRUE, lata = NULL) 
   }
   if (czyWyjscie) {
     daneKontekstowe = subset(daneKontekstowe, get("populacja_wy") %in% TRUE)
-    daneKontekstowe = group_by_(daneKontekstowe, ~id_szkoly) %>%
-      mutate_(lu_wszyscy = ~n()) %>%
+    daneKontekstowe = group_by(daneKontekstowe, .data$id_szkoly) %>%
+      mutate(lu_wszyscy = n()) %>%
       ungroup()
     maska = paste0("^(plec|id|rok|laur|dysleksja|klasa|publiczna|specjalna)|",
                    "^(typ_szkoly|przyszpitalna|dla_doroslych|artystyczna|wiek)|",
@@ -128,32 +128,41 @@ wczytaj_wyniki_egzaminu = function(nazwyPlikow, daneKontekstowe = NULL) {
 #' @title Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD
 #' @description Funkcja wczytuje wyniki surowe egzaminu z pojedynczego pliku.
 #' @param nazwaPliku ciąg znaków - nazwa pliku z surowymi wynikami egzaminu
+#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+#' połączenia
 #' @import ZPD
 #' @return data table
-wczytaj_wyniki_surowe = function(nazwaPliku) {
-  stopifnot(is.character(nazwaPliku), length(nazwaPliku) == 1)
+wczytaj_wyniki_surowe = function(nazwaPliku, src) {
+  stopifnot(
+    is.character(nazwaPliku), length(nazwaPliku) == 1,
+    dplyr::is.src(src) | is.null(src)
+  )
   stopifnot(file.exists(nazwaPliku))
+  if (is.null(src)) {
+    src = ZPD::polacz()
+  }
 
   obiekty = load(nazwaPliku)
   # obsługa części egzaminu gimnazjalnego
-  testy = pobierz_testy(polacz()) %>%
-    filter_(~prefiks %in% c("gh", "gm"), ~is.na(arkusz), ~dane_ewd == TRUE) %>%
+  testy = pobierz_testy(src) %>%
+    filter(.data$prefiks %in% c("gh", "gm") & .data$is.na(arkusz) & .data$dane_ewd == TRUE) %>%
     collect(n = Inf)
   if (exists("gh_h") & exists("gh_p")) {
     gh = suppressMessages(inner_join(get("gh_h"),
                                      get("gh_p")[, names(get("gh_p")) != "id_testu"]))
-    gh$id_testu = filter_(testy, ~prefiks == "gh", ~rok == gh$rok[1])$id_testu
+    gh$id_testu = filter(testy, .data$prefiks == "gh" & .data$rok == gh$rok[1])$id_testu
     obiekty = c(obiekty, "gh")
   }
   if (exists("gm_m") & exists("gm_p")) {
     gm = suppressMessages(inner_join(get("gm_m"),
                                      get("gm_p")[, names(get("gm_p")) != "id_testu"]))
-    gm$id_testu = filter_(testy, ~prefiks == "gm", ~rok == gm$rok[1])$id_testu
+    gm$id_testu = filter(testy, .data$prefiks == "gm", .data$rok == gm$rok[1])$id_testu
     obiekty = c(obiekty, "gm")
   }
 
-  skale = pobierz_skale(polacz(), doPrezentacji = NA) %>%
-    filter_(~opis_skalowania == "normalizacja ekwikwantylowa EWD") %>%
+  skale = pobierz_skale(src, doPrezentacji = NA) %>%
+    filter(.data$opis_skalowania == "normalizacja ekwikwantylowa EWD") %>%
     collect(n = Inf)
   skaleTesty = list()
   normy = list()
@@ -164,26 +173,26 @@ wczytaj_wyniki_surowe = function(nazwaPliku) {
     if (all(c("wynikiSurowe", "czescEgzaminu") %in% class(temp))) {
       flaga = TRUE
       temp = zsumuj_punkty(temp)
-      temp = filter_(temp, ~!is.na(wynik))
+      temp = filter(temp, !is.na(.data$wynik))
       # trochę szukania, żeby móc przypisać normy
       maskaSkali = paste0("^ewd;", konstrukt, "R;", temp$rok[1],"$")
-      idSkali = filter_(skale, ~grepl(maskaSkali, opis_skali)) %>%
-        arrange_(~skalowanie)
+      idSkali = filter(skale, grepl(maskaSkali, .data$opis_skali)) %>%
+        arrange(.data$skalowanie)
       if (nrow(idSkali) > 0) {
         skaleTesty = c(skaleTesty, list(unique(temp$id_testu)))
         names(skaleTesty)[length(skaleTesty)] = idSkali$id_skali[1]
       }
-      grupa = last(filter_(idSkali, ~posiada_normy == TRUE)$grupa, default = NULL)
-      skalowanie = last(filter_(idSkali, ~posiada_normy == TRUE)$skalowanie, default = NULL)
-      idSkali = last(filter_(idSkali, ~posiada_normy == TRUE)$id_skali, default = NULL)
+      grupa = last(filter(idSkali, .data$posiada_normy == TRUE)$grupa, default = NULL)
+      skalowanie = last(filter(idSkali, .data$posiada_normy == TRUE)$skalowanie, default = NULL)
+      idSkali = last(filter(idSkali, .data$posiada_normy == TRUE)$id_skali, default = NULL)
       if (!is.null(idSkali) & !is.null(skalowanie) & !is.null(grupa)) {
         if (grupa == '') {
-          temp = normalizuj(temp, src = polacz(), idSkali = idSkali,
+          temp = normalizuj(temp, src = src, idSkali = idSkali,
                             skalowanie = skalowanie, grupa = grupa)
-          normy[[length(normy) + 1]] = pobierz_normy(polacz()) %>%
-            filter_(~id_skali == idSkali, ~skalowanie == skalowanie, ~grupa == grupa) %>%
-            as.data.frame() %>%
-            mutate_(rok = ~temp$rok[1], konstrukt = ~konstrukt)
+          normy[[length(normy) + 1]] = pobierz_normy(src) %>%
+            filter(.data$id_skali == idSkali & .data$skalowanie == skalowanie & .data$grupa == grupa) %>%
+            as_tibble() %>%
+            mutate(rok = .data$temp$rok[1], konstrukt = .data$konstrukt)
           names(normy)[length(normy)] = paste0(konstrukt, "_", temp$rok[1])
         }
       } else if (is.null(idSkali)) {
@@ -243,20 +252,17 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
       skale = bind_rows(
         skale,
         attributes(oszacowania)$skale %>%
-          arrange_(~id_skali, ~desc(skalowanie_do_prezentacji),
-                   ~desc(data_skalowania)) %>%
-          group_by_(~id_skali) %>%
-          mutate_(.dots = setNames(list(~1:n()), "priorytet")) %>%
+          arrange(.data$id_skali, desc(.data$skalowanie_do_prezentacji), desc(.data$data_skalowania)) %>%
+          group_by(.data$id_skali) %>%
+          mutate(priorytet = 1:n()) %>%
           ungroup() %>%
-          filter_(~priorytet == 1) %>%
-          select_(~-priorytet) %>%
-          mutate_(.dots = setNames(list(~sub("^ewd;([^;]+);.*$", "\\1_irt",
-                                             opis_skali)),
-                                   "zmienna"))
+          filter(.data$priorytet == 1) %>%
+          select(-.data$priorytet) %>%
+          mutate(zmienna = sub("^ewd;([^;]+);.*$", "\\1_irt", .data$opis_skali))
       )
       oszacowania = suppressMessages(
-        inner_join(oszacowania, select_(skale, ~id_skali, ~skalowanie, ~zmienna)) %>%
-          select_(~-id_skali, ~-skalowanie) %>%
+        inner_join(oszacowania, select(skale, .data$id_skali, .data$skalowanie, .data$zmienna)) %>%
+          select(-.data$id_skali, -.data$skalowanie) %>%
           melt(measure.vars = c("wynik", "bs", "grupa"), variable.name = "co",
                value.name = "wartosc") %>%
           dcast(id_obserwacji + rok + nr_pv ~ co + zmienna,
@@ -335,10 +341,10 @@ wczytaj_liczbe_przystepujacych = function(nazwyPlikow) {
       data.frame(id_obserwacji = vector(mode = "integer", length = 0))
     for (j in obiekty) {
       if (all(c("wynikiSurowe", "czescEgzaminu") %in% class(get(j)))) {
+        nazwa = paste0("zdawal_", j)
         temp = get(j) %>%
-          select_(~id_obserwacji, ~rok) %>%
-          mutate_(.dots = setNames(list(~TRUE),
-                                   paste0("zdawal_", j)))
+          select(.data$id_obserwacji, .data$rok) %>%
+          mutate( {{nazwa}} := TRUE)
         przystepowanie[[i]] = suppressMessages(
           full_join(przystepowanie[[i]], temp))
       }

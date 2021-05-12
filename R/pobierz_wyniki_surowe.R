@@ -58,7 +58,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   )
   czyZamykacSrc = FALSE
   if (is.null(src)) {
-    src = polacz()
+    src = ZPD::polacz()
     czyZamykacSrc = TRUE
   }
   if (is.null(lata)) {

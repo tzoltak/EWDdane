@@ -35,10 +35,10 @@ pobierz_baze_szkol = function(typySzkol, zapis = NULL, src = NULL) {
   for (typ in typySzkol) {
     daneSzkol = pobierz_dane_szkol(lata, typ, idOke = FALSE,
                                    daneAdresowe = TRUE, src = src) %>%
-      filter_(~id_szkoly > 0)
+      filter(.data$id_szkoly > 0)
     lata = max(daneSzkol$rok):min(daneSzkol$rok)
-    daneSzkol = select_(daneSzkol, ~-rok, ~-wielkosc_miejscowosci,
-                        ~-rodzaj_gminy, ~-matura_miedzynarodowa)
+    daneSzkol = daneSzkol %>%
+      select(-.data$rok, -.data$wielkosc_miejscowosci, -.data$rodzaj_gminy, -.data$matura_miedzynarodowa)
     daneSzkol = within(daneSzkol, {
       oke = c("Wrocław", "Gdańsk", "Kraków", "Poznań", "Łódź", "Kraków",
               "Warszawa", "Wrocław", "Kraków", "Łomża", "Gdańsk", "Jaworzno",
@@ -47,9 +47,9 @@ pobierz_baze_szkol = function(typySzkol, zapis = NULL, src = NULL) {
     for (i in lata) {
       kody = pobierz_dane_szkol(i, typ, idOke = TRUE, daneAdresowe = FALSE,
                                 src = src)
-      kody = select_(kody, ~id_szkoly, ~id_szkoly_oke, ~matura_miedzynarodowa)
+      kody = select(kody, .data$id_szkoly, .data$id_szkoly_oke, .data$matura_miedzynarodowa)
       if (!(typ %in% c("LO", "LP", "T"))) {
-        kody = select_(kody, ~-matura_miedzynarodowa)
+        kody = select(kody, -.data$matura_miedzynarodowa)
       }
       maska = names(kody) != "id_szkoly"
       names(kody)[maska] = paste0(names(kody)[maska], "_", i)
