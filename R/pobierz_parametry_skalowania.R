@@ -220,7 +220,9 @@ zmien_na_mplus = function(x) {
   x$kryterium[maska] = x$uwagi[maska]
   grm   = filter(x, .data$model %in% "GRM")
   binarne = filter(x, .data$model %in% "2PL")
-  grupowe  = filter(x, !is.na(.data$grupa) & parametr != "r EAP")
+  grupowe  = filter(x, !is.na(.data$grupa) & parametr != "r EAP") %>%
+    anti_join(grm) %>%
+    anti_join(binarne)
 
   if ((nrow(grm) + nrow(binarne) + nrow(grupowe)) !=
       nrow(filter(x, .data$parametr != "r EAP"))) {
