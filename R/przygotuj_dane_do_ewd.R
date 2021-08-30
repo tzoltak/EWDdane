@@ -27,6 +27,9 @@
 #' obejmować pojedynczy plik (domyślnie 1 - zbiory "jednoroczne")
 #' @param wydluzenie liczba całkowita - w przygotowanym zbiorze znajdą się
 #' uczniowie o toku kształcenia wydłużonym maksymalnie o tyle lat
+#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+#' połączenia
 #' @return wektor z nazwami zapisanych plików (niewidocznie)
 #' @param usunPusteKolumny opcjonalnie wartość logiczna - czy usunąć puste
 #' kolumny opisujące grupę w skalowaniu, błędy standardowe oraz kolumnę 'nr_pv',
@@ -36,19 +39,25 @@
 #' @export
 przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
                                  lataDo, liczbaRocznikow = 1,
-                                 wydluzenie = 1, usunPusteKolumny = TRUE) {
+                                 wydluzenie = 1, usunPusteKolumny = TRUE,
+                                 src = NULL) {
   stopifnot(is.character(katalogZDanymi), length(katalogZDanymi) == 1,
             is.character(typSzkoly), length(typSzkoly) == 1,
             is.numeric(lataDo), length(lataDo) > 0,
             is.numeric(liczbaRocznikow), length(liczbaRocznikow) == 1,
             is.numeric(wydluzenie), length(wydluzenie) == 1,
             all(usunPusteKolumny %in% c(TRUE, FALSE)),
-            length(usunPusteKolumny) == 1)
+            length(usunPusteKolumny) == 1,
+            is.src(src) | is.null(src)
+  )
   stopifnot(typSzkoly %in% c("gimn.", "LO", "T"),
             dir.exists(katalogZDanymi))
   stopifnot(lataDo >= 2006, all(as.integer(lataDo) == lataDo),
             liczbaRocznikow %in% 0:3,
             wydluzenie %in% 0:2)
+  if (is.null(src)) {
+    src = ZPD::polacz()
+  }
 
   egzaminNaWejsciu = list("gimn." = "sprawdzian",
                           "LO" = "egzamin gimnazjalny",
@@ -142,35 +151,31 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
     normy = c(attributes(daneNaWyjsciu)$normy,
               attributes(daneNaWejsciu)$normy)
     if (any(grepl("R_irt$", names(dane)))) {
-      skaleNormy = filter_(skale, ~grepl("^ewd;[^;]+R;", opis_skali)) %>%
-        select_(~id_skali, ~skalowanie, ~rok, ~zmienna)
+      skaleNormy = filter(skale, grepl("^ewd;[^;]+R;", .data$opis_skali)) %>%
+        select(.data$id_skali, .data$skalowanie, .data$rok, .data$zmienna)
       normy = suppressMessages(
-        inner_join(pobierz_normy(polacz()), skaleNormy, copy = TRUE) %>%
+        inner_join(pobierz_normy(src), skaleNormy, copy = TRUE) %>%
           collect(n = Inf)
       )
       for (j in unique(normy$zmienna)) {
         skrotEgz = substr(j, 1, 1)
-        temp = filter_(normy, ~zmienna == j) %>%
-          select_(~-id_skali, ~-skalowanie, ~-zmienna) %>%
-          group_by_(~grupa) %>%
-          mutate_(.dots = setNames(list(~wartosc_zr == min(wartosc_zr)),
-                                   "usun")) %>%
-          mutate_(.dots = setNames(list(~usun & wartosc != suppressWarnings(max(wartosc[usun]))),
-                                   "usun")) %>%
-          filter_(~!usun) %>%
-          mutate_(.dots = setNames(list(~wartosc_zr == max(wartosc_zr)),
-                                   "usun")) %>%
-          mutate_(.dots = setNames(list(~usun & wartosc != suppressWarnings(min(wartosc[usun]))),
-                                   "usun")) %>%
-          filter_(~!usun) %>%
+        temp = filter(normy, .data$zmienna == j) %>%
+          select(-.data$id_skali, -.data$skalowanie, -.data$zmienna) %>%
+          group_by(.data$grupa) %>%
+          mutate(usun = .data$wartosc_zr == min(.data$wartosc_zr)) %>%
+          mutate(usun = .data$usun & .data$wartosc != suppressWarnings(max(.data$wartosc[.data$usun]))) %>%
+          filter(!.data$usun) %>%
+          mutate(usun = .data$wartosc_zr == max(.data$wartosc_zr)) %>%
+          mutate(usun = .data$usun & .data$wartosc != suppressWarnings(min(.data$wartosc[.data$usun]))) %>%
+          filter(!.data$usun) %>%
           ungroup() %>%
-          select_(~-usun)
+          select(-.data$usun)
         names(temp) = sub("^wartosc$", paste0(sub("_irt$", "", j), "_suma"),
                           names(temp))
         names(temp) = sub("^wartosc_zr$", j, names(temp))
         names(temp) = sub("^rok$", paste0("rok_", skrotEgz), names(temp))
         if (all(temp$grupa == "" | is.na(temp$grupa))) {
-          temp = select_(temp, ~-grupa)
+          temp = select(temp, -.data$grupa)
         } else {
           names(temp) = sub("^grupa$", paste0("grupa_", j), names(temp))
         }
@@ -213,9 +218,9 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
         dane = suppressMessages(left_join(dane, przystepowanie))
       }
       # dołączanie informacji o maturze międzynarodowej
-      ib = pobierz_szkoly(polacz()) %>%
-        filter_(~typ_szkoly == typSzkoly, ~rok %in% c(lataWyjscie, lataWyjscie)) %>%
-        select_(~id_szkoly, ~rok, ~matura_miedzynarodowa) %>%
+      ib = pobierz_szkoly(src) %>%
+        filter(.data$typ_szkoly == typSzkoly, .data$rok %in% lataWyjscie) %>%
+        select(.data$id_szkoly, .data$rok, .data$matura_miedzynarodowa) %>%
         collect(n = Inf)
       names(ib) = paste0(names(ib), "_", skrotEgzaminu)
       names(ib) = sub("^(matura_miedzynarodowa).*$", "\\1", names(ib))

@@ -35,8 +35,9 @@
 #' @param gamma poziom ufności (liczba z przedziału [0;1] )
 #' @param fileEncoding ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
 #' plik csv
-#' @param src połączenie z bazą danych (jeśli NULL, zostanie podjęta próba
-#'   nawiązania połączenia za pomocą \code{ZPD::polacz()})
+#' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
+#' \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+#' połączenia
 #' @details
 #' Przykłady użycia - p. \href{http://zpd.ibe.edu.pl/doku.php?id=pobieranie_wartosci_ewd}{http://zpd.ibe.edu.pl/doku.php?id=pobieranie_wartosci_ewd}.
 #' @return data frame
@@ -89,7 +90,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     lata = rep(lata, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
   }
   if (is.null(src)) {
-    src = polacz()
+    src = ZPD::polacz()
   }
   wskazniki = src %>%
     pobierz_wskazniki(doPrezentacji = tylkoWskDoPrezentacji) %>%

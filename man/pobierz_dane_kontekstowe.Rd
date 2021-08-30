@@ -84,9 +84,9 @@ definiowani są jako zdający:
 }
 Dodatkowe uwagi:
 \itemize{
-  \item{Informacje o wieku i klasie zostaną wykorszystane tylko wtedy,
-        jeśli przekazane do funkcji połączenie z bazą posiada odpowiednio
-        wysoki poziom uprawnień.}
+  \item{Informacje o wieku i klasie są użyteczne tylko wtedy, jeśli 
+        przekazane do funkcji połączenie z bazą posiada poziom uprawnień,
+        który umożliwia ich pobranie.}
   \item{Przed przystąpieniem do skalowania na populacji "wzorcowej" konieczne
         jest jeszcze usunięcie z danych z wynikami surowymi egzaminów
         punktacji za zadania przypisanej laureatom. Musi to jednak zostać

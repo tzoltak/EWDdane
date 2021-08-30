@@ -121,17 +121,18 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
   dane = melt(dane[, c(zmienne,
                        grep(maskaZmienne, names(dane), value = TRUE))],
               id = zmienne) %>%
-    mutate_(.dots = list(wskaznik = ~gsub(maskaZmienne, "", variable),
-                         variable = ~gsub(paste0(maskaZmienne, ".*$"), "\\1",
-                                          variable)))
+    mutate(
+      wskaznik = gsub(maskaZmienne, "", .data$variable),
+      variable = gsub(paste0(maskaZmienne, ".*$"), "\\1", .data$variable)
+    )
 
   formulaTemp = as.formula(paste0(paste0(zmienne, collapse = "+"),
                                   " + wskaznik ~ variable"))
   dane = dcast(dane, formulaTemp, value.var = "value") %>%
-    group_by_(.dots = as.list(c(rokDo, "wskaznik", zmiennaGrupujaca)))
+    group_by({{rokDo}}, .data$wskaznik, {{zmiennaGrupujaca}})
   # Gdy tylkoWyswietlane to TRUE, odfiltruj niewyświetlane.
   if (tylkoWyswietlane %in% TRUE & "wyswietlaj" %in% names(dane)) {
-    dane = dane %>% filter_(~wyswietlaj == 1)
+    dane = dane %>% filter(.data$wyswietlaj == 1)
   } else if (tylkoWyswietlane %in% TRUE) {
     message("W danych brak informacji o tym, dla których szkół wyświetlane są elipsy. ",
             "Aby mieć pewność, że szkoły, dla których elipsy nie są wyświetlane, ",
@@ -153,43 +154,48 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
   }
   if (!("wyswietlaj" %in% names(dane))) dane = mutate(dane, wyswietlaj = NA)
 
-  dots = list(ewd_agr = ~weighted.mean(ewd, lu_ewd, na.rm = TRUE),
-              srednia_agr = ~weighted.mean(srednia, lu_ewd, na.rm = TRUE),
-              lu_sum = ~sum(lu_ewd, na.rm = TRUE),
-              wyswietlaj = ~any(wyswietlaj == 1)
-  )
   if (pu) {
     lambda = sqrt(qchisq(gammaDane, 2))
     dane = dane %>%
-      mutate_(.dots = list(
-        dg_pu_ewd = ~(ewd - dg_pu_ewd) / lambda,
-        dg_pu_srednia = ~(srednia - dg_pu_srednia) / lambda)) %>%
-      rename_(bs_ewd = ~dg_pu_ewd,
-              bs_srednia = ~dg_pu_srednia)
+      mutate(
+        dg_pu_ewd = (.data$ewd - .data$dg_pu_ewd) / lambda,
+        dg_pu_srednia = (.data$srednia - .data$dg_pu_srednia) / lambda
+      ) %>%
+      rename(
+        bs_ewd = .data$dg_pu_ewd,
+        bs_srednia = .data$dg_pu_srednia
+      )
     lambda = sqrt(qchisq(gamma, 2))
-    dots = append(dots,
-                  list(
-                    bs_ewd = ~sqrt(
-                      sum(lu_ewd * ewd^2, na.rm = TRUE) -
-                        sum(lu_ewd * ewd, na.rm = TRUE)^2 / lu_sum +
-                        sum(lu_ewd^2 * bs_ewd^2, na.rm = TRUE)
-                    ) / lu_sum,
-                    bs_srednia = ~sqrt(
-                      sum(lu_ewd * srednia^2, na.rm = TRUE) -
-                        sum(lu_ewd * srednia, na.rm = TRUE)^2 / lu_sum +
-                        sum(lu_ewd^2 * bs_srednia^2, na.rm = TRUE)
-                    ) / lu_sum,
-                    dg_pu_ewd = ~ewd_agr - lambda * bs_ewd,
-                    gg_pu_ewd = ~ewd_agr + lambda * bs_ewd,
-                    dg_pu_srednia = ~srednia_agr - lambda * bs_srednia,
-                    gg_pu_srednia = ~srednia_agr + lambda * bs_srednia
-                  ))
   }
-  dane = dane %>% summarise_(.dots = dots) %>%
-    rename_(ewd = ~ewd_agr, srednia = ~srednia_agr)
+  dane = dane %>% 
+    summarise(
+      ewd_agr       = weighted.mean(.data$ewd, .data$lu_ewd, na.rm = TRUE),
+      srednia_agr   = weighted.mean(.data$srednia, .data$lu_ewd, na.rm = TRUE),
+      lu_sum        = sum(.data$lu_ewd, na.rm = TRUE),
+      wyswietlaj    = any(.data$wyswietlaj == 1),
+      bs_ewd        = sqrt(
+        sum(.data$lu_ewd * .data$ewd^2, na.rm = TRUE) -
+        sum(.data$lu_ewd * .data$ewd, na.rm = TRUE)^2 / .data$lu_sum +
+        sum(.data$lu_ewd^2 * .data$bs_ewd^2, na.rm = TRUE)
+      ) / .data$lu_sum,
+      bs_srednia    = sqrt(
+        sum(.data$lu_ewd * .data$srednia^2, na.rm = TRUE) -
+        sum(.data$lu_ewd * .data$srednia, na.rm = TRUE)^2 / .data$lu_sum +
+        sum(.data$lu_ewd^2 * .data$bs_srednia^2, na.rm = TRUE)
+      ) / .data$lu_sum,
+      dg_pu_ewd     = .data$ewd_agr - lambda * .data$bs_ewd,
+      gg_pu_ewd     = .data$ewd_agr + lambda * .data$bs_ewd,
+      dg_pu_srednia = .data$srednia_agr - lambda * .data$bs_srednia,
+      gg_pu_srednia = .data$srednia_agr + lambda * .data$bs_srednia
+    ) %>%
+    rename(ewd = .data$ewd_agr, srednia = srednia_agr)
+  if (!pu) {
+    dane = dane %>%
+      select(-.data$bs_ewd, -.data$bs_srednia, -.data$dg_pu_ewd, -.data$gg_pu_ewd, -.data$dg_pu_srednia, -.data$gg_pu_srednia)
+  }
   if (pu) {
     dane = dane %>%
-      select_(~-bs_ewd, ~-bs_srednia)
+      select(-.data$bs_ewd, -.data$bs_srednia)
   }
   if (is.na(tylkoWyswietlane) & "wyswietlaj" %in% names(dane)) {
     dane$ewd[!dane$wyswietlaj] = NA
@@ -201,7 +207,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
       dane$gg_pu_srednia[!dane$wyswietlaj] = NA
     }
   }
-  dane = select_(dane, ~-wyswietlaj) %>%
+  dane = select(dane, -.data$wyswietlaj) %>%
     melt(c(rokDo, zmiennaGrupujaca, "wskaznik")) %>%
     dcast(as.formula(paste0(paste0(c(rokDo, zmiennaGrupujaca), collapse = "+"),
                             " ~ wskaznik + variable")))
@@ -224,13 +230,13 @@ przygotuj_funkcje_grupujaca_teryt <- function(poziom){
   stopifnot(poziom %in% c("gmina", "powiat", "województwo"))
   fun = switch(poziom,
                gmina = function(teryt){
-                 return(data.frame(teryt_gminy = teryt))
+                 return(tibble(teryt_gminy = teryt))
                },
                powiat = function(teryt){
-                 return(data.frame(teryt_powiatu = round(teryt / 100) * 100))
+                 return(tibble(teryt_powiatu = round(teryt / 100) * 100))
                },
                `województwo` = function(teryt){
-                 return(data.frame("teryt_wojewodztwa" = round(teryt / 10^4) * 10^4))
+                 return(tibble("teryt_wojewodztwa" = round(teryt / 10^4) * 10^4))
                }
   )
   return(fun)
