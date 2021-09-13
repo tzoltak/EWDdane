@@ -1,8 +1,20 @@
 --------------------
+Zmiany w EWDdane 0.9.15 (13.09.2021)
+
+Uaktualnienia:
+  - prepisanie operacji zmiany formy danych z szerokiej na długą lub z długiej na szeroką z pakietu reshape2 na pakiet tidyr
+
+Naprawione błędy:
+  - obsługa wywołania agreguj_wskazniki_ewd() z argumentem pu=FALSE
+  - pomyłka w nazwach obiektów uniemożliwiająca porównanie stanu zrzutu i zaktualzowanej bazy szkół przez weryfikuj_baze_szkol()
+  - dodano nieco brakujących prefiksów `.data$` w wywołaniach funkcji dplyr-a
+  - dodano zależność od pakietu rlang (ze względu na użycie `:=` w wczytaj_liczbe_przystepujacych())
+
+--------------------
 Zmiany w EWDdane 0.9.14 (12.05.2021)
 
 Uaktualnienia:
-  - przepisanie dplyr-owych verb_() na verb() (dbplyr odmawiał już z nimi 
+  - przepisanie dplyr-owych verb_() na verb() (dbplyr odmawiał już z nimi
     współpracy)
   - dodanie możliwości przekazania połączenia do bazy danych do wszystkich
     funkcji, które wewnętrznie wołały ZPD::polacz()

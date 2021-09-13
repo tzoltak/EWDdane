@@ -44,8 +44,8 @@
 #' @importFrom stats qchisq
 #' @importFrom utils write.csv2
 #' @import ZPD
-#' @import reshape2
-#' @import lazyeval
+#' @import dplyr
+#' @import tidyr
 #' @export
 pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = NULL,
                                            idOke = FALSE, daneAdresowe = TRUE,
@@ -54,7 +54,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
                                            tylkoWskDoPrezentacji = TRUE,
                                            tylkoWyswietlane = TRUE,
                                            tylkoNiePomin = TRUE,
-                                           gamma = 0.95, 
+                                           gamma = 0.95,
                                            fileEncoding = "windows-1250",
                                            src = NULL) {
   stopifnot(is.numeric(lata)        , length(lata) > 0,
@@ -115,8 +115,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
       collect(n = Inf) %>%
       as.data.frame()
     lUczniow$czesc_egzaminu = paste0("l_uczn_", lUczniow$czesc_egzaminu)
-    lUczniow = dcast(lUczniow, id_ww ~ czesc_egzaminu, identity, fill = NA_integer_,
-                     value.var = "przedm_lu")
+    lUczniow = lUczniow %>%
+      pivot_wider(names_from = "czesc_egzaminu", values_from = "przedm_lu")
     names(lUczniow) = sub("podstawowa", "podst", names(lUczniow))
     names(lUczniow) = sub("rozszerzona", "rozsz", names(lUczniow))
     names(lUczniow) = gsub(" ", "_", names(lUczniow), fixed = TRUE)
@@ -145,9 +145,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     zmNaDlugi = c(zmNaDlugi, names(lUczniow)[!(names(lUczniow) %in% names(wskazniki))])
     wskazniki = suppressMessages(left_join(wskazniki, lUczniow))
   }
-  wskazniki = melt(wskazniki, id.vars = c("id_ww", "rok_do", "wskaznik", "skrot",
-                                          "id_szkoly", "pomin", "lu_wszyscy"),
-                   measure.vars = zmNaDlugi)
+  wskazniki = wskazniki %>%
+    pivot_longer(zmNaDlugi, names_to = "variable", values_to = "value")
   # usuwanie niepotrzebnych zmiennych (które chwilowo są obserwacjami)
   if (!dodatkoweInfo) {
     zmienneUsun = c("kategoria", "korelacja")
@@ -155,7 +154,6 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     wskazniki = filter(wskazniki, !(.data$variable %in% zmienneUsun))
   }
   # przekształcanie do postaci szerokiej
-  wskazniki = mutate(wskazniki, variable = levels(.data$variable)[.data$variable])
   if (opisoweNazwy) {
     wskazniki = mutate(wskazniki,
                         variable = paste(.data$variable, "wsk.", .data$skrot)) %>%
@@ -166,11 +164,12 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     nazwyWskaznikow = unique(sub("^ewd ", "",
                                  grep("^ewd ", wskazniki$variable, value = TRUE)))
   } else {
-    wskazniki = mutate(wskazniki, variable = paste(.data$variable, .data$wskaznik, sep="_"))
+    wskazniki = mutate(wskazniki, variable = paste(.data$variable, .data$wskaznik, sep = "_"))
     nazwyWskaznikow = paste0("_", unique(wskazniki$wskaznik))
   }
-  wskazniki = dcast(wskazniki, rok_do + id_szkoly + pomin + lu_wszyscy ~ variable,
-                    identity, fill = NA_real_, value.var = "value")
+  wskazniki = wskazniki %>%
+    select("rok_do", "id_szkoly", "pomin", "lu_wszyscy", "variable", "value") %>%
+    pivot_wider(names_from = "variable", values_from = "value")
   # łączenie z danymi szkół
   message("Pobieranie informacji o szkołach.")
   daneSzkol = pobierz_dane_szkol(c(lata, min(lata) - (1:2)), typSzkoly, idOke = idOke, daneAdresowe = daneAdresowe, src = src)

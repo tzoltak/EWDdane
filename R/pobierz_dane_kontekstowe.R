@@ -71,7 +71,7 @@
 #' }
 #' Dodatkowe uwagi:
 #' \itemize{
-#'   \item{Informacje o wieku i klasie są użyteczne tylko wtedy, jeśli 
+#'   \item{Informacje o wieku i klasie są użyteczne tylko wtedy, jeśli
 #'         przekazane do funkcji połączenie z bazą posiada poziom uprawnień,
 #'         który umożliwia ich pobranie.}
 #'   \item{Przed przystąpieniem do skalowania na populacji "wzorcowej" konieczne
@@ -81,6 +81,7 @@
 #'         zwróconych przez tę funkcję informacji o byciu laureatem).}
 #' }
 #' @import dplyr
+#' @import tidyr
 #' @import ZPD
 #' @export
 pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
@@ -175,7 +176,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
 
   # pobieranie informacji o ostatnich przystąpieniach
   ostatnie = filtruj_przystapienia(
-    src, pierwsze = FALSE, 
+    src, pierwsze = FALSE,
     rodzajEgzaminu = rodzajEgzaminu,
     czescEgzaminu = NULL, czyEwd = TRUE
   ) %>%
@@ -199,7 +200,8 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
   message(" Obrabianie informacji o byciu laureatem.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   uczniowieTesty = uczniowieTesty %>%
     mutate(prefiks = paste0('laur_', .data$prefiks)) %>%
-    reshape2::dcast(id_obserwacji + rok ~ prefiks, value.var = 'laureat')
+    select("id_obserwacji", "rok", "prefiks", "laureat") %>%
+    pivot_wider(names_from = "prefiks", values_from = "laureat")
 
   # złączenie i usunięcie zbędnych danych
   dane = suppressMessages(inner_join(dane, uczniowieTesty))

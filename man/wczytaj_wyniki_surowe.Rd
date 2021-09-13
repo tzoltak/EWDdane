@@ -4,10 +4,14 @@
 \alias{wczytaj_wyniki_surowe}
 \title{Funkcje pomocnicze przy przygotowywaniu danych do obliczania modeli EWD}
 \usage{
-wczytaj_wyniki_surowe(nazwaPliku)
+wczytaj_wyniki_surowe(nazwaPliku, src)
 }
 \arguments{
 \item{nazwaPliku}{ciąg znaków - nazwa pliku z surowymi wynikami egzaminu}
+
+\item{src}{NULL połączenie z bazą danych IBE zwracane przez funkcję
+\code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+połączenia}
 }
 \value{
 data table

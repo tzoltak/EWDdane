@@ -26,10 +26,9 @@ zostaną wyniki tylko z lat, dla których pliki jeszcze nie istnieją}
 \item{daneKontekstowe}{wartość logiczna - czy pobrać również plik z danymi
 kontekstowymi (tj. o uczniach i szkołach)?}
 
-\item{src}{opcjonalnie połączenie z bazą danych IBE zwracane przez funkcję
-\code{\link[ZPD]{polacz}}; pozwala posłużyć się połączeniem o wyższych niż
-domyślne prawach dostępu, co ma znaczenie dla zakresu pobieranych danych
-kontekstowych}
+\item{src}{NULL połączenie z bazą danych IBE zwracane przez funkcję
+\code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+połączenia}
 
 \item{katalogWyskalowane}{opcjonalnie ciąg znaków - ścieżka do katalogu,
 w którym znajdują się pliki .RData z wynikami skalowania, zapisane przez

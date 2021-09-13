@@ -146,7 +146,7 @@ wczytaj_wyniki_surowe = function(nazwaPliku, src) {
   obiekty = load(nazwaPliku)
   # obsługa części egzaminu gimnazjalnego
   testy = pobierz_testy(src) %>%
-    filter(.data$prefiks %in% c("gh", "gm") & .data$is.na(arkusz) & .data$dane_ewd == TRUE) %>%
+    filter(.data$prefiks %in% c("gh", "gm") & .data$is.na(.data$arkusz) & .data$dane_ewd == TRUE) %>%
     collect(n = Inf)
   if (exists("gh_h") & exists("gh_p")) {
     gh = suppressMessages(inner_join(get("gh_h"),
@@ -233,7 +233,8 @@ wczytaj_wyniki_surowe = function(nazwaPliku, src) {
 #' te, których data skalowania jest najpóżniejsza.
 #' @importFrom stats setNames
 #' @import ZPD
-#' @import reshape2
+#' @import dplyr
+#' @import tidyr
 #' @return data table
 wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
   stopifnot(is.character(nazwaPliku), length(nazwaPliku) == 1)
@@ -243,7 +244,7 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
   obiekty = load(nazwaPliku)
   for (i in obiekty) {
     oszacowania = get(i)
-    # konwersja grup na liczby, żeby mogły być przetwarzana melt/dcast z oszacowaniami
+    # konwersja grup na liczby, żeby mogły być przetwarzana pivotami z oszacowaniami
     oszacowania$grupa = factor(oszacowania$grupa)
     grupy = levels(oszacowania$grupa)
     oszacowania$grupa = as.numeric(oszacowania$grupa)
@@ -263,10 +264,13 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
       oszacowania = suppressMessages(
         inner_join(oszacowania, select(skale, .data$id_skali, .data$skalowanie, .data$zmienna)) %>%
           select(-.data$id_skali, -.data$skalowanie) %>%
-          melt(measure.vars = c("wynik", "bs", "grupa"), variable.name = "co",
-               value.name = "wartosc") %>%
-          dcast(id_obserwacji + rok + nr_pv ~ co + zmienna,
-                value.var = "wartosc")
+          pivot_longer(cols = c("wynik", "bs", "grupa"),
+                       names_to = "co", values_to = "wartosc") %>%
+          pivot_wider(names_from = c("co", "zmienna"),
+                      values_from = "wartosc") %>%
+          select(all_of(c("id_obserwacji", "rok", "nr_pv")),
+                 starts_with("wynik_"), starts_with("bs_"),
+                 starts_with("grupa_"))
       )
       names(oszacowania) = sub("wynik_", "", names(oszacowania))
       # grupy znów na ciągi znaków
@@ -329,6 +333,7 @@ wczytaj_wyniki_skalowania = function(nazwyPlikow) {
 #' egzaminu
 #' @importFrom stats setNames
 #' @import dplyr
+#' @import rlang
 #' @return data table
 wczytaj_liczbe_przystepujacych = function(nazwyPlikow) {
   stopifnot(is.character(nazwyPlikow), length(nazwyPlikow) > 0)

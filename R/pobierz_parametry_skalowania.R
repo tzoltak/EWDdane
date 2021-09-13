@@ -129,13 +129,13 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
     group_by(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie) %>%
     summarise(
       parametry = list(tibble(
-        grupa = grupa[1:n()],
-        kryterium = kryterium[1:n()],
-        uwagi = parametr_uwagi[1:n()],
-        parametr = parametr[1:n()],
-        model = model[1:n()],
-        wartosc = wartosc[1:n()],
-        bs = bs[1:n()]
+        grupa = .data$grupa[1:n()],
+        kryterium = .data$kryterium[1:n()],
+        uwagi = .data$parametr_uwagi[1:n()],
+        parametr = .data$parametr[1:n()],
+        model = .data$model[1:n()],
+        wartosc = .data$wartosc[1:n()],
+        bs = .data$bs[1:n()]
       ))
     ) %>%
     ungroup()  # jeśli jest tylko jedno skalowanie, to zostało właśnie zgubione grupowanie po nim
@@ -183,7 +183,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   skale = skale %>%
     filter(!.data$jest_wybrane_skalowanie | is.na(.data$ma_parametry)) %>%
     mutate(
-      skalowanie = .data$max_skalowanie + 1L, 
+      skalowanie = .data$max_skalowanie + 1L,
       parametry = list()
     ) %>%
     select(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie, .data$parametry)
@@ -220,7 +220,7 @@ zmien_na_mplus = function(x) {
   x$kryterium[maska] = x$uwagi[maska]
   grm   = filter(x, .data$model %in% "GRM")
   binarne = filter(x, .data$model %in% "2PL")
-  grupowe  = filter(x, !is.na(.data$grupa) & parametr != "r EAP") %>%
+  grupowe  = filter(x, !is.na(.data$grupa) & .data$parametr != "r EAP") %>%
     anti_join(grm) %>%
     anti_join(binarne)
 
@@ -261,15 +261,15 @@ zmien_na_mplus = function(x) {
   )
   binarne$b = suppressMessages(
     full_join(
-      binarne$b, 
+      binarne$b,
       with(
-        binarne$a, 
+        binarne$a,
         tibble(zmienna1 = zmienna2, a = wartosc)
       )
     )
   )
   binarne$b = within(
-    binarne$b, 
+    binarne$b,
     {
       wartosc = get("wartosc") * get("a")
       S.E. = get("S.E.") * get("a")
@@ -315,16 +315,16 @@ zmien_na_mplus = function(x) {
   )
   grm$b = suppressMessages(
     full_join(
-      grm$b, 
+      grm$b,
       with(
-        grm$a, 
+        grm$a,
         tibble(zmienna1 = zmienna2, a = wartosc)
       )
     ) %>%
     full_join(grm$g)
   )
   grm$b = within(
-    grm$b, 
+    grm$b,
     {
       wartosc = get("wartosc") + get("trudnosc") * get("a")
       S.E. = get("S.E.") * get("a")
