@@ -8,7 +8,8 @@ pobierz_parametry_skalowania(
   skala,
   skalowanie = NULL,
   doPrezentacji = NA,
-  parametryzacja = "baza"
+  parametryzacja = "baza",
+  src = NULL
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ prezentacji, \code{FALSE} - tylko oznaczone jako nie do prezentacji,
 
 \item{parametryzacja}{parametr określający format zwracanego wyniku. Domyślna
 wartość to 'baza'. Inna możliwa wartość to 'mplus'.}
+
+\item{src}{NULL połączenie z bazą danych IBE zwracane przez funkcję
+\code{\link[ZPD]{polacz}}. Jeśli nie podane, podjęta zostanie próba
+automatycznego nawiązania połączenia.}
 }
 \value{
 data frame (data table) o kolumnach:

@@ -84,7 +84,7 @@ definiowani są jako zdający:
 }
 Dodatkowe uwagi:
 \itemize{
-  \item{Informacje o wieku i klasie są użyteczne tylko wtedy, jeśli 
+  \item{Informacje o wieku i klasie są użyteczne tylko wtedy, jeśli
         przekazane do funkcji połączenie z bazą posiada poziom uprawnień,
         który umożliwia ich pobranie.}
   \item{Przed przystąpieniem do skalowania na populacji "wzorcowej" konieczne

@@ -112,8 +112,8 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
     names(zmiany) = c("zmianyId", "zmianyKodowOke")
     # sprawdzamy, co się zmieniło w stosunku do zrzutu
     maskaIdSzkolyZakt = grepl("^id_szkoly(|_strona)$", names(bazaZakt))
-    maskaIdSzkolyZrzut = grepl("^id_szkoly(|_strona)$", names(bazaZakt))
-    temp     = bazaZakt[!is.na(bazaZakt[, maskaIdSzkolyZakt]), ]
+    maskaIdSzkolyZrzut = grepl("^id_szkoly(|_strona)$", names(bazaZrzut))
+    temp = bazaZakt[!is.na(bazaZakt[, maskaIdSzkolyZakt]), ]
     maskaUsuniete = !(bazaZrzut[, maskaIdSzkolyZrzut] %in% temp[, maskaIdSzkolyZakt])
     usuniete = bazaZrzut[maskaUsuniete, maskaIdSzkolyZrzut]
     zmiany$zmianyId   = as.data.frame(matrix(0, ncol = 3, nrow = 0))
@@ -142,17 +142,19 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
 
     # i jeszcze śledzenie ew. zmian kodów OKE w stosunku do zrzutu
     maskaZmienne = intersect(names(bazaZrzut), names(bazaZakt))
-    maskaZmienne = maskaZmienne[grep("^id_szkoly(|_strona)$|^id_szkoly_oke_|^kod_(g|lo|t)_",
-                                     maskaZmienne)]
+    maskaZmienne = grep("^id_szkoly(|_strona)$|^id_szkoly_oke_|^kod_(g|lo|t)_",
+                        maskaZmienne, value = TRUE)
     polaczone = merge(
       bazaZrzut[, maskaZmienne],
       bazaZakt[, maskaZmienne],
       by = names(bazaZakt)[maskaIdSzkolyZakt],
       suffixes = c("", "_zakt")
     )
-    maskaZmienne = maskaZmienne[grep("^id_szkoly_oke_|^kod_(g|lo|t)_", maskaZmienne)]
+    maskaZmienne = grep("^id_szkoly_oke_|^kod_(g|lo|t)_", maskaZmienne,
+                        value = TRUE)
     temp = polaczone[, maskaZmienne] != polaczone[, paste0(maskaZmienne, "_zakt")]
     maska = apply(temp, 1, any)
+    maska[is.na(maska)] = FALSE
     polaczone = polaczone[maska %in% TRUE, ]
     if (any(maska)) {
       maska = polaczone[, maskaZmienne] == polaczone[, paste0(maskaZmienne, "_zakt")]

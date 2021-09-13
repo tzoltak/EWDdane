@@ -63,8 +63,9 @@
 #' dane = pobierz_wartosci_wskaznikow_ewd("T", 2013:2014, tylkoWyswietlane = FALSE, gamma = gamma)
 #' agr = agreguj_wskazniki_ewd(dane, zmiennaGrupujaca = "poczta", pu = TRUE, gammaDane = gamma)
 #' }
-#' @importFrom stats as.formula
+#' @importFrom stats as.formula weighted.mean
 #' @import dplyr
+#' @import tidyr
 #' @import ZPD
 #' @export
 agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
@@ -118,18 +119,14 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
 
   zmienne = c("id_szkoly", "rok_do", zmiennaGrupujaca)
   maskaZmienne = paste0("^(ewd|lu_ewd|wyswietlaj|srednia", maskaPU, ")[_ ]")
-  dane = melt(dane[, c(zmienne,
-                       grep(maskaZmienne, names(dane), value = TRUE))],
-              id = zmienne) %>%
+  dane = dane %>%
+    select(all_of(zmienne), matches(maskaZmienne)) %>%
+    pivot_longer(-all_of(zmienne), names_to = "variable", values_to = "value") %>%
     mutate(
       wskaznik = gsub(maskaZmienne, "", .data$variable),
-      variable = gsub(paste0(maskaZmienne, ".*$"), "\\1", .data$variable)
-    )
-
-  formulaTemp = as.formula(paste0(paste0(zmienne, collapse = "+"),
-                                  " + wskaznik ~ variable"))
-  dane = dcast(dane, formulaTemp, value.var = "value") %>%
-    group_by({{rokDo}}, .data$wskaznik, {{zmiennaGrupujaca}})
+      variable = gsub(paste0(maskaZmienne, ".*$"), "\\1", .data$variable)) %>%
+    pivot_wider(names_from = "variable", values_from = "value") %>%
+    group_by(across(c(rokDo, "wskaznik", zmiennaGrupujaca)))
   # Gdy tylkoWyswietlane to TRUE, odfiltruj niewyświetlane.
   if (tylkoWyswietlane %in% TRUE & "wyswietlaj" %in% names(dane)) {
     dane = dane %>% filter(.data$wyswietlaj == 1)
@@ -166,36 +163,38 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
         bs_srednia = .data$dg_pu_srednia
       )
     lambda = sqrt(qchisq(gamma, 2))
-  }
-  dane = dane %>% 
-    summarise(
-      ewd_agr       = weighted.mean(.data$ewd, .data$lu_ewd, na.rm = TRUE),
-      srednia_agr   = weighted.mean(.data$srednia, .data$lu_ewd, na.rm = TRUE),
-      lu_sum        = sum(.data$lu_ewd, na.rm = TRUE),
-      wyswietlaj    = any(.data$wyswietlaj == 1),
-      bs_ewd        = sqrt(
-        sum(.data$lu_ewd * .data$ewd^2, na.rm = TRUE) -
-        sum(.data$lu_ewd * .data$ewd, na.rm = TRUE)^2 / .data$lu_sum +
-        sum(.data$lu_ewd^2 * .data$bs_ewd^2, na.rm = TRUE)
-      ) / .data$lu_sum,
-      bs_srednia    = sqrt(
-        sum(.data$lu_ewd * .data$srednia^2, na.rm = TRUE) -
-        sum(.data$lu_ewd * .data$srednia, na.rm = TRUE)^2 / .data$lu_sum +
-        sum(.data$lu_ewd^2 * .data$bs_srednia^2, na.rm = TRUE)
-      ) / .data$lu_sum,
-      dg_pu_ewd     = .data$ewd_agr - lambda * .data$bs_ewd,
-      gg_pu_ewd     = .data$ewd_agr + lambda * .data$bs_ewd,
-      dg_pu_srednia = .data$srednia_agr - lambda * .data$bs_srednia,
-      gg_pu_srednia = .data$srednia_agr + lambda * .data$bs_srednia
-    ) %>%
-    rename(ewd = .data$ewd_agr, srednia = srednia_agr)
-  if (!pu) {
+
     dane = dane %>%
-      select(-.data$bs_ewd, -.data$bs_srednia, -.data$dg_pu_ewd, -.data$gg_pu_ewd, -.data$dg_pu_srednia, -.data$gg_pu_srednia)
-  }
-  if (pu) {
+      summarise(
+        ewd_agr       = weighted.mean(.data$ewd, .data$lu_ewd, na.rm = TRUE),
+        srednia_agr   = weighted.mean(.data$srednia, .data$lu_ewd, na.rm = TRUE),
+        lu_sum        = sum(.data$lu_ewd, na.rm = TRUE),
+        wyswietlaj    = any(.data$wyswietlaj == 1),
+        bs_ewd        = sqrt(
+          sum(.data$lu_ewd * .data$ewd^2, na.rm = TRUE) -
+            sum(.data$lu_ewd * .data$ewd, na.rm = TRUE)^2 / .data$lu_sum +
+            sum(.data$lu_ewd^2 * .data$bs_ewd^2, na.rm = TRUE)
+        ) / .data$lu_sum,
+        bs_srednia    = sqrt(
+          sum(.data$lu_ewd * .data$srednia^2, na.rm = TRUE) -
+            sum(.data$lu_ewd * .data$srednia, na.rm = TRUE)^2 / .data$lu_sum +
+            sum(.data$lu_ewd^2 * .data$bs_srednia^2, na.rm = TRUE)
+        ) / .data$lu_sum,
+        dg_pu_ewd     = .data$ewd_agr - lambda * .data$bs_ewd,
+        gg_pu_ewd     = .data$ewd_agr + lambda * .data$bs_ewd,
+        dg_pu_srednia = .data$srednia_agr - lambda * .data$bs_srednia,
+        gg_pu_srednia = .data$srednia_agr + lambda * .data$bs_srednia
+      ) %>%
+      rename(ewd = .data$ewd_agr, srednia = .data$srednia_agr) %>%
+      select(-all_of(c("bs_ewd", "bs_srednia")))
+  } else {
     dane = dane %>%
-      select(-.data$bs_ewd, -.data$bs_srednia)
+      summarise(
+        ewd_agr       = weighted.mean(.data$ewd, .data$lu_ewd, na.rm = TRUE),
+        srednia_agr   = weighted.mean(.data$srednia, .data$lu_ewd, na.rm = TRUE),
+        lu_sum        = sum(.data$lu_ewd, na.rm = TRUE),
+        wyswietlaj    = any(.data$wyswietlaj == 1)
+      )
   }
   if (is.na(tylkoWyswietlane) & "wyswietlaj" %in% names(dane)) {
     dane$ewd[!dane$wyswietlaj] = NA
@@ -207,10 +206,11 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
       dane$gg_pu_srednia[!dane$wyswietlaj] = NA
     }
   }
-  dane = select(dane, -.data$wyswietlaj) %>%
-    melt(c(rokDo, zmiennaGrupujaca, "wskaznik")) %>%
-    dcast(as.formula(paste0(paste0(c(rokDo, zmiennaGrupujaca), collapse = "+"),
-                            " ~ wskaznik + variable")))
+  dane = dane %>%
+    select(-.data$wyswietlaj) %>%
+    pivot_longer(-c(rokDo, zmiennaGrupujaca, "wskaznik"), names_to = "variable",
+                 values_to = "value") %>%
+    pivot_wider(names_from = c("wskaznik", "variable"), values_from = "value")
 
   if (opisoweNazwy) {
     names(dane) = konwertuj_nazwy_na_opisowe(names(dane))

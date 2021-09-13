@@ -10,7 +10,8 @@ przygotuj_dane_do_ewd(
   lataDo,
   liczbaRocznikow = 1,
   wydluzenie = 1,
-  usunPusteKolumny = TRUE
+  usunPusteKolumny = TRUE,
+  src = NULL
 )
 }
 \arguments{
@@ -34,6 +35,10 @@ uczniowie o toku kształcenia wydłużonym maksymalnie o tyle lat}
 \item{usunPusteKolumny}{opcjonalnie wartość logiczna - czy usunąć puste
 kolumny opisujące grupę w skalowaniu, błędy standardowe oraz kolumnę 'nr_pv',
 jeśli skalowanie nie generowało PV?}
+
+\item{src}{NULL połączenie z bazą danych IBE zwracane przez funkcję
+\code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+połączenia}
 }
 \value{
 wektor z nazwami zapisanych plików (niewidocznie)

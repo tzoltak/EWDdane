@@ -70,8 +70,9 @@ wskaźników na stronie)?}
 \item{fileEncoding}{ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
 plik csv}
 
-\item{src}{połączenie z bazą danych (jeśli NULL, zostanie podjęta próba
-nawiązania połączenia za pomocą \code{ZPD::polacz()})}
+\item{src}{NULL połączenie z bazą danych IBE zwracane przez funkcję
+\code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
+połączenia}
 }
 \value{
 data frame
