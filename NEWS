@@ -4,6 +4,9 @@ Zmiany w EWDdane 0.9.16 (27.09.2021)
 Naprawione błędy:
   - pobierz_parametry_skalowania() znów radzi sobie ze skalami, które nie mają zapisanych parametrów.
 
+Uaktualnienia:
+  - podniesiono zależność od ZPD (które zostało przepisane na dialekt dplyr >= 1.0.0, co pozwala uniknąć zwracania licznych ostrzeżeń o używaniu przestarzałej składni).
+
 --------------------
 Zmiany w EWDdane 0.9.15 (13.09.2021)
 
