@@ -127,17 +127,8 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   # przekształcanie parametrów
   parametry = parametry %>%
     group_by(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie) %>%
-    summarise(
-      parametry = list(tibble(
-        grupa = .data$grupa[1:n()],
-        kryterium = .data$kryterium[1:n()],
-        uwagi = .data$parametr_uwagi[1:n()],
-        parametr = .data$parametr[1:n()],
-        model = .data$model[1:n()],
-        wartosc = .data$wartosc[1:n()],
-        bs = .data$bs[1:n()]
-      ))
-    ) %>%
+    nest(parametry = all_of(c("grupa", "kryterium", "parametr_uwagi",
+                              "parametr", "model", "wartosc", "bs"))) %>%
     ungroup()  # jeśli jest tylko jedno skalowanie, to zostało właśnie zgubione grupowanie po nim
   if (parametryzacja == "mplus") {
     parametry = parametry %>%
@@ -184,7 +175,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
     filter(!.data$jest_wybrane_skalowanie | is.na(.data$ma_parametry)) %>%
     mutate(
       skalowanie = .data$max_skalowanie + 1L,
-      parametry = list()
+      parametry = vector(mode = "list", length = n())
     ) %>%
     select(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie, .data$parametry)
 

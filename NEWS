@@ -1,39 +1,45 @@
 --------------------
+Zmiany w EWDdane 0.9.16 (27.09.2021)
+
+Naprawione błędy:
+  - pobierz_parametry_skalowania() znów radzi sobie ze skalami, które nie mają zapisanych parametrów.
+
+--------------------
 Zmiany w EWDdane 0.9.15 (13.09.2021)
 
 Uaktualnienia:
-  - prepisanie operacji zmiany formy danych z szerokiej na długą lub z długiej na szeroką z pakietu reshape2 na pakiet tidyr
+  - prepisanie operacji zmiany formy danych z szerokiej na długą lub z długiej na szeroką z pakietu reshape2 na pakiet tidyr.
 
 Naprawione błędy:
   - obsługa wywołania agreguj_wskazniki_ewd() z argumentem pu=FALSE
   - pomyłka w nazwach obiektów uniemożliwiająca porównanie stanu zrzutu i zaktualzowanej bazy szkół przez weryfikuj_baze_szkol()
   - dodano nieco brakujących prefiksów `.data$` w wywołaniach funkcji dplyr-a
-  - dodano zależność od pakietu rlang (ze względu na użycie `:=` w wczytaj_liczbe_przystepujacych())
+  - dodano zależność od pakietu rlang (ze względu na użycie `:=` we wczytaj_liczbe_przystepujacych()).
 
 --------------------
 Zmiany w EWDdane 0.9.14 (12.05.2021)
 
 Uaktualnienia:
   - przepisanie dplyr-owych verb_() na verb() (dbplyr odmawiał już z nimi
-    współpracy)
+    współpracy);
   - dodanie możliwości przekazania połączenia do bazy danych do wszystkich
-    funkcji, które wewnętrznie wołały ZPD::polacz()
+    funkcji, które wewnętrznie wołały ZPD::polacz();
   - pobierz_wyniki_surowe() przepisane z ZPD::pobierz_czesc_egzaminu() na
     ZPD::pobierz_odpowiedzi() plus tidyr::pivot_wider() z uwagi na problemy
-    z wydajnością po stronie serwera bazy danych
+    z wydajnością po stronie serwera bazy danych.
 
 Naprawione błędy:
-  - `@import dplyr` dodane do dokumentacji pobierz_wyniki_surowe()
+  - `@import dplyr` dodane do dokumentacji pobierz_wyniki_surowe().
 
 --------------------
 Zmiany w EWDdane 0.9.13 (16.11.2020)
 
 Uaktualnienia:
   - dostosowanie pobierz_wartosci_wskaznikow_ewd() oraz pobierz_dane_szkol()
-    do aktualnej dplyr-a >= 1.0.0.
+    do aktualnej dplyr-a >= 1.0.0;
   - dodanie parametru src do pobierz_wartosci_wskaznikow_ewd() tak by było
     możliwe pobieranie danych z ręcznie ustanowionego połączenia z bazą
-    (niezbędne po migracji bazy do CIE)
+    (niezbędne po migracji bazy do CIE).
 
 Naprawione błędy:
   - funkcje pakietu przypisując dodatkowe klasy zwracanym obiektom dopisują je
