@@ -150,11 +150,11 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
       by = names(bazaZakt)[maskaIdSzkolyZakt],
       suffixes = c("", "_zakt")
     )
+    polaczone[is.na(polaczone)] = ""
     maskaZmienne = grep("^id_szkoly_oke_|^kod_(g|lo|t)_", maskaZmienne,
                         value = TRUE)
     temp = polaczone[, maskaZmienne] != polaczone[, paste0(maskaZmienne, "_zakt")]
     maska = apply(temp, 1, any)
-    maska[is.na(maska)] = FALSE
     polaczone = polaczone[maska %in% TRUE, ]
     if (any(maska)) {
       maska = polaczone[, maskaZmienne] == polaczone[, paste0(maskaZmienne, "_zakt")]
