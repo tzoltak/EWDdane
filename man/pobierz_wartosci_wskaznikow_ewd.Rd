@@ -19,6 +19,7 @@ pobierz_wartosci_wskaznikow_ewd(
   tylkoNiePomin = TRUE,
   gamma = 0.95,
   fileEncoding = "windows-1250",
+  maskaWskazniki = "",
   src = NULL
 )
 }
@@ -69,6 +70,9 @@ wskaźników na stronie)?}
 
 \item{fileEncoding}{ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
 plik csv}
+
+\item{maskaWskazniki}{opcjonalnie wyrażenie regularne, które powinny spełniać nazwy
+wskażników (do wartości domyślnej - pustego ciągu znaków - pasują wszystkie nazwy)}
 
 \item{src}{NULL połączenie z bazą danych IBE zwracane przez funkcję
 \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami

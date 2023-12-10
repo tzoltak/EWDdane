@@ -186,7 +186,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
         gg_pu_srednia = .data$srednia_agr + lambda * .data$bs_srednia
       ) %>%
       rename(ewd = .data$ewd_agr, srednia = .data$srednia_agr) %>%
-      select(-all_of(c("bs_ewd", "bs_srednia")))
+      select(-c("bs_ewd", "bs_srednia"))
   } else {
     dane = dane %>%
       summarise(
@@ -207,7 +207,7 @@ agreguj_wskazniki_ewd <- function(dane, poziom = NULL, grupujPoLatach = TRUE,
     }
   }
   dane = dane %>%
-    select(-.data$wyswietlaj) %>%
+    select(-"wyswietlaj") %>%
     pivot_longer(-c(rokDo, zmiennaGrupujaca, "wskaznik"), names_to = "variable",
                  values_to = "value") %>%
     pivot_wider(names_from = c("wskaznik", "variable"), values_from = "value")

@@ -48,7 +48,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 
   # szukamy skal
   skale = pobierz_skale(src, doPrezentacji = NA, czyKtt = FALSE) %>%
-    select(-.data$id_testu, -.data$grupa) %>%
+    select(-c("id_testu", "grupa")) %>%
     collect(n = Inf) %>%
     distinct()
   if (!is.na(doPrezentacji)) {
@@ -81,9 +81,17 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   )
 
   if (is.character(skalowanie)) {
-    skale = mutate(skale, wybrane_skalowanie = grepl(local(skalowanie), .data$opis_skalowania))
+    skale = mutate(skale,
+                   wybrane_skalowanie =
+                     grepl(get("skalowanie",
+                               envir = parent.env(parent.env(parent.env(env())))),
+                           .data$opis_skalowania))
   } else if (is.numeric(skalowanie)) {
-    skale = mutate(skale, wybrane_skalowanie = local(skalowanie) %in% .data$skalowanie)
+    skale = mutate(skale,
+                   wybrane_skalowanie =
+                     get("skalowanie",
+                         envir = parent.env(parent.env(parent.env(env())))) %in%
+                     .data$skalowanie)
   } else {
     skale = mutate(skale, wybrane_skalowanie = !.data$brak_skalowan)
     if (!is.na(doPrezentacji)) {
@@ -95,11 +103,11 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
   # pobieranie parametrów
   skaleZeSkalowaniem = skale %>%
     filter(.data$wybrane_skalowanie) %>%
-    select(.data$id_skali, .data$rodzaj_egzaminu, .data$skalowanie, .data$opis_skali, .data$max_skalowanie) %>%
+    select("id_skali", "rodzaj_egzaminu", "skalowanie", "opis_skali", "max_skalowanie") %>%
     distinct()
   parametry = suppressMessages(
     pobierz_parametry(src) %>%
-      inner_join(select(skaleZeSkalowaniem, -.data$max_skalowanie), copy = TRUE) %>%
+      inner_join(select(skaleZeSkalowaniem, -"max_skalowanie"), copy = TRUE) %>%
       collect(n = Inf)
   )
   if (ncol(parametry) == 0) {
@@ -114,7 +122,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
 
   skaleZeSkalowaniem = suppressMessages(
     semi_join(skaleZeSkalowaniem, parametry) %>%
-      select(.data$id_skali) %>%
+      select("id_skali") %>%
       distinct() %>%
       mutate(ma_parametry = TRUE)
   )
@@ -177,7 +185,7 @@ pobierz_parametry_skalowania = function(skala, skalowanie = NULL,
       skalowanie = .data$max_skalowanie + 1L,
       parametry = vector(mode = "list", length = n())
     ) %>%
-    select(.data$id_skali, .data$rodzaj_egzaminu, .data$opis_skali, .data$skalowanie, .data$parametry)
+    select("id_skali", "rodzaj_egzaminu", "opis_skali", "skalowanie", "parametry")
 
   # koniec
   return(
@@ -266,7 +274,7 @@ zmien_na_mplus = function(x) {
       S.E. = get("S.E.") * get("a")
     }
   )
-  binarne$b = select(binarne$b, -.data$a)
+  binarne$b = select(binarne$b, -"a")
   binarne = bind_rows(binarne)
 
   #GRM
@@ -321,7 +329,7 @@ zmien_na_mplus = function(x) {
       S.E. = get("S.E.") * get("a")
     }
   )
-  grm$b = select(grm$b, -.data$a, -.data$trudnosc)
+  grm$b = select(grm$b, -c("a", "trudnosc"))
   grm = bind_rows(grm[c("a", "b")])
 
   # parametry grupowe
@@ -359,10 +367,10 @@ zmien_na_mplus = function(x) {
   std = filter(x, .data$parametr %in% c("std_mean", "std_sd"))
   if (nrow(std) > 0) {
     stdSr = filter(std, .data$parametr == "std_mean") %>%
-      select(.data$grupa, .data$wartosc) %>%
+      select("grupa", "wartosc") %>%
       setNames(c("grupa", "sr"))
     stdOs = filter(std, .data$parametr == "std_sd") %>%
-      select(.data$grupa, .data$wartosc) %>%
+      select("grupa", "wartosc") %>%
       setNames(c("grupa", "os"))
     attributes(wynik)$"paramStd" = full_join(stdSr, stdOs)
   }

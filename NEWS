@@ -1,4 +1,18 @@
 --------------------
+Zmiany w EWDdane 0.9.18 (10.12.2023)
+
+Naprawione błędy:
+  - pobierz_parametry_skalowania() wykorzystuje wartość parametru `skalowanie` przy określaniu, które parametry wybrać,
+  - pobierz_wartosci_wskaznikow_ewd() w sensowniejszy sposób etykietuje nazwy wskaźników, jeśli mają zostać zwrócone opisowe nazwy (i mają zostać pobrane różne warianty analogicznych wskaźników dziedzinowych).
+
+Uaktualnienia:
+  - W pobierz_dane_kontekstowe() przeniesiono agregację po ucznio-testach do poziomu uczniów na stronę bazy danych, co pozwala uniknąć problemu z niewydolnością agregacji przy pomocy dplyr-a przy bardzo, bardzo dużej liczbie grup.
+  - Przepisano wywowołania `select()` tak aby konsekwentnie wykorzystywać w nich odwoływanie się do nazw kolumn przez ciągi znaków (zgodnie z konwencją wprowadzoną jako preferowana w wersji 1.0.0 pakietu tidyselect jeszcze w styczniu 2020 r.).
+
+Nowe funkcjonalności:
+  - pobierz_wartosci_wskaznikow_ewd() otrzymało dodatkowy argument maskaWskazniki, który pozwala podać wyrażenie regularne, do którego mają pasować nazwy wskaźników, których wartości mają zostać pobrane.
+
+--------------------
 Zmiany w EWDdane 0.9.17 (29.09.2022)
 
 Naprawione błędy:
@@ -20,9 +34,9 @@ Uaktualnienia:
   - przepisanie operacji zmiany formy danych z szerokiej na długą lub z długiej na szeroką z pakietu reshape2 na pakiet tidyr.
 
 Naprawione błędy:
-  - obsługa wywołania agreguj_wskazniki_ewd() z argumentem pu=FALSE
-  - pomyłka w nazwach obiektów uniemożliwiająca porównanie stanu zrzutu i zaktualzowanej bazy szkół przez weryfikuj_baze_szkol()
-  - dodano nieco brakujących prefiksów `.data$` w wywołaniach funkcji dplyr-a
+  - obsługa wywołania agreguj_wskazniki_ewd() z argumentem pu=FALSE;
+  - pomyłka w nazwach obiektów uniemożliwiająca porównanie stanu zrzutu i zaktualzowanej bazy szkół przez weryfikuj_baze_szkol();
+  - dodano nieco brakujących prefiksów `.data$` w wywołaniach funkcji dplyr-a;
   - dodano zależność od pakietu rlang (ze względu na użycie `:=` we wczytaj_liczbe_przystepujacych()).
 
 --------------------
@@ -183,7 +197,7 @@ Naprawione błędy:
     pod uwagę wyłącznie to, które jest to podejście do egzaminu; przestała za to
     sprawdzać, czy szkoła, do której egzamin jest przypisany istnieje w bazie
     (w przypadku SP zdarzały się przypadki nieistnienia, co powodowoało
-    wykleczeniem uczniów takich SP przy obliczaniu EWD gimnazjuów);
+    wykleczeniem uczniów takich SP przy obliczaniu EWD gimnazjów);
   - pobierz_dane_kontekstowe() sprawdza, czy podano występujący w bazie rodzaj
     egzaminu, a jeśli nie, rzuca informatywnym błędem.
 

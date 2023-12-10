@@ -152,7 +152,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
               attributes(daneNaWejsciu)$normy)
     if (any(grepl("R_irt$", names(dane)))) {
       skaleNormy = filter(skale, grepl("^ewd;[^;]+R;", .data$opis_skali)) %>%
-        select(.data$id_skali, .data$skalowanie, .data$rok, .data$zmienna)
+        select("id_skali", "skalowanie", "rok", "zmienna")
       normy = suppressMessages(
         inner_join(pobierz_normy(src), skaleNormy, copy = TRUE) %>%
           collect(n = Inf)
@@ -160,7 +160,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
       for (j in unique(normy$zmienna)) {
         skrotEgz = substr(j, 1, 1)
         temp = filter(normy, .data$zmienna == j) %>%
-          select(-.data$id_skali, -.data$skalowanie, -.data$zmienna) %>%
+          select(-c("id_skali", "skalowanie", "zmienna")) %>%
           group_by(.data$grupa) %>%
           mutate(usun = .data$wartosc_zr == min(.data$wartosc_zr)) %>%
           mutate(usun = .data$usun & .data$wartosc != suppressWarnings(max(.data$wartosc[.data$usun]))) %>%
@@ -169,13 +169,13 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
           mutate(usun = .data$usun & .data$wartosc != suppressWarnings(min(.data$wartosc[.data$usun]))) %>%
           filter(!.data$usun) %>%
           ungroup() %>%
-          select(-.data$usun)
+          select(-"usun")
         names(temp) = sub("^wartosc$", paste0(sub("_irt$", "", j), "_suma"),
                           names(temp))
         names(temp) = sub("^wartosc_zr$", j, names(temp))
         names(temp) = sub("^rok$", paste0("rok_", skrotEgz), names(temp))
         if (all(temp$grupa == "" | is.na(temp$grupa))) {
-          temp = select(temp, -.data$grupa)
+          temp = select(temp, -"grupa")
         } else {
           names(temp) = sub("^grupa$", paste0("grupa_", j), names(temp))
         }
@@ -220,7 +220,7 @@ przygotuj_dane_do_ewd = function(katalogZDanymi, typSzkoly,
       # dołączanie informacji o maturze międzynarodowej
       ib = pobierz_szkoly(src) %>%
         filter(.data$typ_szkoly == typSzkoly, .data$rok %in% lataWyjscie) %>%
-        select(.data$id_szkoly, .data$rok, .data$matura_miedzynarodowa) %>%
+        select("id_szkoly", "rok", "matura_miedzynarodowa") %>%
         collect(n = Inf)
       names(ib) = paste0(names(ib), "_", skrotEgzaminu)
       names(ib) = sub("^(matura_miedzynarodowa).*$", "\\1", names(ib))

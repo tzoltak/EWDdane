@@ -17,7 +17,7 @@ Funkcja wczytuje wyniki surowe egzaminu z pojedynczego pliku.
 }
 \details{
 Jeśli plik dla jakiejś skali zawiera wyniki więcej niż jednego skalowania,
-to zwrócone zostaną wyniki tylko jednego z nich, przy czym piwerwszeństwo
+to zwrócone zostaną wyniki tylko jednego z nich, przy czym pierwszeństwo
 będą mieć skalowania oznaczone jako do prezentacji, a w dalszej kolejności
 te, których data skalowania jest najpóżniejsza.
 }

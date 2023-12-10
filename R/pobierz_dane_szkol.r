@@ -34,11 +34,13 @@ pobierz_dane_szkol = function(lata, typySzkol = NULL, idOke = FALSE,
   if (length(typySzkol) == 1) typySzkol = rep(typySzkol, 2)  # brzydkie, ale za to 4 wiersze dalej zadziała
   szkoly = pobierz_szkoly(src) %>%
     filter(.data$rok %in% lata) %>%
-    select(-matches('^(wojewodztwo_szkoly|powiat_szkoly|gmina_szkoly)$'))
+    select(-c("wojewodztwo_szkoly", "powiat_szkoly", "gmina_szkoly"))
   if (!is.null(typySzkol)) szkoly = filter(szkoly, .data$typ_szkoly %in% typySzkol)
-  if (!idOke) szkoly = select(szkoly, -matches('^id_szkoly_oke$'))
+  if (!idOke) szkoly = select(szkoly, -"id_szkoly_oke")
   if (!daneAdresowe) {
-    szkoly = select(szkoly, -matches('^(nazwa_szkoly|adres|miejscowosc|pna|poczta|wielkosc_miejscowosci|teryt_szkoly|rodzaj_gminy)$'))
+    szkoly = select(szkoly, -c("nazwa_szkoly", "adres", "miejscowosc", "pna",
+                               "poczta", "wielkosc_miejscowosci",
+                               "teryt_szkoly", "rodzaj_gminy"))
   }
   szkoly = collect(szkoly, n = Inf) %>%
     group_by(.data$id_szkoly) %>%
