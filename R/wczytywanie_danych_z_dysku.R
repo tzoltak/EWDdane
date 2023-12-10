@@ -228,7 +228,7 @@ wczytaj_wyniki_surowe = function(nazwaPliku, src) {
 #' @param nazwaPliku ciąg znaków - nazwa pliku z surowymi wynikami egzaminu
 #' @details
 #' Jeśli plik dla jakiejś skali zawiera wyniki więcej niż jednego skalowania,
-#' to zwrócone zostaną wyniki tylko jednego z nich, przy czym piwerwszeństwo
+#' to zwrócone zostaną wyniki tylko jednego z nich, przy czym pierwszeństwo
 #' będą mieć skalowania oznaczone jako do prezentacji, a w dalszej kolejności
 #' te, których data skalowania jest najpóżniejsza.
 #' @importFrom stats setNames
@@ -258,17 +258,17 @@ wczytaj_wyniki_wyskalowane = function(nazwaPliku) {
           mutate(priorytet = 1:n()) %>%
           ungroup() %>%
           filter(.data$priorytet == 1) %>%
-          select(-.data$priorytet) %>%
+          select(-"priorytet") %>%
           mutate(zmienna = sub("^ewd;([^;]+);.*$", "\\1_irt", .data$opis_skali))
       )
       oszacowania = suppressMessages(
-        inner_join(oszacowania, select(skale, .data$id_skali, .data$skalowanie, .data$zmienna)) %>%
-          select(-.data$id_skali, -.data$skalowanie) %>%
+        inner_join(oszacowania, select(skale, "id_skali", "skalowanie", "zmienna")) %>%
+          select(-c("id_skali", "skalowanie")) %>%
           pivot_longer(cols = c("wynik", "bs", "grupa"),
                        names_to = "co", values_to = "wartosc") %>%
           pivot_wider(names_from = c("co", "zmienna"),
                       values_from = "wartosc") %>%
-          select(all_of(c("id_obserwacji", "rok", "nr_pv")),
+          select("id_obserwacji", "rok", "nr_pv",
                  starts_with("wynik_"), starts_with("bs_"),
                  starts_with("grupa_"))
       )
@@ -348,7 +348,7 @@ wczytaj_liczbe_przystepujacych = function(nazwyPlikow) {
       if (all(c("wynikiSurowe", "czescEgzaminu") %in% class(get(j)))) {
         nazwa = paste0("zdawal_", j)
         temp = get(j) %>%
-          select(.data$id_obserwacji, .data$rok) %>%
+          select("id_obserwacji", "rok") %>%
           mutate( {{nazwa}} := TRUE)
         przystepowanie[[i]] = suppressMessages(
           full_join(przystepowanie[[i]], temp))

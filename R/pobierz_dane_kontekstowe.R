@@ -98,68 +98,27 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     daneOsobowe = TRUE
   }, silent = TRUE)
 
-  # definicje agregatów na poziomie {uczeń, rodzajEgzaminu, rok}
-  dotsSummarize = function(dane) {
-    dane %>% summarize(
-        data       = min(.data$data_testu, na.rm = T),
-        id_szkoly  = min(.data$id_szkoly, na.rm = T),
-        dysleksja  = all(.data$dysleksja, na.rm = T),
-        id_szkoly2 = max(.data$id_szkoly, na.rm = T),
-        dysleksja2 = any(.data$dysleksja, na.rm = T),
-        klasa      = min(.data$klasa, na.rm = T),
-        kod_u      = min(.data$kod_u, na.rm = T),
-        klasa2     = max(.data$klasa, na.rm = T),
-        kod_u2     = max(.data$kod_u, na.rm = T)
-      )
-  }
-  dotsMutate = function(dane) {
-    dane %>% mutate(
-      id_szkoly = ifelse(.data$id_szkoly == .data$id_szkoly2, .data$id_szkoly, NA),
-      dysleksja = ifelse(.data$dysleksja == .data$dysleksja2, .data$dysleksja, NA),
-      klasa  = ifelse(.data$klasa == .data$klasa2, .data$klasa, NA),
-      kod_u  = ifelse(.data$kod_u == .data$kod_u2, .data$kod_u, NA)
-    )
-  }
-  dotsSelect = '^(id_szkoly2|dysleksja2|klasa2|kod_u2)$'
-
   # pobranie danych na poziomie {uczeń, rodzajEgzaminu, czescEgzaminu, rok} i agregacja do {uczeń, rok}
   message(" Pobieranie danych o przystępowaniu do egzaminów.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  testy = suppressMessages(
-    pobierz_testy(src) %>%
-      filter(.data$dane_ewd == TRUE, .data$rodzaj_egzaminu == rodzajEgzaminu, .data$czy_egzamin == TRUE) %>%
-      select(.data$id_testu, .data$prefiks, .data$data_testu)
-  )
-  if (select(testy, .data$id_testu) %>% collect() %>% nrow() == 0) {
+  testy = suppressMessages(pobierz_testy(src)) %>%
+    filter(.data$dane_ewd == TRUE, .data$rodzaj_egzaminu == rodzajEgzaminu, .data$czy_egzamin == TRUE) %>%
+    select("id_testu", "prefiks", "data_testu")
+  if (select(testy, "id_testu") %>% collect() %>% nrow() == 0) {
     stop("Podano rodzaj egzaminu, który nie występuje w bazie.")
-  }
-  uczniowieTesty = suppressMessages(
-    pobierz_dane_uczniowie_testy(src, daneOsobowe = daneOsobowe) %>%
-      inner_join(testy) %>%
-      select(-.data$pop_podejscie, -.data$oke, -.data$zrodlo, -.data$id_testu) %>%
-      collect(n = Inf)
-  )
-  if (daneOsobowe == FALSE) {
-    uczniowieTesty = uczniowieTesty %>%
-      mutate(
-        klasa = 'brak danych',
-        kod_u = -999L
-      )
   }
 
   # pobieranie informacji o szkołach
   message(" Pobieranie informacji o szkołach.",
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   szkoly = pobierz_szkoly(src) %>%
-    select(
-      .data$id_szkoly, .data$rok, .data$typ_szkoly, .data$publiczna, .data$specjalna,
-      .data$dla_doroslych, .data$przyszpitalna, .data$artystyczna
-    ) %>%
+    select("id_szkoly", "rok", "typ_szkoly", "publiczna", "specjalna",
+           "dla_doroslych", "przyszpitalna", "artystyczna") %>%
     collect(n = Inf)
 
   # pobieranie informacji o obserwacjach
   message(" Pobieranie informacji o uczniach.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
   obserwacje = pobierz_uczniow(src, daneOsobowe = daneOsobowe) %>%
-    select(-.data$id_cke) %>%
+    select(-"id_cke") %>%
     distinct() %>%
     collect(n = Inf)
 
@@ -171,7 +130,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     czescEgzaminu = NULL, czyEwd = TRUE
   ) %>%
     collect(n = Inf) %>%
-    select(-.data$rodzaj_egzaminu, -.data$dane_ewd) %>%
+    select(-c("rodzaj_egzaminu", "dane_ewd")) %>%
     mutate(pierwsze = TRUE)
 
   # pobieranie informacji o ostatnich przystąpieniach
@@ -181,49 +140,81 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     czescEgzaminu = NULL, czyEwd = TRUE
   ) %>%
     collect(n = Inf) %>%
-    select(-.data$rodzaj_egzaminu, -.data$dane_ewd) %>%
+    select(-c("rodzaj_egzaminu", "dane_ewd")) %>%
     mutate(ostatnie = TRUE)
 
   # obróbka danych indywidualnych
   message(" Konwersja danych na format krótszy.",
           format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  dane = suppressWarnings(
-    uczniowieTesty %>%
-      group_by(.data$id_obserwacji, .data$rok) %>%
-      dotsSummarize() %>%
-      ungroup() %>%
-      dotsMutate() %>%
-      select(-matches(dotsSelect))
-  )
+  dane = pobierz_dane_uczniowie_testy(src, daneOsobowe = daneOsobowe) %>%
+    inner_join(testy,
+               by = "id_testu") %>%
+    select(-c("pop_podejscie", "oke", "zrodlo", "id_testu")) %>%
+    group_by(.data$id_obserwacji, .data$rok) %>%
+    summarise(data       = min(.data$data_testu, na.rm = TRUE),
+              id_szkoly  = min(.data$id_szkoly, na.rm = TRUE),
+              dysleksja  = all(.data$dysleksja, na.rm = TRUE),
+              id_szkoly2 = max(.data$id_szkoly, na.rm = TRUE),
+              dysleksja2 = any(.data$dysleksja, na.rm = TRUE),
+              klasa      = min(.data$klasa, na.rm = TRUE),
+              kod_u      = min(.data$kod_u, na.rm = TRUE),
+              klasa2     = max(.data$klasa, na.rm = TRUE),
+              kod_u2     = max(.data$kod_u, na.rm = TRUE)) %>%
+    ungroup() %>%
+    collect(n = Inf) %>%
+    mutate(id_szkoly = ifelse(.data$id_szkoly == .data$id_szkoly2, .data$id_szkoly, NA),
+           dysleksja = ifelse(.data$dysleksja == .data$dysleksja2, .data$dysleksja, NA),
+           klasa  = ifelse(.data$klasa == .data$klasa2, .data$klasa, NA),
+           kod_u  = ifelse(.data$kod_u == .data$kod_u2, .data$kod_u, NA)) %>%
+    select(-c("id_szkoly2", "dysleksja2", "klasa2", "kod_u2")) %>%
+    arrange(.data$id_obserwacji, .data$rok)
+  if (daneOsobowe == FALSE) {
+    dane = dane %>%
+      mutate(
+        klasa = 'brak danych',
+        kod_u = -999L
+      )
+  }
 
   # konwersja informacji o byciu laureatem do postaci szerokiej
+  # w początkowej części redundancja z tworzeniem obiektu dane wprowadzona ze względów wydajnościowych
+  # (agregacja przy tworzeniu obiektu dane jest przy około 4,5 mln. grup nieskończenie efektywniejsza po stronie bazy, niż w samym dplyrze)
   message(" Obrabianie informacji o byciu laureatem.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  uczniowieTesty = uczniowieTesty %>%
-    mutate(prefiks = paste0('laur_', .data$prefiks)) %>%
+  uczniowieTesty = pobierz_dane_uczniowie_testy(src, daneOsobowe = daneOsobowe) %>%
+    inner_join(testy,
+               by = "id_testu") %>%
     select("id_obserwacji", "rok", "prefiks", "laureat") %>%
-    pivot_wider(names_from = "prefiks", values_from = "laureat")
+    collect(n = Inf) %>%
+    mutate(prefiks = paste0('laur_', .data$prefiks)) %>%
+    pivot_wider(names_from = "prefiks", values_from = "laureat") %>%
+    arrange(.data$id_obserwacji, .data$rok)
 
   # złączenie i usunięcie zbędnych danych
-  dane = suppressMessages(inner_join(dane, uczniowieTesty))
+  dane = inner_join(dane, uczniowieTesty,
+                    by = c("id_obserwacji", "rok"))
   rm(uczniowieTesty)
 
   # dołączenie informacji o szkołach
   message(" Dołączanie informacji o szkołach.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  dane = suppressMessages(inner_join(dane, szkoly))
+  dane = inner_join(dane, szkoly,
+                    by = c("rok", "id_szkoly"))
   rm(szkoly)
 
   # dołączanie informacji o obserwacjach
   message(" Dołączanie informacji o uczniach.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  dane = suppressMessages(inner_join(dane, obserwacje))
+  dane = inner_join(dane, obserwacje,
+                    by = "id_obserwacji")
   rm(obserwacje)
 
   # oznaczamy pierwsze przystąpienia
   message(" Oznaczanie pierwszych i ostatnich przystąpień do egzaminu.", format(Sys.time(), " (%Y.%m.%d, %H:%M:%S)"))
-  dane = suppressMessages(left_join(dane, pierwsze))
+  dane = left_join(dane, pierwsze,
+                   by = c("id_obserwacji", "rok"))
   rm(pierwsze)
 
   # oznaczamy ostatnie przystąpienia
-  dane = suppressMessages(left_join(dane, ostatnie))
+  dane = left_join(dane, ostatnie,
+                   by = c("id_obserwacji", "rok"))
   rm(ostatnie)
 
   # ew. obliczenie wieku w miesiącach
@@ -237,7 +228,7 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
                as.numeric(substr(.data$data_ur, 6, 7))
       )
   }
-  dane = dane %>% select(-.data$data)
+  dane = dane %>% select(-"data")
 
   # wygenerowanie zmiennej określającej populację
   message(" Generowanie zmiennnych określających populacje wzorcowe.",

@@ -35,6 +35,8 @@
 #' @param gamma poziom ufności (liczba z przedziału [0;1] )
 #' @param fileEncoding ciąg znaków - strona kodowa, w której zostanie zapisany wynikowy
 #' plik csv
+#' @param maskaWskazniki opcjonalnie wyrażenie regularne, które powinny spełniać nazwy
+#' wskażników (do wartości domyślnej - pustego ciągu znaków - pasują wszystkie nazwy)
 #' @param src NULL połączenie z bazą danych IBE zwracane przez funkcję
 #' \code{\link[ZPD]{polacz}}; pozwala posłużyć się niestandardowymi parametrami
 #' połączenia
@@ -56,6 +58,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
                                            tylkoNiePomin = TRUE,
                                            gamma = 0.95,
                                            fileEncoding = "windows-1250",
+                                           maskaWskazniki = "",
                                            src = NULL) {
   stopifnot(is.numeric(lata)        , length(lata) > 0,
             is.character(typSzkoly) , length(typSzkoly) == 1,
@@ -71,7 +74,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
             is.logical(tylkoWyswietlane)     , length(tylkoWyswietlane) == 1,
             is.logical(tylkoNiePomin)        , length(tylkoNiePomin) == 1,
             is.numeric(gamma)                , length(gamma) == 1,
-            is.character(fileEncoding)       , length(fileEncoding) == 1
+            is.character(fileEncoding)       , length(fileEncoding) == 1,
+            is.character(maskaWskazniki)     , length(maskaWskazniki) == 1
   )
   stopifnot(idOke %in% c(TRUE, FALSE),
             daneAdresowe %in% c(TRUE, FALSE),
@@ -81,7 +85,9 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
             tylkoWskDoPrezentacji %in% c(TRUE, FALSE),
             tylkoWyswietlane %in% c(TRUE, FALSE),
             tylkoNiePomin %in% c(TRUE, FALSE),
-            gamma < 1, gamma > 0, !is.na(gamma))
+            gamma < 1, gamma > 0, !is.na(gamma),
+            "Argument `wskazniki` nie jest poprawnym wyrażeniem regularnym." =
+              try(grepl(maskaWskazniki, ""), silent = TRUE) %in% c(TRUE, FALSE))
   if (tylkoWskDoPrezentacji == FALSE) {
     tylkoWskDoPrezentacji = NA
   }
@@ -95,8 +101,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   wskazniki = src %>%
     pobierz_wskazniki(doPrezentacji = tylkoWskDoPrezentacji) %>%
     filter(.data$rodzaj_wsk == "ewd", .data$typ_szkoly == typSzkoly, .data$rok_do %in% lata) %>%
-    select(-matches("^(opis_wsk|id_skali|skalowanie)$"),
-            -matches("^(rodzaj_egzaminu|czesc_egzaminu)$")) %>%
+    select(-c("opis_wsk", "id_skali", "skalowanie", "rodzaj_egzaminu", "czesc_egzaminu")) %>%
     distinct()
   wskazniki =
     suppressMessages(left_join(wskazniki,
@@ -104,14 +109,14 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   if (tylkoWyswietlane) {
     wskazniki = filter(wskazniki, .data$wyswietlaj %in% TRUE)
   }
-  wskazniki = select(wskazniki, matches("^(wskaznik|skrot|rok_do|id_ww|id_szkoly)$"),
-                      matches("^(pomin|kategoria|wyswietlaj|srednia|bs|ewd|bs_ewd)$"),
-                      matches("^(trend_ewd|bs_trend_ewd|korelacja|lu_ewd|lu_wszyscy)$"))
+  wskazniki = select(wskazniki, "wskaznik", "skrot", "rok_do", "id_ww", "id_szkoly",
+                     "pomin", "kategoria", "wyswietlaj", "srednia", "bs", "ewd", "bs_ewd",
+                      "trend_ewd", "bs_trend_ewd", "korelacja", "lu_ewd", "lu_wszyscy")
   if (lUcznPrzedm) {
     message("Pobieranie informacji o liczbie zdających.")
     lUczniow = suppressMessages(left_join(wskazniki, pobierz_wartosci_wskaznikow_lu(src))) %>%
       filter(!is.na(.data$czesc_egzaminu)) %>%
-      select(matches("^(id_ww|czesc_egzaminu|przedm_lu)$")) %>%
+      select("id_ww", "czesc_egzaminu", "przedm_lu") %>%
       collect(n = Inf) %>%
       as.data.frame()
     lUczniow$czesc_egzaminu = paste0("l_uczn_", lUczniow$czesc_egzaminu)
@@ -122,7 +127,8 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(lUczniow) = gsub(" ", "_", names(lUczniow), fixed = TRUE)
   }
   message("Pobieranie informacji o wartościach wskaźników.")
-  wskazniki = collect(wskazniki, n = Inf)
+  wskazniki = collect(wskazniki, n = Inf) %>%
+    filter(grepl(maskaWskazniki, .data$wskaznik))
   if (nrow(wskazniki) == 0) {
     stop("Nie znaleziono żadnych wskaźników spełniających podane ktryteria.")
   }
@@ -156,9 +162,9 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   # przekształcanie do postaci szerokiej
   if (opisoweNazwy) {
     wskazniki = mutate(wskazniki,
-                        variable = paste(.data$variable, "wsk.", .data$skrot)) %>%
-      group_by(.data$rok_do, .data$id_szkoly, .data$variable) %>%
-      mutate(n = n()) %>%
+                       variable = paste(.data$variable, "wsk.", .data$skrot)) %>%
+      group_by(.data$skrot) %>%
+      mutate(n = n_distinct(.data$wskaznik)) %>%
       ungroup() %>%
       mutate(variable = ifelse(.data$n == 1, .data$variable, paste0(.data$variable, " (", .data$wskaznik, ")")))
     nazwyWskaznikow = unique(sub("^ewd ", "",
@@ -174,11 +180,12 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   message("Pobieranie informacji o szkołach.")
   daneSzkol = pobierz_dane_szkol(c(lata, min(lata) - (1:2)), typSzkoly, idOke = idOke, daneAdresowe = daneAdresowe, src = src)
   if (!dodatkoweInfo) {
-    daneSzkol = select(daneSzkol, -matches("^(publiczna|dla_doroslych|specjalna)$"),
-                        -matches("^(przyszpitalna|wielkosc_miejscowosci|rodzaj_gminy)$"))
+    daneSzkol = select(daneSzkol, -c("publiczna", "dla_doroslych", "specjalna",
+                                     "przyszpitalna", "wielkosc_miejscowosci",
+                                     "rodzaj_gminy"))
   }
   if (!any(c("LO", "T") %in% typSzkoly)) {
-    daneSzkol = select(daneSzkol, -matches("^(matura_miedzynarodowa)$"))
+    daneSzkol = select(daneSzkol, -"matura_miedzynarodowa")
   }
   wskazniki = suppressMessages(inner_join(daneSzkol, wskazniki))
   # filtrowanie JST
@@ -206,7 +213,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
   wskazniki = wskazniki[, order(sort1, sort2, sort3)]
   # ew. piękne nazwy kolumn
   if (tylkoNiePomin) {
-    wskazniki = select(wskazniki, -matches("^(pomin)$"))
+    wskazniki = select(wskazniki, -"pomin")
   }
   names(wskazniki) = enc2native(names(wskazniki))
   if (opisoweNazwy) {
@@ -239,7 +246,7 @@ pobierz_wartosci_wskaznikow_ewd = function(typSzkoly, lata, zapis = NULL, jst = 
     names(wskazniki) = sub("matura_miedzynarodowa", "matura międzynarodowa", names(wskazniki))
   }
   # porządki
-  wskazniki = select(wskazniki, -matches("^(rok)$"))
+  wskazniki = select(wskazniki, -"rok")
   maska = unlist(lapply(wskazniki, function(x) {return(all(is.na(x)))}))
   wskazniki = wskazniki[, !maska]
  	# zapis

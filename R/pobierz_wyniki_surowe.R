@@ -49,7 +49,8 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
                                  daneKontekstowe = TRUE, src = NULL) {
   stopifnot(
     is.character(rodzajEgzaminu), length(rodzajEgzaminu) == 1,
-    all(rodzajEgzaminu %in% c("sprawdzian", "egzamin gimnazjalny", "matura")),
+    rodzajEgzaminu %in% c("sprawdzian", "egzamin gimnazjalny", "matura",
+                          "egzamin ósmoklasisty"),
     is.numeric(lata) | is.null(lata), length(lata) > 0 | is.null(lata),
     all(as.integer(lata) == lata),
     all(nadpisz %in% c(TRUE, FALSE)), length(nadpisz) == 1,
@@ -64,7 +65,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
   if (is.null(lata)) {
     lata = pobierz_testy(src) %>%
       filter(.data$rodzaj_egzaminu == rodzajEgzaminu) %>%
-      select(.data$rok) %>%
+      select("rok") %>%
       distinct() %>%
       collect(n = Inf) %>%
       as.list() %>%
@@ -111,9 +112,9 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
     }
     czesciEgzaminu = pobierz_testy(src) %>%
       filter(.data$rodzaj_egzaminu == rodzajEgzaminu & .data$rok == i & .data$czy_egzamin == TRUE & .data$dane_ewd == czyEwd) %>%
-      select(.data$id_testu, .data$czesc_egzaminu, .data$prefiks) %>%
+      select("id_testu", "czesc_egzaminu", "prefiks") %>%
       collect(n = Inf) %>%
-      group_by(.data$czesc_egzaminu, .data$prefiks) %>% 
+      group_by(.data$czesc_egzaminu, .data$prefiks) %>%
       summarize(id_testu = list(.data$id_testu))
     for (j in 1:nrow(czesciEgzaminu)) {
       if (czesciEgzaminu$czesc_egzaminu[j] != "") {
@@ -122,7 +123,7 @@ pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
       temp = pobierz_odpowiedzi(src) %>%
         filter(.data$id_testu %in% local(czesciEgzaminu$id_testu[[j]])) %>%
         collect(n = Inf) %>%
-        select(-.data$odpowiedz) %>% 
+        select(-"odpowiedz") %>%
         tidyr::pivot_wider(names_from = 'kryterium', values_from = 'ocena')
       class(temp) = c("wynikiSurowe", "czescEgzaminu", class(temp))
       attributes(temp)$dataPobrania = Sys.time()
