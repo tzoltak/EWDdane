@@ -41,10 +41,10 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   problemy = vector(mode = "list", length = 4)
   names(problemy) = c("duplikaty", "adresWNazwie", "miejscowoscJakoUlica",
                       "niepoprawnyPna")
-  # szukanie duplikatów
+  # szukanie duplikatów id OKE
   maskaKodyOke = grepl("^id_szkoly_oke_|^kod_(g|lo|t)_", names(bazaZakt))
   message("Liczba duplikatów id_szkoly_oke_rrrr dla lat:")
-  for (i in names(bazaZakt)[maskaKodyOke]) {
+  for (i in sort(names(bazaZakt)[maskaKodyOke], decreasing = TRUE)) {
     bazaZakt[is.na(bazaZakt[, i]), i] = ""
     message("   ", gsub("[^[:digit:]]", "", i), ": ",
         sum(duplicated(bazaZakt[bazaZakt[, i] != "", i])),
@@ -55,13 +55,43 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   powtKody = table(wszystkieKody)[table(wszystkieKody) > 1]
   message("Liczba powtórzeń wykorzystania id_szkoly_oke między latami: ",
           length(powtKody))
-
-  message(paste0(paste0("  ", names(powtKody)), collapse = "\n"))
+  if (length(powtKody) > 0) {
+    message(paste0(paste0("  ", names(powtKody)[seq_len(min(100, length(powtKody)))],
+                          ifelse(seq_len(min(100, length(powtKody))) == 100,
+                                 ", ... (i inne)", "")),
+                   collapse = "\n"))
+  }
   maskaWiersze = apply(bazaZakt[, maskaKodyOke], 1,
                        function(x, powtKody) {return(any(x %in% powtKody))},
                        powtKody = names(powtKody))
   maskaKolumny = maskaKodyOke | grepl("^id_|^nazwa", names(bazaZakt))
   problemy$duplikaty = bazaZakt[maskaWiersze, maskaKolumny, drop = FALSE]
+
+  # szukanie duplikatów id RSPO
+  maskaKodyRspo = grepl("^id_rspo_", names(bazaZakt))
+  message("Liczba duplikatów id_rspo_rrrr dla lat:")
+  for (i in sort(names(bazaZakt)[maskaKodyRspo], decreasing = TRUE)) {
+    bazaZakt[is.na(bazaZakt[, i]), i] = ""
+    message("   ", gsub("[^[:digit:]]", "", i), ": ",
+            sum(duplicated(bazaZakt[bazaZakt[, i] != "", i])),
+            " z ", sum(bazaZakt[, i] != ""))
+  }
+  wszystkieKodyRspo = unlist(apply(bazaZakt[, maskaKodyRspo], 1,
+                                   function(x) {return(unique(x[x != ""]))}))
+  powtKodyRspo = table(wszystkieKodyRspo)[table(wszystkieKodyRspo) > 1]
+  message("Liczba powtórzeń wykorzystania id_rspo między latami: ",
+          length(powtKodyRspo))
+  if (length(powtKodyRspo > 0)) {
+    message(paste0(paste0("  ", names(powtKodyRspo)[seq_len(min(100, length(powtKodyRspo)))],
+                          ifelse(seq_len(min(100, length(powtKodyRspo))) == 100,
+                                 ", ... (i inne)", "")),
+                   collapse = "\n"))
+  }
+  maskaWiersze = apply(bazaZakt[, maskaKodyRspo], 1,
+                       function(x, powtKodyRspo) {return(any(x %in% powtKodyRspo))},
+                       powtKodyRspo = names(powtKodyRspo))
+  maskaKolumny = maskaKodyRspo | grepl("^id_|^nazwa", names(bazaZakt))
+  problemy$duplikatyRspo = bazaZakt[maskaWiersze, maskaKolumny, drop = FALSE]
 
   # trochę sprawdzania nazw i adresów
   message("Szkoły z adresami w nazwie (szukam kodów pocztowych):")
@@ -80,14 +110,14 @@ weryfikuj_baze_szkol = function(bazaZakt, bazaZrzut = NULL) {
   }
 
   message("Szkoły z nazwą miejscowości jako ulicą:")
-  problemy$miejscowoscJakoUlica = bazaZakt[!grepl("^[[:digit:]]+[[:lower:][:upper:]]?$",
-                                                  bazaZakt$adres)
-                                           & grepl("^[ [:digit:]]+$", mapply(
-                                             function(x, y) {
-                                               return(sub(y, "", x))
-                                             },
-                                             bazaZakt$adres, bazaZakt$miejscowosc
-                                           )),
+  problemy$miejscowoscJakoUlica = bazaZakt[!grepl("^[ ]?[[:digit:]]+[[:lower:][:upper:]]?$",
+                                                  bazaZakt$adres) &
+                                             grepl("^[ [:digit:]]+$", mapply(
+                                               function(x, y) {
+                                                 return(sub(y, "", x))
+                                               },
+                                               bazaZakt$adres, bazaZakt$miejscowosc
+                                             )),
                                            grepl("^id_szkoly$|^id_(g|lo|t)|^adres$|^miejscowosc$",
                                                  names(bazaZakt))]
   if (nrow(problemy$miejscowoscJakoUlica) > 0) {
