@@ -1,4 +1,17 @@
 --------------------
+Zmiany w EWDdane 0.9.19 (23.09.2024)
+
+Naprawione błędy:
+  - W weryfikuj_baze_szkol() poprawiono warunek sprawdzania adresów zawierających nazwę miejscowości.
+
+Uaktualnienia:
+  - weryfikuj_baze_szkol() ogranicza liczbę wypisywanych na konsoli powtórzonych między latami id OKE (co przydaje się w przypadku bazy SP, w której problem ten występuje powszechnie).
+
+Nowe funkcjonalności:
+  - pobierz_baze_szkol() zwraca również id RSPO szkoły (zależy od ZPD 1.9.0);
+  - weryfikuj_baze_szkol() sprawdza również unikalność kodów RSPO.
+
+--------------------
 Zmiany w EWDdane 0.9.18 (10.12.2023)
 
 Naprawione błędy:
