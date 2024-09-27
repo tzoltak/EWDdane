@@ -45,18 +45,26 @@
 #' @import dplyr
 #' @import ZPD
 #' @export
-pobierz_wyniki_surowe = function(rodzajEgzaminu, lata = NULL, nadpisz = FALSE,
+pobierz_wyniki_surowe = function(rodzajEgzaminu = c("sprawdzian",
+                                                    "egzamin gimnazjalny",
+                                                    "matura",
+                                                    "egzamin ósmoklasisty"),
+                                 lata = NULL, nadpisz = FALSE,
                                  daneKontekstowe = TRUE, src = NULL) {
+  rodzajEgzaminu = match.arg(rodzajEgzaminu, )
   stopifnot(
     is.character(rodzajEgzaminu), length(rodzajEgzaminu) == 1,
-    rodzajEgzaminu %in% c("sprawdzian", "egzamin gimnazjalny", "matura",
-                          "egzamin ósmoklasisty"),
     is.numeric(lata) | is.null(lata), length(lata) > 0 | is.null(lata),
     all(as.integer(lata) == lata),
     all(nadpisz %in% c(TRUE, FALSE)), length(nadpisz) == 1,
     all(daneKontekstowe %in% c(TRUE, FALSE)), length(daneKontekstowe) == 1,
     is.src(src) | is.null(src)
   )
+  if ((rodzajEgzaminu == "matura" && 2025 %in% lata) ||
+      (rodzajEgzaminu == "egzamin ósmoklasisty" && 2021 %in% lata)) {
+    warning("Trzeba sprawdzić, czy kryterium zawężania populacji 'wyjściowej' po wieku działa dobrze w odniesieniu do uczniów, którzy rozpoczęli naukę jako sześciolatkowie.",
+            immediate. = TRUE)
+  }
   czyZamykacSrc = FALSE
   if (is.null(src)) {
     src = ZPD::polacz()

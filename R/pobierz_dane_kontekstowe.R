@@ -253,19 +253,32 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
     if (rodzajEgzaminu == "sprawdzian") {
       wiekWzor = 153.5
       rokSprawdzWiek = 2005
+      rokSzesciolatki = Inf
     } else if (rodzajEgzaminu == "egzamin gimnazjalny") {
       wiekWzor = 189.5
       rokSprawdzWiek = 2008
+      rokSzesciolatki = Inf
+    } else if (rodzajEgzaminu == "egzamin ósmoklasisty") {
+      wiekWzor = 177.5
+      rokSprawdzWiek = 2008
+      rokSzesciolatki = 2021
     } else {
       wiekWzor = 225.5
       rokSprawdzWiek = 2010
+      rokSzesciolatki = 2025
     }
     dane = dane %>%
       mutate(
         populacja_wy = .data$populacja_wy &
           ifelse(
             .data$rok >= rokSprawdzWiek,
-            (.data$wiek - ifelse(.data$typ_szkoly %in% "T", 12, 0)) %in% seq(wiekWzor - 29.5, wiekWzor + 29.5, 1),
+            (.data$wiek - ifelse(.data$typ_szkoly %in% "T", 12, 0)) %in%
+              seq(wiekWzor - 29.5 -
+                    ifelse(.data$rok >= (rokSzesciolatki +
+                                           ifelse(.data$typ_szkoly %in% "T", 1, 0)),
+                           12, 0),
+                  wiekWzor + 29.5,
+                  1),
             TRUE
           )
       )
