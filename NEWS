@@ -1,11 +1,24 @@
 --------------------
+Zmiany w EWDdane 0.9.20 (27.09.2024)
+
+Uaktualnienia:
+  - W pobierz_dane_kontekstowe() dostosowano kryteria zawężania populacji
+    "na wyjściu" na podstawie wieku do egzaminu ósmoklasisty oraz do
+    roczników obejmujących uczniów, którzy rozpoczęli naukę jako sześciolatkowie
+    (choć poprawność działania tego ostatniego trzeba będzie jeszcze
+    zweryfikować empirycznie w przyszłym roku).
+
+--------------------
 Zmiany w EWDdane 0.9.19 (23.09.2024)
 
 Naprawione błędy:
-  - W weryfikuj_baze_szkol() poprawiono warunek sprawdzania adresów zawierających nazwę miejscowości.
+  - W weryfikuj_baze_szkol() poprawiono warunek sprawdzania adresów
+    zawierających nazwę miejscowości.
 
 Uaktualnienia:
-  - weryfikuj_baze_szkol() ogranicza liczbę wypisywanych na konsoli powtórzonych między latami id OKE (co przydaje się w przypadku bazy SP, w której problem ten występuje powszechnie).
+  - weryfikuj_baze_szkol() ogranicza liczbę wypisywanych na konsoli powtórzonych
+    między latami id OKE (co przydaje się w przypadku bazy SP, w której problem
+    ten występuje powszechnie).
 
 Nowe funkcjonalności:
   - pobierz_baze_szkol() zwraca również id RSPO szkoły (zależy od ZPD 1.9.0);
@@ -15,42 +28,61 @@ Nowe funkcjonalności:
 Zmiany w EWDdane 0.9.18 (10.12.2023)
 
 Naprawione błędy:
-  - pobierz_parametry_skalowania() wykorzystuje wartość parametru `skalowanie` przy określaniu, które parametry wybrać,
-  - pobierz_wartosci_wskaznikow_ewd() w sensowniejszy sposób etykietuje nazwy wskaźników, jeśli mają zostać zwrócone opisowe nazwy (i mają zostać pobrane różne warianty analogicznych wskaźników dziedzinowych).
+  - pobierz_parametry_skalowania() wykorzystuje wartość parametru `skalowanie`
+    przy określaniu, które parametry wybrać,
+  - pobierz_wartosci_wskaznikow_ewd() w sensowniejszy sposób etykietuje nazwy
+    wskaźników, jeśli mają zostać zwrócone opisowe nazwy (i mają zostać pobrane
+    różne warianty analogicznych wskaźników dziedzinowych).
 
 Uaktualnienia:
-  - W pobierz_dane_kontekstowe() przeniesiono agregację po ucznio-testach do poziomu uczniów na stronę bazy danych, co pozwala uniknąć problemu z niewydolnością agregacji przy pomocy dplyr-a przy bardzo, bardzo dużej liczbie grup.
-  - Przepisano wywowołania `select()` tak aby konsekwentnie wykorzystywać w nich odwoływanie się do nazw kolumn przez ciągi znaków (zgodnie z konwencją wprowadzoną jako preferowana w wersji 1.0.0 pakietu tidyselect jeszcze w styczniu 2020 r.).
+  - W pobierz_dane_kontekstowe() przeniesiono agregację po ucznio-testach do
+    poziomu uczniów na stronę bazy danych, co pozwala uniknąć problemu
+    z niewydolnością agregacji przy pomocy dplyr-a przy bardzo, bardzo dużej
+    liczbie grup.
+  - Przepisano wywowołania `select()` tak aby konsekwentnie wykorzystywać
+    w nich odwoływanie się do nazw kolumn przez ciągi znaków (zgodnie
+    z konwencją wprowadzoną jako preferowana w wersji 1.0.0 pakietu tidyselect
+    jeszcze w styczniu 2020 r.).
 
 Nowe funkcjonalności:
-  - pobierz_wartosci_wskaznikow_ewd() otrzymało dodatkowy argument maskaWskazniki, który pozwala podać wyrażenie regularne, do którego mają pasować nazwy wskaźników, których wartości mają zostać pobrane.
+  - pobierz_wartosci_wskaznikow_ewd() otrzymało dodatkowy argument
+    maskaWskazniki, który pozwala podać wyrażenie regularne, do którego mają
+    pasować nazwy wskaźników, których wartości mają zostać pobrane.
 
 --------------------
 Zmiany w EWDdane 0.9.17 (29.09.2022)
 
 Naprawione błędy:
-  - weryfikuj_baze_szkol() radzi sobie w sytuacji, gdy w zrzucie i nowej bazie różny jest sposób zapisu braku kodu OKE szkoły w danym roku (NA vs. pusty ciąg znaków).
+  - weryfikuj_baze_szkol() radzi sobie w sytuacji, gdy w zrzucie i nowej bazie
+    różny jest sposób zapisu braku kodu OKE szkoły w danym roku (NA vs. pusty
+    ciąg znaków).
 
 --------------------
 Zmiany w EWDdane 0.9.16 (27.09.2021)
 
 Naprawione błędy:
-  - pobierz_parametry_skalowania() znów radzi sobie ze skalami, które nie mają zapisanych parametrów.
+  - pobierz_parametry_skalowania() znów radzi sobie ze skalami, które nie mają
+    zapisanych parametrów.
 
 Uaktualnienia:
-  - podniesiono zależność od ZPD (które zostało przepisane na dialekt dplyr >= 1.0.0, co pozwala uniknąć zwracania licznych ostrzeżeń o używaniu przestarzałej składni).
+  - podniesiono zależność od ZPD (które zostało przepisane na dialekt
+    dplyr >= 1.0.0, co pozwala uniknąć zwracania licznych ostrzeżeń o używaniu
+    przestarzałej składni).
 
 --------------------
 Zmiany w EWDdane 0.9.15 (13.09.2021)
 
 Uaktualnienia:
-  - przepisanie operacji zmiany formy danych z szerokiej na długą lub z długiej na szeroką z pakietu reshape2 na pakiet tidyr.
+  - przepisanie operacji zmiany formy danych z szerokiej na długą lub z długiej
+    na szeroką z pakietu reshape2 na pakiet tidyr.
 
 Naprawione błędy:
   - obsługa wywołania agreguj_wskazniki_ewd() z argumentem pu=FALSE;
-  - pomyłka w nazwach obiektów uniemożliwiająca porównanie stanu zrzutu i zaktualzowanej bazy szkół przez weryfikuj_baze_szkol();
+  - pomyłka w nazwach obiektów uniemożliwiająca porównanie stanu zrzutu
+    i zaktualzowanej bazy szkół przez weryfikuj_baze_szkol();
   - dodano nieco brakujących prefiksów `.data$` w wywołaniach funkcji dplyr-a;
-  - dodano zależność od pakietu rlang (ze względu na użycie `:=` we wczytaj_liczbe_przystepujacych()).
+  - dodano zależność od pakietu rlang (ze względu na użycie
+    `:=` we wczytaj_liczbe_przystepujacych()).
 
 --------------------
 Zmiany w EWDdane 0.9.14 (12.05.2021)

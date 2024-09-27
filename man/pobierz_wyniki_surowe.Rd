@@ -5,7 +5,8 @@
 \title{Pobieranie surowych wynikow egzaminu}
 \usage{
 pobierz_wyniki_surowe(
-  rodzajEgzaminu,
+  rodzajEgzaminu = c("sprawdzian", "egzamin gimnazjalny", "matura",
+    "egzamin ósmoklasisty"),
   lata = NULL,
   nadpisz = FALSE,
   daneKontekstowe = TRUE,
