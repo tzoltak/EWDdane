@@ -272,13 +272,13 @@ pobierz_dane_kontekstowe = function(src, rodzajEgzaminu) {
         populacja_wy = .data$populacja_wy &
           ifelse(
             .data$rok >= rokSprawdzWiek,
-            (.data$wiek - ifelse(.data$typ_szkoly %in% "T", 12, 0)) %in%
-              seq(wiekWzor - 29.5 -
-                    ifelse(.data$rok >= (rokSzesciolatki +
-                                           ifelse(.data$typ_szkoly %in% "T", 1, 0)),
-                           12, 0),
-                  wiekWzor + 29.5,
-                  1),
+            (.data$wiek - ifelse(.data$typ_szkoly %in% "T", 12, 0)) >=
+              (wiekWzor - 29.5 -
+                 ifelse(.data$rok >= (rokSzesciolatki +
+                                        ifelse(.data$typ_szkoly %in% "T", 1, 0)),
+                        12, 0)) &
+              (.data$wiek - ifelse(.data$typ_szkoly %in% "T", 12, 0)) <=
+              (wiekWzor + 29.5),
             TRUE
           )
       )

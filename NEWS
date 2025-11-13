@@ -1,4 +1,12 @@
 --------------------
+Zmiany w EWDdane 0.9.21 (13.11.2025)
+
+Naprawione błędy:
+  - W pobierz_dane_kontekstowe() poprawiono implementację kryterium zawężania
+    populacji "na wyjściu" na podstawie wieku w osniesieniu do roczników
+    obejmujących uczniów, którzy rozpoczęli naukę jako sześciolatkowie.
+
+--------------------
 Zmiany w EWDdane 0.9.20 (27.09.2024)
 
 Uaktualnienia:
